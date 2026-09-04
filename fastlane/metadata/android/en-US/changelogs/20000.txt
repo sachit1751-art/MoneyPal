@@ -1,0 +1,5 @@
+- Rebrand: the app is now MoneyPal under new ownership
+- fix: stop cloud-backing-up the financial database (data stays local)
+- fix: recurring bills due on the 29th-31st are now counted on the last day of shorter months, matching their notifications
+- fix: validate Wear messages come from your own watch before syncing expenses
+- fix: harden bug-report attachment names against path traversal
