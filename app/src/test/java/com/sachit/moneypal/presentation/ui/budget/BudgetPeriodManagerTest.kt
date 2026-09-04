@@ -78,6 +78,7 @@ class BudgetPeriodManagerTest {
             userSettings = userSettings.copy(periodEndAlreadyHandled = firstArg())
         }
         every { timeProvider.nowEpochMillis() } returns 1_000_000L
+        every { timeProvider.today() } returns LocalDate.now()
     }
 
     private fun budget(

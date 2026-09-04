@@ -43,7 +43,7 @@ class BudgetPeriodManager @Inject constructor(
     suspend fun finishBudgetEarly() {
         val settings = budgetRepository.getBudgetSettingsSync() ?: return
         val originalEndDate = settings.getPeriodEndDate()
-        val now = LocalDate.now()
+        val now = timeProvider.today()
 
         settingsRepository.setEarlyFinishActive(
             active = true,

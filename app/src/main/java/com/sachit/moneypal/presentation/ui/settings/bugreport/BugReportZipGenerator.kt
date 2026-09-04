@@ -174,19 +174,28 @@ class BugReportZipGenerator @Inject constructor(
 			}
 	}
 
-	private fun sanitizeZipEntryName(value: String): String {
-		val normalized = Normalizer.normalize(value, Normalizer.Form.NFD)
-			.replace("\\p{Mn}+".toRegex(), "")
-		return normalized
-			.replace("[^A-Za-z0-9._-]".toRegex(), "_")
-			.trim('_')
-	}
-
 	companion object {
 		private const val BUG_REPORT_CACHE_DIR = "bug_reports"
 		private const val REPORT_MARKDOWN_FILE_NAME = "report.md"
 		private const val ERROR_LOG_ENTRY_NAME = "diagnostics/error_log.txt"
 		private val FILE_DATE_FORMATTER = DateTimeFormatter.ofPattern("ddMMMyyyy", Locale.US)
+
+		/**
+		 * Reduces a display name to a safe single zip-entry leaf: strips accents,
+		 * keeps only [A-Za-z0-9._-], collapses runs of dots (so a name can never
+		 * contain a `..` traversal segment), and trims leading/trailing underscores
+		 * and leading dots. A blank result means the caller should fall back to a
+		 * generated name.
+		 */
+		internal fun sanitizeZipEntryName(value: String): String {
+			val normalized = Normalizer.normalize(value, Normalizer.Form.NFD)
+				.replace("\\p{Mn}+".toRegex(), "")
+			return normalized
+				.replace("[^A-Za-z0-9._-]".toRegex(), "_")
+				.replace(Regex("\\.{2,}"), ".")
+				.trim('_')
+				.trimStart('.')
+		}
 	}
 }
 

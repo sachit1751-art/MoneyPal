@@ -45,8 +45,19 @@ class PhoneWearMessageListener @Inject constructor(
     override fun onMessageReceived(messageEvent: MessageEvent) {
         logcat { "onMessageReceived: path=${messageEvent.path}, sourceNode=${messageEvent.sourceNodeId}" }
         when (messageEvent.path) {
-            WearPaths.EXPENSE_ADD -> handleExpenseAdd(messageEvent)
-            WearPaths.EXPENSE_SNAPSHOT -> handleSnapshotRequest(messageEvent)
+            WearPaths.EXPENSE_ADD, WearPaths.EXPENSE_SNAPSHOT -> {
+                scope.launch {
+                    if (isTrustedWearSource(context, messageEvent.sourceNodeId)) {
+                        when (messageEvent.path) {
+                            WearPaths.EXPENSE_ADD -> handleExpenseAdd(messageEvent)
+                            else -> handleSnapshotRequest(messageEvent)
+                        }
+                    } else {
+                        logcat { "Dropping message from untrusted node=${messageEvent.sourceNodeId} path=${messageEvent.path}" }
+                    }
+                }
+            }
+
             else -> Unit
         }
     }

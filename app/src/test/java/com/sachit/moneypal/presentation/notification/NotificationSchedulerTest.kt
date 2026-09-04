@@ -3,6 +3,7 @@ package com.sachit.moneypal.presentation.notification
 import com.google.common.truth.Truth.assertThat
 import com.sachit.moneypal.data.repository.BudgetRepository
 import com.sachit.moneypal.data.repository.SettingsRepository
+import com.sachit.moneypal.domain.calculator.RecurringExpenseCalculator
 import com.sachit.moneypal.domain.model.RecurrentFrequency
 import com.sachit.moneypal.domain.model.Transaction
 import io.mockk.mockk
@@ -97,6 +98,27 @@ class NotificationSchedulerTest {
     fun `monthly billing day on the last day of a 31-day month resolves to that day`() {
         assertThat(scheduler.nextMonthlyOccurrence(d(2026, 1, 1), d(2026, 1, 31), 31))
             .isEqualTo(d(2026, 1, 31))
+    }
+
+    @Test
+    fun `scheduler and calculator agree on month-end clamping for a 31st-day bill`() {
+        // Same 31st-day transaction the calculator tests use.
+        val tx = recurringTx(
+            date = LocalDateTime.of(2026, 1, 31, 8, 0),
+            frequency = RecurrentFrequency.MONTHLY,
+            subscriptionDay = 31,
+        )
+        val calculator = RecurringExpenseCalculator()
+
+        // Feb 2026: both land on the clamped 28th.
+        assertThat(scheduler.nextMonthlyOccurrence(d(2026, 1, 31), d(2026, 2, 10), 31))
+            .isEqualTo(d(2026, 2, 28))
+        assertThat(calculator.isRecurringDueToday(tx, d(2026, 2, 28))).isTrue()
+
+        // Mar 2026: both land on the 31st.
+        assertThat(scheduler.nextMonthlyOccurrence(d(2026, 1, 31), d(2026, 3, 1), 31))
+            .isEqualTo(d(2026, 3, 31))
+        assertThat(calculator.isRecurringDueToday(tx, d(2026, 3, 31))).isTrue()
     }
 
     private val notifyAt9 = 9 to 0

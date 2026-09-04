@@ -69,6 +69,39 @@ class MidnightPeriodCheckerTest {
         return endDate
     }
 
+    private fun checkerWithClockAt(date: LocalDate): MidnightPeriodChecker =
+        MidnightPeriodChecker(budgetRepository, settingsRepository, FakeTimeProvider(date))
+
+    private fun stubActiveSettings(periodEnd: LocalDate) {
+        stubEndDate(periodEnd)
+        coEvery { settingsRepository.observeMidnightTransitionOccurred() } returns flowOf(false)
+        coEvery { settingsRepository.getSettings() } returns UserSettings.DEFAULT.copy(
+            earlyFinishActive = false,
+            periodEndAlreadyHandled = false,
+        )
+        coEvery { budgetRepository.getTransactions() } returns flowOf(emptyList())
+    }
+
+    @Test
+    fun `when today is pinned after the period end then the period is flagged as ended`() = runTest {
+        val fixedToday = LocalDate.of(2026, 3, 15)
+        stubActiveSettings(periodEnd = fixedToday.minusDays(1))
+
+        val state = checkerWithClockAt(fixedToday).resolveEndingPeriodState()
+
+        assertThat(state.shouldHandleEndingPeriod).isTrue()
+    }
+
+    @Test
+    fun `when today is pinned before the period end then the period is not flagged as ended`() = runTest {
+        val fixedToday = LocalDate.of(2026, 3, 15)
+        stubActiveSettings(periodEnd = fixedToday.plusDays(1))
+
+        val state = checkerWithClockAt(fixedToday).resolveEndingPeriodState()
+
+        assertThat(state.shouldHandleEndingPeriod).isFalse()
+    }
+
     @Test
     fun `when a period was finished early then it is never flagged as ended, even past the original schedule`() = runTest {
         val originalEndDate = LocalDate.now().minusDays(5) // original schedule already elapsed

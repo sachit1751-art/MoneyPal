@@ -5,8 +5,18 @@ import com.sachit.moneypal.domain.model.RecurrentFrequency
 import com.sachit.moneypal.domain.model.Transaction
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
+
+/**
+ * Monthly occurrence day for a billing day [billingDay] in [month], clamping the
+ * billing day to the month's length so a 31st is billed on the last day of shorter
+ * months (Feb 28/29, Apr 30, ...). Single source of truth shared by the "due today"
+ * predicate and the notification scheduler.
+ */
+internal fun monthlyOccurrenceDay(billingDay: Int, month: YearMonth): Int =
+    billingDay.coerceIn(1, month.lengthOfMonth())
 
 class RecurringExpenseCalculator @Inject constructor() {
 
@@ -48,7 +58,7 @@ class RecurringExpenseCalculator @Inject constructor() {
 
             RecurrentFrequency.MONTHLY -> {
                 val billingDay = transaction.subscriptionDay ?: startDate.dayOfMonth
-                today.dayOfMonth == billingDay
+                today.dayOfMonth == monthlyOccurrenceDay(billingDay, YearMonth.from(today))
             }
         }
     }

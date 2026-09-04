@@ -13,6 +13,7 @@ import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.sachit.moneypal.data.repository.BudgetRepository
 import com.sachit.moneypal.data.repository.SettingsRepository
+import com.sachit.moneypal.domain.calculator.monthlyOccurrenceDay
 import com.sachit.moneypal.domain.model.RecurrentFrequency
 import com.sachit.moneypal.domain.model.Transaction
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -26,6 +27,7 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -357,11 +359,14 @@ class NotificationScheduler @Inject constructor(
         today: LocalDate,
         subscriptionDay: Int,
     ): LocalDate {
-        var candidate = today.withDayOfMonth(subscriptionDay.coerceIn(1, today.lengthOfMonth()))
+        val billingDay = subscriptionDay.coerceIn(1, 31)
+        var candidate =
+            today.withDayOfMonth(monthlyOccurrenceDay(billingDay, YearMonth.from(today)))
         if (candidate.isBefore(today)) {
             val nextMonth = today.plusMonths(1)
-            candidate =
-                nextMonth.withDayOfMonth(subscriptionDay.coerceIn(1, nextMonth.lengthOfMonth()))
+            candidate = nextMonth.withDayOfMonth(
+                monthlyOccurrenceDay(billingDay, YearMonth.from(nextMonth))
+            )
         }
         return if (candidate.isBefore(startDate)) startDate else candidate
     }

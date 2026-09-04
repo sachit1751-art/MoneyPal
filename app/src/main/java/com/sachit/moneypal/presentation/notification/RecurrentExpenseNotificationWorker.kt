@@ -5,9 +5,9 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.sachit.moneypal.data.repository.BudgetRepository
 import com.sachit.moneypal.data.repository.SettingsRepository
+import com.sachit.moneypal.domain.calculator.RecurringExpenseCalculator
 import com.sachit.moneypal.domain.model.BudgetSettings
 import com.sachit.moneypal.domain.model.CreditCard
-import com.sachit.moneypal.domain.model.RecurrentFrequency
 import com.sachit.moneypal.domain.model.Transaction
 import com.sachit.moneypal.domain.model.calculatePaymentDueDate
 import dagger.hilt.EntryPoint
@@ -160,8 +160,7 @@ class RecurrentExpenseNotificationWorker(
         settingsRepository: SettingsRepository,
         budgetRepository: BudgetRepository,
     ) {
-        val frequency = transaction.recurrentFrequency ?: return
-        if (!isDueToday(transaction, today, frequency)) {
+        if (!RecurringExpenseCalculator().isRecurringDueToday(transaction, today)) {
             logcat { "Recurrent notification worker fired but transaction is not due today: transactionId=${transaction.id} today=$today" }
             return
         }
@@ -191,42 +190,5 @@ class RecurrentExpenseNotificationWorker(
 
     private fun recurrentNotificationDedupeKey(transaction: Transaction, date: LocalDate) =
         "$LAST_RECURRENT_NOTIFICATION_PREFIX${transaction.id}_${date}"
-
-    private fun isDueToday(transaction: Transaction, today: LocalDate, frequency: RecurrentFrequency): Boolean {
-        val startDate = transaction.date?.toLocalDate() ?: return false
-        
-        val endDate = transaction.recurrentEndDate?.toLocalDate()
-        if (endDate != null && today.isAfter(endDate)) {
-            return false
-        }
-        
-        if (today.isBefore(startDate)) {
-            return false
-        }
-
-        return when (frequency) {
-            RecurrentFrequency.WEEKLY -> {
-                val daysBetween = ChronoUnit.DAYS.between(startDate, today).toInt()
-                daysBetween >= 0 && daysBetween % 7 == 0
-            }
-            RecurrentFrequency.BIWEEKLY -> {
-                val daysBetween = ChronoUnit.DAYS.between(startDate, today).toInt()
-                daysBetween >= 0 && daysBetween % 14 == 0
-            }
-            RecurrentFrequency.MONTHLY -> {
-                val billingDay = transaction.subscriptionDay ?: startDate.dayOfMonth
-                val todayDay = today.dayOfMonth
-                
-                if (todayDay != billingDay) {
-                    return false
-                }
-                
-                // For monthly subscriptions, we should notify on the billing day 
-                // as long as we're within the subscription period (startDate to endDate)
-                // This handles both the first billing and subsequent billings
-                true
-            }
-        }
-    }
 
 }

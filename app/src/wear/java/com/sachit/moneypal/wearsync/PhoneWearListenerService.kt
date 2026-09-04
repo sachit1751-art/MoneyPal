@@ -1,5 +1,7 @@
 package com.sachit.moneypal.wearsync
 
+import android.content.Context
+import com.google.android.gms.wearable.CapabilityClient
 import com.google.android.gms.wearable.MessageEvent
 import com.google.android.gms.wearable.Wearable
 import com.google.android.gms.wearable.WearableListenerService
@@ -21,6 +23,25 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.encodeToString
 import java.time.ZoneOffset
 
+/**
+ * Capability the MoneyPal watch app advertises (see wear/src/main/res/values/wear_capabilities.xml).
+ * Only nodes running that app are trusted to send expenses or request snapshots.
+ */
+internal const val CAPABILITY_WEAR_SENDER = "minus_wear_sender"
+
+/**
+ * True when [nodeId] belongs to a reachable node running the MoneyPal watch app.
+ * Fails closed: any capability-lookup error (or unknown node) denies the message.
+ */
+internal suspend fun isTrustedWearSource(context: Context, nodeId: String): Boolean =
+    runCatching {
+        Wearable.getCapabilityClient(context)
+            .getCapability(CAPABILITY_WEAR_SENDER, CapabilityClient.FILTER_REACHABLE)
+            .await()
+            .nodes
+            .any { it.id == nodeId }
+    }.getOrDefault(false)
+
 class PhoneWearListenerService : WearableListenerService() {
 
     companion object {
@@ -41,8 +62,19 @@ class PhoneWearListenerService : WearableListenerService() {
     override fun onMessageReceived(messageEvent: MessageEvent) {
         logcat { "onMessageReceived: path=${messageEvent.path}, sourceNode=${messageEvent.sourceNodeId}" }
         when (messageEvent.path) {
-            WearPaths.EXPENSE_ADD -> handleExpenseAdd(messageEvent)
-            WearPaths.EXPENSE_SNAPSHOT -> handleSnapshotRequest(messageEvent)
+            WearPaths.EXPENSE_ADD, WearPaths.EXPENSE_SNAPSHOT -> {
+                scope.launch {
+                    if (isTrustedWearSource(applicationContext, messageEvent.sourceNodeId)) {
+                        when (messageEvent.path) {
+                            WearPaths.EXPENSE_ADD -> handleExpenseAdd(messageEvent)
+                            else -> handleSnapshotRequest(messageEvent)
+                        }
+                    } else {
+                        logcat { "Dropping message from untrusted node=${messageEvent.sourceNodeId} path=${messageEvent.path}" }
+                    }
+                }
+            }
+
             else -> {
                 logcat { "onMessageReceived: unhandled path=${messageEvent.path}" }
                 super.onMessageReceived(messageEvent)

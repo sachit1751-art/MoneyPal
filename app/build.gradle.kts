@@ -194,7 +194,6 @@ android {
         resources.excludes += "/META-INF/LICENSE.md"
         resources.excludes += "/META-INF/LICENSE-notice.md"
     }
-    namespace = "com.sachit.moneypal"
 
     dependenciesInfo {
         includeInApk = false

@@ -31,6 +31,7 @@ data class MidnightTransitionData(
 class MidnightPeriodChecker @Inject constructor(
     private val budgetRepository: BudgetRepository,
     private val settingsRepository: SettingsRepository,
+    private val timeProvider: TimeProvider = SystemTimeProvider(),
 ) {
     data class EndingPeriodState(
         val shouldHandleEndingPeriod: Boolean,
@@ -141,7 +142,7 @@ class MidnightPeriodChecker @Inject constructor(
 
     suspend fun resolveEndingPeriodState(): EndingPeriodState {
         val transitionOccurred = settingsRepository.observeMidnightTransitionOccurred().first()
-        val today = LocalDate.now()
+        val today = timeProvider.today()
 
         val userSettings = settingsRepository.getSettings()
 
@@ -231,7 +232,7 @@ class MidnightPeriodChecker @Inject constructor(
             RemainingBudgetStrategy.ASK_ALWAYS -> {
                 _midnightTransitionData.value = MidnightTransitionData(
                     periodStartDate = settings.startDate,
-                    periodEndDate = LocalDate.now(),
+                    periodEndDate = timeProvider.today(),
                     totalBudget = settings.totalBudget,
                     remainingAmount = remainingAmount,
                     totalSpent = settings.totalBudget.subtract(remainingAmount),

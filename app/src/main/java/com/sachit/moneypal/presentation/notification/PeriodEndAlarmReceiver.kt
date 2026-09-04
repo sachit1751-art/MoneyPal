@@ -33,28 +33,10 @@ class PeriodEndAlarmReceiver : BroadcastReceiver() {
                     context.applicationContext,
                     PeriodEndAlarmReceiverEntryPoint::class.java
                 )
-                val budgetRepository = entryPoint.budgetRepository()
-                val notificationHelper = entryPoint.notificationHelper()
-                val settings = budgetRepository.getBudgetSettingsSync() ?: return@launch
-                val periodEnd = settings.getPeriodEndDate()
-                val today = LocalDate.now()
-                if (!today.isAfter(periodEnd)) {
-                    return@launch
-                }
-                val transactions = budgetRepository.getTransactions().first()
-                val periodTransactions = transactions.filter { transaction ->
-                    val txDate = transaction.date?.toLocalDate()
-                    txDate != null && !txDate.isBefore(settings.startDate) && !txDate.isAfter(
-                        periodEnd
-                    )
-                }
-                val totalSpent = periodTransactions
-                    .filter { !it.isDeleted }
-                    .sumOf { it.amount }
-                val remaining = settings.totalBudget.subtract(totalSpent)
-                notificationHelper.showPeriodEndNotification(
-                    remainingBudget = remaining.toPlainString(),
-                    currency = settings.currencyCode
+                handlePeriodEndAlarm(
+                    budgetRepository = entryPoint.budgetRepository(),
+                    notificationHelper = entryPoint.notificationHelper(),
+                    today = LocalDate.now(),
                 )
             } catch (e: Exception) {
                 logcat { "Error handling period end alarm\n${e.asLog()}" }
@@ -62,5 +44,32 @@ class PeriodEndAlarmReceiver : BroadcastReceiver() {
                 pendingResult.finish()
             }
         }
+    }
+
+    internal suspend fun handlePeriodEndAlarm(
+        budgetRepository: BudgetRepository,
+        notificationHelper: NotificationHelper,
+        today: LocalDate,
+    ) {
+        val settings = budgetRepository.getBudgetSettingsSync() ?: return
+        val periodEnd = settings.getPeriodEndDate()
+        if (!today.isAfter(periodEnd)) {
+            return
+        }
+        val transactions = budgetRepository.getTransactions().first()
+        val periodTransactions = transactions.filter { transaction ->
+            val txDate = transaction.date?.toLocalDate()
+            txDate != null && !txDate.isBefore(settings.startDate) && !txDate.isAfter(
+                periodEnd
+            )
+        }
+        val totalSpent = periodTransactions
+            .filter { !it.isDeleted }
+            .sumOf { it.amount }
+        val remaining = settings.totalBudget.subtract(totalSpent)
+        notificationHelper.showPeriodEndNotification(
+            remainingBudget = remaining.toPlainString(),
+            currency = settings.currencyCode
+        )
     }
 }

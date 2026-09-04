@@ -23,29 +23,22 @@
 <table align="center">
   <tr>
     <td align="center">
-      <a href="https://apt.izzysoft.de/packages/com.sachit.moneypal">
-        <img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroidButtonGreyBorder_nofont.png" height="50" alt="Get it at IzzyOnDroid">
-      </a>
-    </td>
-    <td align="center">
       <a href="https://github.com/sachit1751-art/MoneyPal/releases">
         <img src="assets/badge_github.png" height="80" alt="Get it at GitHub">
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://play.google.com/store/apps/details?id=com.sachit.moneypal">
-        <img src="assets/badge_playstore.png" height="80" alt="Get it at Google Play Store">
       </a>
     </td>
   </tr>
 </table>
 
 <p align="center">
+  Google Play Store and IzzyOnDroid listings are coming soon — APKs are published with each
+  release on GitHub.
+</p>
+
+<p align="center">
   <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/Android/android2.svg">
   <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/AndroidStudio/androidstudio3.svg">
   <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/Kotlin/kotlin1.svg">
-  <img src="https://m3-markdown-badges.vercel.app/stars/1/3/sachit1751-art/MoneyPal">
-  <img src="https://m3-markdown-badges.vercel.app/issues/1/2/sachit1751-art/MoneyPal">
 </p>
 
 <table align="center">
@@ -90,11 +83,9 @@ Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTIN
 information.
 
 ## Translations
-[![Crowdin](https://badges.crowdin.net/moneypal-budget-tracker-app/localized.svg)](https://crowdin.com/project/moneypal-budget-tracker-app)
 
-Feel free to see, check and fix current translation, any help will be appreciated.
-Access to
-Crowdin [here](https://crowdin.com/project/moneypal-budget-tracker-app)
+Translations are welcome! Once a Crowdin project is set up for MoneyPal
+(`moneypal-budget-tracker-app`), the badge and invite link will be re-added here.
 
 ---
 

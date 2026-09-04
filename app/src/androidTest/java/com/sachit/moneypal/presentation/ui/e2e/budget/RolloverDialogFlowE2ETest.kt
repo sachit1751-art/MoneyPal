@@ -115,6 +115,7 @@ class RolloverDialogFlowE2ETest {
             )
         }
         every { timeProvider.nowEpochMillis() } returns 1_000_000L
+        every { timeProvider.today() } returns LocalDate.now()
 
         coEvery { budgetRepository.getBudgetSettingsSync() } returns monthlySettings(
             startDate = periodEnd.minusDays(29),
