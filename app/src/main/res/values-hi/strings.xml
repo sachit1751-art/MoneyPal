@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Minus</string>
+    <string name="app_name">MoneyPal</string>
     <string name="tile_new_transaction_label">नया लेन-देन</string>
     <string name="tutorial_numpad_title">नंपैड</string>
     <string name="tutorial_numpad_description">अपनी खर्च की गई रकम डालें और सेव करने के लिए हरे रंग के चेक मार्क पर टैप करें। कैलकुलेट करने के लिए नंपैड पर ऊपर की ओर स्वाइप करें।</string>

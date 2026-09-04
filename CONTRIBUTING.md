@@ -1,6 +1,6 @@
-# Contributing to Minus
+# Contributing to MoneyPal
 
-Thanks for helping improve Minus. This project is an Android budget tracker built with Kotlin, Jetpack Compose, Room, Hilt, and a Wear OS companion module.
+Thanks for helping improve MoneyPal. This project is an Android budget tracker built with Kotlin, Jetpack Compose, Room, Hilt, and a Wear OS companion module.
 
 ## Getting started
 
@@ -14,8 +14,10 @@ Thanks for helping improve Minus. This project is an Android budget tracker buil
 Run the same basic checks used by CI:
 
 ```bash
-./gradlew :app:compileDebugKotlin :wear:compileDebugKotlin :sync-contract:compileKotlin :app:testDebugUnitTest
+./gradlew :app:compileFossDebugKotlin :app:compileWearDebugKotlin :wear:compileDebugKotlin :sync-contract:compileKotlin :app:testFossDebugUnitTest
 ```
+
+Note: `:app` has no default flavor, so flavor-qualified tasks are required — bare tasks like `:app:compileDebugKotlin` are ambiguous and fail.
 
 If your change only affects one module, still make sure the full app compiles before requesting review.
 

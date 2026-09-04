@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.detekt)
 }
 
-group = "com.serranoie.app.minus"
+group = "com.sachit.moneypal"
 version = "1.0"
 
 

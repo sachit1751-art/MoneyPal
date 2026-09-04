@@ -31,13 +31,13 @@ val appVersionName = versionProps.getProperty("VERSION_NAME") ?: "0.0.0-dev"
 val appVersionCode = versionProps.getProperty("VERSION_CODE")?.toIntOrNull() ?: 1
 
 android {
-	namespace = "com.serranoie.app.wear.minus"
+	namespace = "com.sachit.moneypal.wear"
 	compileSdk {
 		version = release(36)
 	}
 
 	defaultConfig {
-		applicationId = "com.serranoie.app.minus"
+		applicationId = "com.sachit.moneypal"
 		minSdk = 30
 		targetSdk = 36
 		versionCode = appVersionCode
@@ -71,7 +71,7 @@ android {
 		outputs.all {
 			val output = this as? BaseVariantOutputImpl
 			if (output != null) {
-				output.outputFileName = "Minus-WearOS-v$appVersionName.apk"
+				output.outputFileName = "MoneyPal-WearOS-v$appVersionName.apk"
 			}
 		}
 	}

@@ -1,0 +1,112 @@
+package com.sachit.moneypal.data.local.dao
+
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
+import com.sachit.moneypal.data.local.entity.TransactionEntity
+import kotlinx.coroutines.flow.Flow
+
+@Dao
+interface TransactionDao {
+
+    @Query("SELECT * FROM transactions ORDER BY date DESC")
+    fun getAllTransactions(): Flow<List<TransactionEntity>>
+
+    @Query("""
+        SELECT * FROM transactions 
+        WHERE date >= :startDate AND date < :endDate 
+        ORDER BY date DESC
+    """)
+    fun getTransactionsForDateRange(
+        startDate: Long,
+        endDate: Long
+    ): Flow<List<TransactionEntity>>
+
+    @Query("""
+        SELECT * FROM transactions 
+        WHERE date >= :startOfDay AND date < :endOfDay 
+        ORDER BY date DESC
+    """)
+    fun getTransactionsForDay(
+        startOfDay: Long,
+        endOfDay: Long
+    ): Flow<List<TransactionEntity>>
+
+    @Query("""
+        SELECT SUM(CAST(amount AS REAL)) FROM transactions 
+        WHERE date >= :startOfDay AND date < :endOfDay
+    """)
+    fun getTotalSpentForDay(
+        startOfDay: Long,
+        endOfDay: Long
+    ): Flow<Double?>
+
+    @Query("""
+        SELECT SUM(CAST(amount AS REAL)) FROM transactions 
+        WHERE date >= :startDate AND date < :endDate
+    """)
+    fun getTotalSpentForPeriod(
+        startDate: Long,
+        endDate: Long
+    ): Flow<Double?>
+
+    @Insert
+    suspend fun insert(transaction: TransactionEntity): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertOrReplace(transaction: TransactionEntity): Long
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertIgnore(transaction: TransactionEntity): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllOrReplace(transactions: List<TransactionEntity>)
+
+    @Update
+    suspend fun update(transaction: TransactionEntity)
+
+    @Delete
+    suspend fun delete(transaction: TransactionEntity)
+
+    @Query("DELETE FROM transactions WHERE id = :transactionId")
+    suspend fun deleteById(transactionId: Long)
+
+    @Query("SELECT * FROM transactions WHERE id = :transactionId LIMIT 1")
+    suspend fun getTransactionById(transactionId: Long): TransactionEntity?
+
+    @Query("SELECT COUNT(DISTINCT periodId) FROM transactions WHERE periodId > 0")
+    suspend fun countDistinctPeriods(): Int
+
+    @Query("SELECT EXISTS(SELECT 1 FROM transactions WHERE periodId = :periodId)")
+    suspend fun hasTransactionsInPeriod(periodId: Long): Boolean
+
+    @Query("SELECT EXISTS(SELECT 1 FROM transactions WHERE clientGeneratedId = :clientGeneratedId)")
+    suspend fun existsByClientGeneratedId(clientGeneratedId: String): Boolean
+
+    @Query("SELECT * FROM transactions ORDER BY date DESC LIMIT :limit")
+    suspend fun getRecentTransactions(limit: Int): List<TransactionEntity>
+
+    @Query("""
+        UPDATE transactions 
+        SET isCreditPaid = 1 
+        WHERE isCredit = 1 AND date >= :startDate AND date < :endDate AND isCreditPaid = 0
+    """)
+    suspend fun markCreditAsPaidInRange(startDate: Long, endDate: Long)
+
+    @Query("""
+        UPDATE transactions 
+        SET isCreditPaid = 1 
+        WHERE isCredit = 1 AND isCreditPaid = 0
+    """)
+    suspend fun markAllCreditAsPaid()
+
+    @Query("""
+        UPDATE transactions 
+        SET isCreditPaid = 1 
+        WHERE id = :transactionId AND isCredit = 1
+    """)
+    suspend fun markTransactionAsPaid(transactionId: Long)
+}

@@ -3,7 +3,7 @@ name: Implementation of a currency
 about: Add an existing currency into the app
 title: "[Currency]: "
 labels: currency
-assignees: isaacsa51
+assignees: sachit1751-art
 
 ---
 

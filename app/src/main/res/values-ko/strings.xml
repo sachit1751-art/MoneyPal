@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Minus</string>
+    <string name="app_name">MoneyPal</string>
     <string name="tile_new_transaction_label">새 거래</string>
     <string name="tutorial_numpad_title">숫자 패드</string>
     <string name="tutorial_numpad_description">지출 금액을 입력하고 녹색 체크 표시를 탭하여 저장하세요. 숫자 패드를 위로 쓸어 올리면 계산 기능을 사용할 수 있습니다.</string>

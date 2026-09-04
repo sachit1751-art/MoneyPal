@@ -136,7 +136,7 @@ platform :android do
       "  2. git add version.properties fastlane/metadata\n" \
       "  3. git commit -m \"docs(changelog): preparar #{version_tag}\"\n" \
       "  4. git tag -a #{version_tag} -m \"Release #{version_tag.gsub(/^v/, '')}\"\n" \
-      "  5. git push origin #{version_tag}   # dispara el workflow Release Minus\n" \
+      "  5. git push origin #{version_tag}   # dispara el workflow Release MoneyPal\n" \
       "\n" \
       "El CI sólo construye APKs desde el .txt ya comiteado, sin regenerarlo.\n" \
       "Así IzzyOnDroid (RB checker), F-Droid y un checkout limpio obtienen el mismo APK."
@@ -186,8 +186,8 @@ platform :android do
     begin
       sh(
         "gh", "release", "create", version_tag, *apk_paths,
-        "--repo", ENV.fetch("GITHUB_REPOSITORY", "isaacsa51/Minus"),
-        "--title", "Minus #{version_tag}",
+        "--repo", ENV.fetch("GITHUB_REPOSITORY", "sachit1751-art/MoneyPal"),
+        "--title", "MoneyPal #{version_tag}",
         "--generate-notes"
       )
     rescue => e

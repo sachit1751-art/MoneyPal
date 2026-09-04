@@ -4,7 +4,7 @@ about: Generating a report for a non working or partially working feature/compon
   inside the app.
 title: "[Bug]: "
 labels: bug
-assignees: isaacsa51
+assignees: sachit1751-art
 
 ---
 

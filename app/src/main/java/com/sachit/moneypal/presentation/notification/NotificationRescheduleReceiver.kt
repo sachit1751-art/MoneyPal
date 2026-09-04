@@ -1,0 +1,43 @@
+package com.sachit.moneypal.presentation.notification
+
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import com.sachit.moneypal.data.repository.BudgetRepository
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import logcat.asLog
+import logcat.logcat
+
+class NotificationRescheduleReceiver : BroadcastReceiver() {
+    @EntryPoint
+    @InstallIn(SingletonComponent::class)
+    interface NotificationRescheduleReceiverEntryPoint {
+        fun budgetRepository(): BudgetRepository
+        fun notificationScheduler(): NotificationScheduler
+    }
+
+    override fun onReceive(context: Context, intent: Intent) {
+        val pendingResult = goAsync()
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                logcat { "Rescheduling notifications after system event: ${intent.action}" }
+                val entryPoint = EntryPointAccessors.fromApplication(
+                    context.applicationContext,
+                    NotificationRescheduleReceiverEntryPoint::class.java
+                )
+                val scheduler = entryPoint.notificationScheduler()
+                scheduler.initializeNotifications()
+            } catch (e: Exception) {
+                logcat { "Error rescheduling notifications\n${e.asLog()}" }
+            } finally {
+                pendingResult.finish()
+            }
+        }
+    }
+}

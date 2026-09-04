@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Minus</string>
+    <string name="app_name">MoneyPal</string>
 
     <string name="tutorial_numpad_title">Numpad</string>
     <string name="tutorial_numpad_description">Enter the amount you spent and tap the green checkmark to save. Swipe up on the numpad to calculate.</string>
@@ -170,7 +170,7 @@
     <string name="days_remaining_label">Days\nremaining</string>
 
     <!-- Widget Gallery -->
-    <string name="settings_widgets_pin_not_supported">Your device doesn\'t support adding widgets this way. Long-press your home screen and look for Minus instead.</string>
+    <string name="settings_widgets_pin_not_supported">Your device doesn\'t support adding widgets this way. Long-press your home screen and look for MoneyPal instead.</string>
     <string name="widget_complete_budget_title">Complete Budget</string>
     <string name="widget_average_spend_title">Average Spend</string>
     <string name="widget_days_countdown_title">Days Countdown</string>
@@ -256,7 +256,7 @@
 
     <string name="day_total_format">Total: %1$s</string>
 
-    <string name="onboarding_welcome_title">Welcome to Minus</string>
+    <string name="onboarding_welcome_title">Welcome to MoneyPal</string>
     <string name="onboarding_welcome_subtitle">Hi and welcome, lets start saving together.</string>
     <string name="onboarding_welcome_intro">A simple budget tracker that helps you decide how much you can spend each day, week, biweekly, or month.</string>
     <string name="onboarding_step_1_title">Set a budget</string>
@@ -264,7 +264,7 @@
     <string name="onboarding_step_2_title">Track expenses</string>
     <string name="onboarding_step_2_subtitle">Log what you spend and see what is left each day.</string>
     <string name="onboarding_step_3_title">Recurring expenses</string>
-    <string name="onboarding_step_3_subtitle">Add subscriptions and Minus will track them for you automatically.</string>
+    <string name="onboarding_step_3_subtitle">Add subscriptions and MoneyPal will track them for you automatically.</string>
     <string name="onboarding_step_4_title">Calculate on the fly</string>
     <string name="onboarding_step_4_subtitle">Your remaining budget updates in real time as you spend.</string>
     <string name="onboarding_step_5_title">See your analytics</string>
@@ -418,13 +418,13 @@
     <string name="bug_report_attachments_label_bug">Screenshots or recordings</string>
     <string name="bug_report_submit">Submit Report</string>
     <string name="bug_report_share_title">Send report</string>
-    <string name="bug_report_recipient_email" translatable="false">serranoie99@gmail.com</string>
+    <string name="bug_report_recipient_email" translatable="false">sachit1751@gmail.com</string>
     <string name="bug_report_email_subject" translatable="false">%1$s</string>
-    <string name="bug_report_help_title">Help us make Minus better</string>
-    <string name="bug_report_help_message_prefix">"Reporting issues or suggesting improvements helps us make Minus better for everyone.\n\nThis guided form helps you package all the necessary details into a report, automatically attaching device metadata and app diagnostics to speed up our investigation.\n\nOnce prepared, you can send the report via email or contribute via "</string>
+    <string name="bug_report_help_title">Help us make MoneyPal better</string>
+    <string name="bug_report_help_message_prefix">"Reporting issues or suggesting improvements helps us make MoneyPal better for everyone.\n\nThis guided form helps you package all the necessary details into a report, automatically attaching device metadata and app diagnostics to speed up our investigation.\n\nOnce prepared, you can send the report via email or contribute via "</string>
     <string name="bug_report_help_github_issues">" GitHub Issues "</string>
     <string name="bug_report_help_message_suffix"> directly on our repository.</string>
-    <string name="bug_report_github_issues_url" translatable="false">https://github.com/isaacsa51/Minus/issues</string>
+    <string name="bug_report_github_issues_url" translatable="false">https://github.com/sachit1751-art/MoneyPal/issues</string>
     <string name="bug_report_steps_to_reproduce_label">Steps to reproduce</string>
     <string name="bug_report_include_steps_label">Include reproduction steps</string>
     <string name="bug_report_add_step">Add Step</string>

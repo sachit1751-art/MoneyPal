@@ -70,7 +70,7 @@ val appVersionName = versionProps.getProperty("VERSION_NAME") ?: "0.0.0-dev"
 val appVersionCode = versionProps.getProperty("VERSION_CODE")?.toIntOrNull() ?: 1
 
 android {
-    namespace = "com.serranoie.app.minus"
+    namespace = "com.sachit.moneypal"
     compileSdk {
         version = release(36)
     }
@@ -93,7 +93,7 @@ android {
     ).all { v -> !v.isNullOrBlank() }
 
     defaultConfig {
-        applicationId = "com.serranoie.app.minus"
+        applicationId = "com.sachit.moneypal"
         minSdk = 27
         targetSdk = 36
         versionCode = appVersionCode
@@ -171,9 +171,9 @@ android {
             if (output != null) {
                 val flavorName = name.replaceFirstChar { it.titlecase() }
                 output.outputFileName = if (flavorName.contains("wear", ignoreCase = true)) {
-                    "Minus-WearOS-v$appVersionName.apk"
+                    "MoneyPal-WearOS-v$appVersionName.apk"
                 } else {
-                    "Minus-v$appVersionName.apk"
+                    "MoneyPal-v$appVersionName.apk"
                 }
             }
         }
@@ -194,7 +194,7 @@ android {
         resources.excludes += "/META-INF/LICENSE.md"
         resources.excludes += "/META-INF/LICENSE-notice.md"
     }
-    namespace = "com.serranoie.app.minus"
+    namespace = "com.sachit.moneypal"
 
     dependenciesInfo {
         includeInApk = false
@@ -380,9 +380,9 @@ val generateChangelogKotlin by tasks.registering {
         if (txtFiles.isEmpty()) {
             File(outDir, "GeneratedChangelog.kt").writeText(
                 """
-                package com.serranoie.app.minus.generated
+                package com.sachit.moneypal.generated
 
-                import com.serranoie.app.minus.domain.model.changelog.VersionRelease
+                import com.sachit.moneypal.domain.model.changelog.VersionRelease
 
                 object GeneratedChangelog {
                     val releases: List<VersionRelease> = emptyList()
@@ -398,11 +398,11 @@ val generateChangelogKotlin by tasks.registering {
         sb.appendLine("// Source of truth: fastlane/metadata/android/en-US/changelogs/*.txt")
         sb.appendLine("// Regenerate via: ./gradlew :app:generateChangelogKotlin")
         sb.appendLine()
-        sb.appendLine("package com.serranoie.app.minus.generated")
+        sb.appendLine("package com.sachit.moneypal.generated")
         sb.appendLine()
-        sb.appendLine("import com.serranoie.app.minus.domain.model.changelog.ChangelogItem")
-        sb.appendLine("import com.serranoie.app.minus.domain.model.changelog.ReleaseType")
-        sb.appendLine("import com.serranoie.app.minus.domain.model.changelog.VersionRelease")
+        sb.appendLine("import com.sachit.moneypal.domain.model.changelog.ChangelogItem")
+        sb.appendLine("import com.sachit.moneypal.domain.model.changelog.ReleaseType")
+        sb.appendLine("import com.sachit.moneypal.domain.model.changelog.VersionRelease")
         sb.appendLine()
         sb.appendLine("object GeneratedChangelog {")
         sb.appendLine("    val releases: List<VersionRelease> = listOf(")

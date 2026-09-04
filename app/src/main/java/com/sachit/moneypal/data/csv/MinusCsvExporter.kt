@@ -1,0 +1,126 @@
+package com.sachit.moneypal.data.csv
+
+import com.sachit.moneypal.domain.model.ArchivedBudget
+import com.sachit.moneypal.domain.model.Transaction
+import org.apache.commons.csv.CSVFormat
+import org.apache.commons.csv.CSVPrinter
+import java.io.OutputStream
+import java.io.OutputStreamWriter
+import java.nio.charset.StandardCharsets
+import java.time.format.DateTimeFormatter
+
+class MinusCsvExporter {
+
+    private val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+    private val dateFormatter = DateTimeFormatter.ISO_LOCAL_DATE
+
+    fun export(
+        transactions: List<Transaction>,
+        archivedBudgets: List<ArchivedBudget>,
+        metadata: CsvBackupMetadata?,
+        outputStream: OutputStream,
+    ) {
+        val format = CSVFormat.DEFAULT.builder()
+            .setHeader(*MinusCsvContract.HEADERS)
+            .get()
+
+        OutputStreamWriter(outputStream, StandardCharsets.UTF_8).use { writer ->
+            CSVPrinter(writer, format).use { printer ->
+                metadata?.let { meta ->
+                    val s = meta.budgetSettings
+                    printer.printRecord(
+                        MinusCsvContract.MARKER_META,
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        s.totalBudget.toPlainString(),
+                        s.period.name,
+                        s.startDate.format(dateFormatter),
+                        s.getPeriodEndDate().format(dateFormatter),
+                        s.currencyCode,
+                        s.daysInPeriod.toString(),
+                        if (s.rollOverEnabled) "1" else "0",
+                        if (s.rollOverCarryForward) "1" else "0",
+                        s.remainingBudgetStrategy.name,
+                        meta.currentPeriodStartedAtMillis.toString(),
+                        meta.currentPeriodId.toString(),
+                        s.creditCardCutoffDay?.toString().orEmpty(),
+                        s.splitMode.name,
+                    )
+                }
+
+                archivedBudgets.forEach { archive ->
+                    printer.printRecord(
+                        MinusCsvContract.MARKER_ARCHIVED,
+                        archive.spentAmount.toPlainString(),
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        archive.periodId.toString(),
+                        archive.createdAt.toString(),
+                        archive.totalBudget.toPlainString(),
+                        archive.periodType.name,
+                        archive.startDate.format(dateFormatter),
+                        archive.endDate.format(dateFormatter),
+                        archive.currencyCode,
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                    )
+                }
+
+                transactions.forEach { tx ->
+                    val txDate = tx.date ?: return@forEach
+                    val frequency = tx.recurrentFrequency?.name.orEmpty()
+                    val endDate = tx.recurrentEndDate?.toLocalDate()?.format(dateFormatter).orEmpty()
+                    val subDay = tx.subscriptionDay?.toString().orEmpty()
+
+                    printer.printRecord(
+                        txDate.format(dateTimeFormatter),
+                        tx.amount.toPlainString(),
+                        tx.comment,
+                        if (tx.isRecurrent) "1" else "0",
+                        frequency,
+                        endDate,
+                        subDay,
+                        tx.id.toString(),
+                        if (tx.isCredit) "1" else "0",
+                        if (tx.isCreditPaid) "1" else "0",
+                        tx.periodId.toString(),
+                        tx.createdAt.toString(),
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                    )
+                }
+                printer.flush()
+            }
+        }
+    }
+}

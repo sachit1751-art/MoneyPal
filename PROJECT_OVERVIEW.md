@@ -1,6 +1,6 @@
 # Project Overview
 
-The primary goal of Minus is to provide an easy and familiar interface for recording daily spending. By mimicking the layout of a standard calculator interface that reduces its complexity, any user can easily and quickly enter their expenses.
+The primary goal of MoneyPal is to provide an easy and familiar interface for recording daily spending. By mimicking the layout of a standard calculator interface that reduces its complexity, any user can easily and quickly enter their expenses.
 
 ---
 
@@ -23,7 +23,7 @@ The primary goal of Minus is to provide an easy and familiar interface for recor
 
 ## Architecture
 
-Minus follows Modern Android Development (MAD) practices and a Clean Architecture approach, using MVI for state management with unidirectional data flow.
+MoneyPal follows Modern Android Development (MAD) practices and a Clean Architecture approach, using MVI for state management with unidirectional data flow.
 
 ### High-Level Architecture
 
@@ -111,7 +111,7 @@ flowchart LR
 
 ## How the Notification & Alarm System Works
 
-Minus uses a dual-strategy for background notifications to ensure budget reminders and recurrent expense alerts are delivered reliably while respecting Android's battery optimization.
+MoneyPal uses a dual-strategy for background notifications to ensure budget reminders and recurrent expense alerts are delivered reliably while respecting Android's battery optimization.
 
 ### AlarmManager
 
@@ -164,7 +164,7 @@ The midnight alarm ensures budget periods transition correctly even if the app h
 > Currently there's to version of the `apk` on each release, one is called FOSS and the other wear, the wear integrates the WearOS integration and libraries.
 > This is made since FOSS App stores like F-Droid & IzzyOnDroid don't allow the usage of the Google Play services for the Wear OS bridge connection.
 
-Minus includes a companion Wear OS application that provides a lightweight expense tracking experience on smartwatches.
+MoneyPal includes a companion Wear OS application that provides a lightweight expense tracking experience on smartwatches.
 
 ### Supported Features
 

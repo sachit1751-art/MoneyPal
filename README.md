@@ -2,10 +2,10 @@
   <img src="assets/banner.png" alt="App Banner" width="100%">
 </p>
 
-# Minus - An easy to use, budget tracking app
+# MoneyPal - An easy to use, budget tracking app
 
 <p align="center">
-  <strong>Minus</strong> is an easy to use & powerful budget tracking app. <br/>Register, calculate and make reminders for your recurring expenses alongside credit card due dates.
+  <strong>MoneyPal</strong> is an easy to use & powerful budget tracking app. <br/>Register, calculate and make reminders for your recurring expenses alongside credit card due dates.
 </p>
 
 <div align="center">
@@ -14,26 +14,26 @@
   <span> - </span>
     <a href="PROJECT_OVERVIEW.md">Project Overview</a>
   <span> - </span>
-    <a href="https://github.com/isaacsa51/Minus/issues/new?template=bug_report.md">Report Bug</a>
+    <a href="https://github.com/sachit1751-art/MoneyPal/issues/new?template=bug_report.md">Report Bug</a>
   <span> - </span>
-    <a href="https://github.com/isaacsa51/Minus/issues/new?template=feature_request.md">Request a Feature</a>
+    <a href="https://github.com/sachit1751-art/MoneyPal/issues/new?template=feature_request.md">Request a Feature</a>
   </h4>
 </div>
 
 <table align="center">
   <tr>
     <td align="center">
-      <a href="https://apt.izzysoft.de/packages/com.serranoie.app.minus">
+      <a href="https://apt.izzysoft.de/packages/com.sachit.moneypal">
         <img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroidButtonGreyBorder_nofont.png" height="50" alt="Get it at IzzyOnDroid">
       </a>
     </td>
     <td align="center">
-      <a href="https://github.com/isaacsa51/Minus/releases">
+      <a href="https://github.com/sachit1751-art/MoneyPal/releases">
         <img src="assets/badge_github.png" height="80" alt="Get it at GitHub">
       </a>
     </td>
     <td align="center">
-      <a href="https://play.google.com/store/apps/details?id=com.serranoie.app.minus">
+      <a href="https://play.google.com/store/apps/details?id=com.sachit.moneypal">
         <img src="assets/badge_playstore.png" height="80" alt="Get it at Google Play Store">
       </a>
     </td>
@@ -44,8 +44,8 @@
   <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/Android/android2.svg">
   <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/AndroidStudio/androidstudio3.svg">
   <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/Kotlin/kotlin1.svg">
-  <img src="https://m3-markdown-badges.vercel.app/stars/1/3/isaacsa51/Minus">
-  <img src="https://m3-markdown-badges.vercel.app/issues/1/2/isaacsa51/Minus">
+  <img src="https://m3-markdown-badges.vercel.app/stars/1/3/sachit1751-art/MoneyPal">
+  <img src="https://m3-markdown-badges.vercel.app/issues/1/2/sachit1751-art/MoneyPal">
 </p>
 
 <table align="center">
@@ -77,7 +77,7 @@
 |                                                                                                                                                                                                                                                                                                                   |                                                                                                            |
 |:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------|
 | **Save, Edit, Delete & Calculate on the Fly** <br/> Register expenses in seconds using a familiar calculator-style numpad. No complex forms — just tap the amount and save. Swipe up to reveal math operators and make calculations directly before saving.                                                       | <img src="assets/screenshot_1.png" alt="Numpad expense entry" width="560" style="border-radius:26px;"/>    |
-| **Smart Budget Periods** <br/> Configure your budget to match how you actually think about money. Choose between Daily, Weekly, Biweekly, or Monthly periods. Minus automatically breaks down your total budget.                                                                                                  | <img src="assets/split_budget.png" alt="Budget periods" width="560" style="border-radius:26px;"/>          |
+| **Smart Budget Periods** <br/> Configure your budget to match how you actually think about money. Choose between Daily, Weekly, Biweekly, or Monthly periods. MoneyPal automatically breaks down your total budget.                                                                                                  | <img src="assets/split_budget.png" alt="Budget periods" width="560" style="border-radius:26px;"/>          |
 | **Recurring Expenses & Subscriptions** <br/> Track subscriptions and recurring bills with automatic notifications. Notifications fire at a configurable time before each occurrence.                                                                                                                              | <img src="assets/recurrent_payment.png" alt="Recurring expenses" width="560" style="border-radius:26px;"/> |
 | **See your expenses and analyze them** <br/> Every expense is stored and grouped by date. Browse history organized into: current period transactions, upcoming recurrent expenses, and past period data. Analyze them viewing graphs and see how can you save using the in app recommendation.                    | <img src="assets/screenshot_3.png" alt="Expense history" width="560" style="border-radius:26px;"/>         |
 | **CSV Export** writes your full expense history to the Downloads folder including amount, date, comment, category, and recurrence settings.                                                                                                                                                                       | <img src="assets/screenshot_4.png" alt="Settings" width="560" style="border-radius:26px;"/>                |
@@ -90,21 +90,21 @@ Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTIN
 information.
 
 ## Translations
-[![Crowdin](https://badges.crowdin.net/minus-budget-tracker-app/localized.svg)](https://crowdin.com/project/minus-budget-tracker-app)
+[![Crowdin](https://badges.crowdin.net/moneypal-budget-tracker-app/localized.svg)](https://crowdin.com/project/moneypal-budget-tracker-app)
 
 Feel free to see, check and fix current translation, any help will be appreciated.
 Access to
-Crowdin [here](https://crowdin.com/project/minus-budget-tracker-app/invite?h=5f5fae4aac7d90e9a050c4e45996bc222825687)
+Crowdin [here](https://crowdin.com/project/moneypal-budget-tracker-app)
 
 ---
 
 > [!NOTE]
-> While Minus incorporates visual artifacts
+> While MoneyPal incorporates visual artifacts
 > from [Buckwheat](https://github.com/danilkinkin/buckwheat), it's totally different from the
 > original
 > with a vastly more advanced architectural paradigm. Any superficial similarities are merely legacy
 > design cues within a fundamentally different and more robust ecosystem.
 
 <div align="center">
-    <p>Made with <3 by <a href="https://linkedin.com/in/serranoie">Isaac Serrano</a></p>
+    <p>Made with <3 by <a href="https://github.com/sachit1751-art">Mr Sachit</a></p>
 </div>

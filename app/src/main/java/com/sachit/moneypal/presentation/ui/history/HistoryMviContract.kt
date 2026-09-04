@@ -1,0 +1,69 @@
+package com.sachit.moneypal.presentation.ui.history
+
+import com.sachit.moneypal.domain.model.BudgetSettings
+import com.sachit.moneypal.domain.model.BudgetState
+import com.sachit.moneypal.domain.model.Transaction
+import com.sachit.moneypal.presentation.ui.theme.component.expense.UpcomingRecurrentItem
+import java.math.BigDecimal
+import java.time.LocalDate
+
+sealed interface HistoryUiIntent {
+    data class ToggleExpandedDate(val date: LocalDate) : HistoryUiIntent
+    data class SetEditingTransaction(val transaction: Transaction?) : HistoryUiIntent
+    data class SetRecurrentToDelete(val transaction: Transaction?) : HistoryUiIntent
+    data class SetRecurrentToEdit(val transaction: Transaction?) : HistoryUiIntent
+    data object DismissDeleteRecurrentDialog : HistoryUiIntent
+    data class TogglePastPeriod(val visible: Boolean) : HistoryUiIntent
+    data class ToggleOutOfPeriodSubscriptions(val visible: Boolean) : HistoryUiIntent
+    data class ToggleUpcomingRecurrentInPeriod(val visible: Boolean) : HistoryUiIntent
+    data class ToggleExpandedTransaction(val transactionId: Long?) : HistoryUiIntent
+
+    data class DeleteTransaction(val transaction: Transaction) : HistoryUiIntent
+    data class SaveEditedTransaction(val transaction: Transaction) : HistoryUiIntent
+    data class ConfirmDeleteRecurrent(val transaction: Transaction) : HistoryUiIntent
+    data class MarkTransactionAsPaid(val transaction: Transaction) : HistoryUiIntent
+
+    data class SetLockSwipeable(val locked: Boolean) : HistoryUiIntent
+
+    data class UpdateCreditCutoffDay(val day: Int) : HistoryUiIntent
+}
+
+sealed interface HistoryUiEffect {
+    data class ShowSnackbar(val message: String) : HistoryUiEffect
+}
+
+data class HistoryUiState(
+    val budgetSettings: BudgetSettings? = null,
+    val budgetState: BudgetState? = null,
+    val currentPeriodId: Long = 0L,
+    val currentPeriodStartedAtMillis: Long = 0L,
+
+    val isCreditQuickToggleEnabled: Boolean = false,
+    val showPastTransactionsSetting: Boolean = true,
+
+    val tags: List<String> = emptyList(),
+
+    val transactions: List<Transaction> = emptyList(),
+
+    val editingTransaction: Transaction? = null,
+    val pendingRemovedTransactions: Map<Long, Transaction> = emptyMap(),
+    val recurrentToDelete: Transaction? = null,
+    val recurrentToEdit: Transaction? = null,
+    val showDeleteRecurrentDialog: Boolean = false,
+    val expandedTransactionId: Long? = null,
+
+    val expandedDates: Set<LocalDate> = emptySet(),
+    val showPastPeriod: Boolean = false,
+    val showOutOfPeriodSubscriptions: Boolean = false,
+    val showUpcomingRecurrentInPeriod: Boolean = true,
+    val lockSwipeable: Boolean = true,
+    val recurrentPaymentsViewMode: RecurrentPaymentsViewMode = RecurrentPaymentsViewMode.VERTICAL_LIST,
+
+    val displayTransactions: List<Transaction> = emptyList(),
+    val groupedCurrentTransactions: Map<LocalDate?, List<Transaction>> = emptyMap(),
+    val groupedPastTransactions: Map<LocalDate?, List<Transaction>> = emptyMap(),
+    val upcomingRecurrentInPeriod: List<UpcomingRecurrentItem> = emptyList(),
+    val futureRecurrentOutOfPeriod: List<UpcomingRecurrentItem> = emptyList(),
+    val creditOwed: BigDecimal = BigDecimal.ZERO,
+    val debtAdjustedBalance: BigDecimal = BigDecimal.ZERO,
+)

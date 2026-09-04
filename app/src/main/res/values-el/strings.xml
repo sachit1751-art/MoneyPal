@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Πλην</string>
+    <string name="app_name">MoneyPal</string>
     <string name="tile_new_transaction_label">Νέα συναλλαγή</string>
     <string name="tutorial_numpad_title">Καντράν</string>
     <string name="tutorial_numpad_description">Εισαγάγετε το ποσό που ξοδέψατε και πατήστε το πράσινο σημάδι επιλογής για εξοικονόμηση. Σύρετε προς τα πάνω στο αριθμητικό πληκτρολόγιο για να υπολογίσετε.</string>

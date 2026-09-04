@@ -1,6 +1,6 @@
 **Privacy Policy**
 
-This privacy policy applies to the Minus app for , and mobile devices, together with any related services operated by Isaac Serrano (collectively, the "Application"). Isaac Serrano is hereby referred to as the "Service Provider".
+This privacy policy applies to the MoneyPal app for , and mobile devices, together with any related services operated by Mr Sachit (collectively, the "Application"). Mr Sachit is hereby referred to as the "Service Provider".
 
 **Information Collection and Use**
 
@@ -17,15 +17,15 @@ The Application or its third-party SDKs may use cookies, SDKs, pixels, and simil
 
 **Your Rights**
 
-You may request access to, correction of, or deletion of your personal data held by the Service Provider. To exercise these rights, or to withdraw consent where processing is based on consent, contact the Service Provider at serranoie99@gmail.com.
+You may request access to, correction of, or deletion of your personal data held by the Service Provider. To exercise these rights, or to withdraw consent where processing is based on consent, contact the Service Provider at sachit1751@gmail.com.
 
 **Your California privacy rights (CCPA/CPRA)**
 
-If you are a California resident, you have the right to know what personal information is collected, the right to delete personal information, the right to opt out of the sale or sharing of personal information, and the right to non-discrimination for exercising these rights. To exercise your CCPA/CPRA rights, contact the Service Provider at serranoie99@gmail.com.
+If you are a California resident, you have the right to know what personal information is collected, the right to delete personal information, the right to opt out of the sale or sharing of personal information, and the right to non-discrimination for exercising these rights. To exercise your CCPA/CPRA rights, contact the Service Provider at sachit1751@gmail.com.
 
 The Service Provider may use the information you provide to send important information, required notices, and, where permitted by law, marketing communications.
 
-For a better experience while using the Application, the Service Provider may require you to provide certain personally identifiable information, including but not limited to serranoie99@gmail.com, +526691659043\. The information the Service Provider requests will be retained and used as described in this privacy policy.
+For a better experience while using the Application, the Service Provider may require you to provide certain personally identifiable information, including but not limited to sachit1751@gmail.com. The information the Service Provider requests will be retained and used as described in this privacy policy.
 
 **Third Party Access**
 
@@ -51,7 +51,7 @@ The Service Provider may disclose User Provided and Automatically Collected Info
 
 You can stop further collection of information from your , or mobile device by uninstalling the Application. Uninstalling will stop the Application from collecting data from your device, but it does not automatically delete information that has already been transmitted to the Service Provider or to third parties.
 
-To request deletion of your personal data, to withdraw consent, or to exercise any of your rights, contact the Service Provider at serranoie99@gmail.com.
+To request deletion of your personal data, to withdraw consent, or to exercise any of your rights, contact the Service Provider at sachit1751@gmail.com.
 
 **Data Retention Policy**
 
@@ -62,7 +62,7 @@ The Service Provider retains personal data based on its necessity for the stated
 *   Aggregated and Anonymized Data: Retained indefinitely as it no longer identifies you
 *   Data required for legal compliance: Retained as long as required by applicable law
 
-You may request deletion of your personal data, subject to any legal obligation to retain it. If you want the Service Provider to delete User Provided Data submitted through the Application, please contact them at serranoie99@gmail.com. Please note that some User Provided Data may be required for the Application to function properly.
+You may request deletion of your personal data, subject to any legal obligation to retain it. If you want the Service Provider to delete User Provided Data submitted through the Application, please contact them at sachit1751@gmail.com. Please note that some User Provided Data may be required for the Application to function properly.
 
 **Children**
 
@@ -82,7 +82,7 @@ If a data breach occurs that affects your personal data, the Service Provider wi
 
 The Service Provider may update this Privacy Policy from time to time. The Service Provider will notify you of material changes by posting the updated Privacy Policy with an effective date. Where required by law, the Service Provider will seek your consent to material changes before they take effect.
 
-Previous versions of this Privacy Policy will be maintained and made available upon request by contacting the Service Provider at serranoie99@gmail.com.
+Previous versions of this Privacy Policy will be maintained and made available upon request by contacting the Service Provider at sachit1751@gmail.com.
 
 This privacy policy is effective as of 2026-07-09
 
@@ -92,7 +92,7 @@ Where processing is based on consent, you provide that consent by affirmatively 
 
 **Contact Us**
 
-If you have any questions regarding privacy while using the Application, or have questions about the practices, please contact the Service Provider via email at serranoie99@gmail.com.
+If you have any questions regarding privacy while using the Application, or have questions about the practices, please contact the Service Provider via email at sachit1751@gmail.com.
 
 * * *
 

@@ -19,7 +19,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Minus"
+rootProject.name = "MoneyPal"
 include(":app")
 if (providers.gradleProperty("minus.includeWearModule").orNull != "false") {
 	include(":wear")
