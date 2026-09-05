@@ -55,16 +55,6 @@
 </table>
 
 ---
-
-## Appearing on:
-### [HowToMen](https://www.youtube.com/@howtomen)
-[![YouTube](http://i.ytimg.com/vi/2QBFRcqee7I/hqdefault.jpg)](https://www.youtube.com/watch?v=2QBFRcqee7I&t=694s)
-
-### [Enoch Boateng](https://www.youtube.com/@EnochBoateng)
-[![YouTube](http://i.ytimg.com/vi/7DAGDm9esQE/hqdefault.jpg)]([https://www.youtube.com/watch?v=2QBFRcqee7I&t=694s](https://youtu.be/7DAGDm9esQE?t=194))
-
----
-
 ## Features
 
 |                                                                                                                                                                                                                                                                                                                   |                                                                                                            |
