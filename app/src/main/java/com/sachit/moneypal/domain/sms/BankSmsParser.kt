@@ -27,7 +27,9 @@ import java.util.Locale
  */
 object BankSmsParser {
 
-    private const val NUMBER = """(?:\d{1,3}(?:,\d{2,3})*|\d+)(?:\.\d{1,4})?"""
+    // Comma-grouped form first (requiring at least one group) so plain 4+ digit
+    // numbers like "1000" fall through to \d+ instead of truncating to "100".
+    private const val NUMBER = """(?:\d{1,3}(?:,\d{2,3})+|\d+)(?:\.\d{1,4})?"""
 
     /** amount with a currency cue before or after: Rs/Rs./INR/₹/$/€/£/Rs-suffix forms */
     private val CURRENCY_AMOUNT = Regex(
