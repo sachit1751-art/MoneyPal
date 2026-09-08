@@ -77,7 +77,9 @@ class BudgetRepositoryImpl @Inject constructor(
         id = if (this.id == 0L) 0 else this.id,
         amount = this.amount.toPlainString(),
         comment = this.comment,
-        date = this.date!!.toEpochSecond(ZoneOffset.UTC) * 1000,
+        date = (this.date ?: LocalDateTime.ofInstant(
+            java.time.Instant.ofEpochMilli(this.createdAt), java.time.ZoneId.systemDefault()
+        )).toEpochSecond(ZoneOffset.UTC) * 1000,
         createdAt = this.createdAt,
         clientGeneratedId = this.clientGeneratedId,
         periodId = this.periodId,

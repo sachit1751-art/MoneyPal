@@ -6,6 +6,9 @@ data class OnboardingUiState(
 
 sealed interface OnboardingUiIntent {
     data object OnWelcomeDismissed : OnboardingUiIntent
+
+    /** Records the user's SMS auto-capture choice made on the last carousel page. */
+    data class OnSmsCaptureDecision(val enabled: Boolean) : OnboardingUiIntent
 }
 
 sealed interface OnboardingUiEffect {

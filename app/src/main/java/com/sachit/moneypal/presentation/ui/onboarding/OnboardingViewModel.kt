@@ -41,6 +41,17 @@ class OnboardingViewModel @Inject constructor(
         logcat(TAG) { "processIntent: $intent (state before: isCompleted=${_localState.value.isCompleted})" }
         when (intent) {
             is OnboardingUiIntent.OnWelcomeDismissed -> handleWelcomeDismissed()
+            is OnboardingUiIntent.OnSmsCaptureDecision -> handleSmsCaptureDecision(intent.enabled)
+        }
+    }
+
+    private fun handleSmsCaptureDecision(enabled: Boolean) {
+        viewModelScope.launch {
+            try {
+                settingsRepository.setSmsCaptureEnabled(enabled)
+            } catch (e: Exception) {
+                logcat(TAG) { "handleSmsCaptureDecision failed: ${e.message}" }
+            }
         }
     }
 

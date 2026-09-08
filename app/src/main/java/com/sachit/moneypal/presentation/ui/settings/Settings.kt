@@ -60,6 +60,7 @@ import androidx.compose.material.icons.rounded.Publish
 import androidx.compose.material.icons.rounded.QuestionMark
 import androidx.compose.material.icons.rounded.Repeat
 import androidx.compose.material.icons.rounded.Savings
+import androidx.compose.material.icons.rounded.Sms
 import androidx.compose.material.icons.rounded.Sell
 import androidx.compose.material.icons.rounded.TipsAndUpdates
 import androidx.compose.material.icons.rounded.YoutubeSearchedFor
@@ -168,6 +169,11 @@ fun Settings(
     onExportCsv: () -> Unit = {},
     onImportCsv: () -> Unit = {},
     onResetTutorial: () -> Unit = {},
+    smsCaptureEnabled: Boolean = false,
+    smsPermissionGranted: Boolean = false,
+    onSmsCaptureToggle: () -> Unit = {},
+    onRequestSmsPermission: () -> Unit = {},
+    onOpenSmsAppSettings: () -> Unit = {},
     onBugReportClick: () -> Unit = {},
     onNavigateToChangelog: () -> Unit = {},
     onNavigateToAppearance: () -> Unit = {},
@@ -602,6 +608,79 @@ fun Settings(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
+                        }
+                    }
+                }
+            }
+
+            item {
+                PaddedListGroup(
+                    title = stringResource(R.string.settings_section_sms_capture)
+                ) {
+                    CustomPaddedListItem(
+                        onClick = {
+                            view.toggleFeedback()
+                            if (!smsCaptureEnabled && !smsPermissionGranted) {
+                                onRequestSmsPermission()
+                            }
+                            onSmsCaptureToggle()
+                        },
+                        position = PaddedListItemPosition.Single,
+                        modifier = Modifier.testTag("SettingsSmsCaptureItem")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Sms,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.settings_sms_capture_title),
+                                style = MaterialTheme.typography.bodyMediumEmphasized,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = stringResource(R.string.settings_sms_capture_subtitle),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = smsCaptureEnabled,
+                            onCheckedChange = {
+                                view.toggleFeedback()
+                                if (!smsCaptureEnabled && !smsPermissionGranted) {
+                                    onRequestSmsPermission()
+                                }
+                                onSmsCaptureToggle()
+                            },
+                        )
+                    }
+                    if (smsCaptureEnabled && !smsPermissionGranted) {
+                        CustomPaddedListItem(
+                            onClick = onOpenSmsAppSettings,
+                            position = PaddedListItemPosition.Last,
+                            modifier = Modifier.testTag("SettingsSmsPermissionItem")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.QuestionMark,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(R.string.settings_sms_permission_title),
+                                    style = MaterialTheme.typography.bodyMediumEmphasized,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = stringResource(R.string.settings_sms_permission_subtitle),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
                     }
                 }

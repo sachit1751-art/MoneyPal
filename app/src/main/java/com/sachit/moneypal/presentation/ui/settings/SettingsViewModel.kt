@@ -69,6 +69,8 @@ data class SettingsUiState(
     val periodMappingMode: PeriodMappingMode = PeriodMappingMode.ACTIVE_BUDGET,
     val savingsPreferences: SavingsPreferences = SavingsPreferences.DEFAULT,
     val creditCardCutoffDay: Int? = null,
+    val smsCaptureEnabled: Boolean = false,
+    val smsPermissionGranted: Boolean = false,
 )
 
 sealed interface SettingsUiEffect {
@@ -86,13 +88,15 @@ class SettingsViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _notificationPermissionGranted = MutableStateFlow(false)
+    private val _smsPermissionGranted = MutableStateFlow(false)
 
     val uiState: StateFlow<SettingsUiState> = combine(
         settingsRepository.observeSettings(),
         budgetRepository.getBudgetSettings(),
         censorManager.isCensored,
-        _notificationPermissionGranted
-    ) { settings, budgetSettings, isCensored, permissionGranted ->
+        _notificationPermissionGranted,
+        _smsPermissionGranted,
+    ) { settings, budgetSettings, isCensored, permissionGranted, smsGranted ->
         SettingsUiState(
             currentTheme = when (settings.themeMode) {
                 ThemeMode.LIGHT -> "Light"
@@ -132,7 +136,9 @@ class SettingsViewModel @Inject constructor(
             isCensored = isCensored,
             periodMappingMode = settings.periodMappingMode,
             savingsPreferences = settings.savingsPreferences,
-            creditCardCutoffDay = budgetSettings?.creditCardCutoffDay
+            creditCardCutoffDay = budgetSettings?.creditCardCutoffDay,
+            smsCaptureEnabled = settings.smsCaptureEnabled,
+            smsPermissionGranted = smsGranted,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -148,6 +154,22 @@ class SettingsViewModel @Inject constructor(
 
     init {
         refreshNotificationPermission()
+        refreshSmsPermission()
+    }
+
+    fun refreshSmsPermission() {
+        val granted = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.RECEIVE_SMS,
+        ) == PackageManager.PERMISSION_GRANTED
+        _smsPermissionGranted.value = granted
+    }
+
+    fun onSmsCaptureToggle() {
+        val newValue = !uiState.value.smsCaptureEnabled
+        viewModelScope.launch {
+            settingsRepository.setSmsCaptureEnabled(newValue)
+        }
     }
 
     fun refreshNotificationPermission() {

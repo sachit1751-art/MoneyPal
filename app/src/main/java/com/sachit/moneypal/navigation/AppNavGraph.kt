@@ -58,6 +58,7 @@ fun AppNavGraph(
     startDestination: String,
     onOnboardingComplete: () -> Unit,
     onRequestNotificationPermission: () -> Unit = {},
+    onPermissionRequestSink: () -> Unit = {},
     navController: NavHostController = rememberNavController(),
 ) {
     val tag = TAG
@@ -79,6 +80,7 @@ fun AppNavGraph(
                         Screen.Main.createRoute(openWallet = true, forceWalletSetup = true),
                     ) { popUpTo(Screen.Onboarding.route) { inclusive = true } }
                 },
+                onRequestSmsPermission = onPermissionRequestSink,
             )
         }
 

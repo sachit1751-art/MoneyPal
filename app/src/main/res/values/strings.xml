@@ -272,6 +272,21 @@
     <string name="onboarding_step_6_title">Spend wisely</string>
     <string name="onboarding_step_6_subtitle">Over time, learn how much you can save and how much you can spend.</string>
     <string name="onboarding_set_budget_button">Continue</string>
+
+    <!-- Welcome carousel -->
+    <string name="carousel_skip">Skip</string>
+    <string name="carousel_next">Next</string>
+    <string name="carousel_get_started">Get started</string>
+    <string name="carousel_page_welcome_title">Welcome to MoneyPal</string>
+    <string name="carousel_page_welcome_body">A simple budget tracker that helps you decide how much you can spend each day, week, biweekly, or month.</string>
+    <string name="carousel_page_budget_title">Smart budget periods</string>
+    <string name="carousel_page_budget_body">Choose daily, weekly, biweekly, or monthly periods. MoneyPal breaks your budget down and shows what is left in real time.</string>
+    <string name="carousel_page_numpad_title">Log expenses in seconds</string>
+    <string name="carousel_page_numpad_body">Type the amount on a calculator-style numpad, swipe up for quick math, and save. No forms, no friction.</string>
+    <string name="carousel_page_sms_title">Auto-capture from bank SMS</string>
+    <string name="carousel_page_sms_body">MoneyPal can read bank SMS and record debits and credits for you. Messages are parsed on your device only — nothing is uploaded. You can change this anytime in Settings.</string>
+    <string name="carousel_sms_enable">Enable SMS capture</string>
+    <string name="carousel_sms_not_now">Not now</string>
     <string name="recurrent_toggle_label">Recurrent</string>
     <string name="censor_mode_alert_title">Censor mode is active</string>
     <string name="censor_mode_alert_message">All your financial values are currently blurred.</string>
@@ -444,6 +459,11 @@
     <string name="settings_import_csv_subtitle">Import data from a CSV file</string>
 
     <string name="settings_reset_tutorial_title">Reset tutorial</string>
+    <string name="settings_section_sms_capture">Bank SMS auto-capture</string>
+    <string name="settings_sms_capture_title">Capture from bank SMS</string>
+    <string name="settings_sms_capture_subtitle">Read bank messages on this device and record debits and credits automatically. Parsed on-device, never uploaded.</string>
+    <string name="settings_sms_permission_title">SMS permission missing</string>
+    <string name="settings_sms_permission_subtitle">Grant SMS permissions in system settings so MoneyPal can read bank messages.</string>
     <string name="settings_reset_tutorial_subtitle">You will see gesture hints, info, and actions across the app again.</string>
 
     <string name="settings_theme_dialog_title">App theme</string>
@@ -636,6 +656,12 @@
     <string name="notification_channel_recurrent_description">Notifications when recurring expenses are due</string>
     <string name="notification_channel_credit_name">Credit Card Reminders</string>
     <string name="notification_channel_credit_description">Reminders before credit card cutoff date</string>
+    <string name="notification_channel_sms_capture_name">Bank SMS capture</string>
+    <string name="notification_channel_sms_capture_description">Notifications when an expense or credit is captured automatically from a bank SMS</string>
+    <string name="notification_sms_capture_debit_title">Expense captured</string>
+    <string name="notification_sms_capture_credit_title">Credit captured</string>
+    <string name="notification_sms_capture_message">%1$s from %2$s was added to your budget automatically.</string>
+    <string name="notification_sms_capture_undo">Undo</string>
 
     <string name="notification_period_end_title">Budget period finished</string>
     <string name="notification_period_end_message_positive">The period ended with %1$s remaining. Tap to see details.</string>

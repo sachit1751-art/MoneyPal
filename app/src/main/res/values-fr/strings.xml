@@ -211,6 +211,21 @@
     <string name="onboarding_step_6_title">Dépensez malin</string>
     <string name="onboarding_step_6_subtitle">Avec le temps, apprenez combien vous pouvez économiser et dépenser.</string>
     <string name="onboarding_set_budget_button">Continuer</string>
+
+    <!-- Welcome carousel -->
+    <string name="carousel_skip">Passer</string>
+    <string name="carousel_next">Suivant</string>
+    <string name="carousel_get_started">Commencer</string>
+    <string name="carousel_page_welcome_title">Bienvenue sur MoneyPal</string>
+    <string name="carousel_page_welcome_body">Un suivi de budget simple qui vous aide à décider combien vous pouvez dépenser chaque jour, semaine, quinzaine ou mois.</string>
+    <string name="carousel_page_budget_title">Des périodes de budget intelligentes</string>
+    <string name="carousel_page_budget_body">Choisissez des périodes quotidiennes, hebdomadaires, bimensuelles ou mensuelles. MoneyPal ventile votre budget et affiche ce qui reste en temps réel.</string>
+    <string name="carousel_page_numpad_title">Enregistrez vos dépenses en quelques secondes</string>
+    <string name="carousel_page_numpad_body">Saisissez le montant sur un pavé style calculatrice, balayez vers le haut pour un calcul rapide, puis enregistrez. Aucun formulaire, aucune friction.</string>
+    <string name="carousel_page_sms_title">Capture automatique des SMS bancaires</string>
+    <string name="carousel_page_sms_body">MoneyPal peut lire les SMS de votre banque et enregistrer les dépenses et crédits pour vous. Les messages sont analysés uniquement sur votre appareil — rien n\'est envoyé en ligne. Vous pouvez modifier cela à tout moment dans les paramètres.</string>
+    <string name="carousel_sms_enable">Activer la capture par SMS</string>
+    <string name="carousel_sms_not_now">Pas maintenant</string>
     <string name="recurrent_toggle_label">Récurrent</string>
     <string name="censor_mode_alert_title">Le mode censeur est actif</string>
     <string name="censor_mode_alert_message">Toutes vos valeurs financières sont floutées.</string>
@@ -359,6 +374,11 @@
     <string name="settings_import_csv_title">Importer un CSV</string>
     <string name="settings_import_csv_subtitle">Importer des données à partir d\'un fichier CSV</string>
     <string name="settings_reset_tutorial_title">Réinitialiser le tutoriel</string>
+    <string name="settings_section_sms_capture">Capture automatique des SMS bancaires</string>
+    <string name="settings_sms_capture_title">Capturer depuis les SMS bancaires</string>
+    <string name="settings_sms_capture_subtitle">Lit les messages de votre banque sur cet appareil et enregistre automatiquement les dépenses et crédits. Analyse sur l\'appareil, jamais envoyé en ligne.</string>
+    <string name="settings_sms_permission_title">Autorisation SMS manquante</string>
+    <string name="settings_sms_permission_subtitle">Accordez les autorisations SMS dans les paramètres système pour que MoneyPal puisse lire les messages de votre banque.</string>
     <string name="settings_reset_tutorial_subtitle">Vous verrez à nouveau les indices de gestes, les infos et les actions dans l\'application.</string>
     <string name="settings_theme_dialog_title">Thème de l\'application</string>
     <string name="settings_theme_light_title">Clair</string>
@@ -524,6 +544,12 @@
     <string name="notification_channel_recurrent_description">Notifications lorsque les dépenses récurrentes sont dues</string>
     <string name="notification_channel_credit_name">Rappels de carte de crédit</string>
     <string name="notification_channel_credit_description">Rappels avant la date de fin de la carte de crédit</string>
+    <string name="notification_channel_sms_capture_name">Capture par SMS bancaire</string>
+    <string name="notification_channel_sms_capture_description">Notifications quand une dépense ou un crédit est enregistré automatiquement depuis un SMS bancaire</string>
+    <string name="notification_sms_capture_debit_title">Dépense capturée</string>
+    <string name="notification_sms_capture_credit_title">Crédit capturé</string>
+    <string name="notification_sms_capture_message">%1$s de %2$s ont été ajoutés automatiquement à votre budget.</string>
+    <string name="notification_sms_capture_undo">Annuler</string>
     <string name="notification_period_end_title">Période budgétaire terminée</string>
     <string name="notification_period_end_message_positive">La période s\'est terminée par %1$s restant. Appuyez pour voir les détails.</string>
     <string name="notification_period_end_message_negative">La période s\'est terminée. Vous avez dépensé %1$s de plus. Voir plus de détails.</string>

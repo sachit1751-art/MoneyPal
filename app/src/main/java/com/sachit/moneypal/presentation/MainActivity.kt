@@ -107,6 +107,12 @@ class MainActivity : AppCompatActivity() {
         permissionHandler.onNotificationPermissionResult(isGranted, notificationScheduler)
     }
 
+    private val requestSmsPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions(),
+    ) { grants ->
+        logcat("SACHIT:Main") { "SMS permission result: $grants" }
+    }
+
     private fun checkAndRequestNotificationPermission() {
         permissionHandler.requestNotificationPermissionIfNeeded(
             activity = this,
@@ -222,6 +228,14 @@ class MainActivity : AppCompatActivity() {
                                 },
                                 onRequestNotificationPermission = {
                                     checkAndRequestNotificationPermission()
+                                },
+                                onPermissionRequestSink = {
+                                    requestSmsPermissionLauncher.launch(
+                                        arrayOf(
+                                            android.Manifest.permission.RECEIVE_SMS,
+                                            android.Manifest.permission.READ_SMS,
+                                        )
+                                    )
                                 },
                             )
 

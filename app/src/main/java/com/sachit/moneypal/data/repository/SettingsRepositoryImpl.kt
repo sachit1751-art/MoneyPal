@@ -63,6 +63,8 @@ const val SAVINGS_GOAL_MONTHS_KEY_NAME = "savings_goal_months"
 const val TUTORIAL_BOX_COMPLETED_KEY_NAME = "tutorial_box_completed"
 const val ANALYTICS_TUTORIAL_COMPLETED_KEY_NAME = "analytics_tutorial_completed"
 const val ANALYTICS_SPENDS_TUTORIAL_COMPLETED_KEY_NAME = "analytics_spends_tutorial_completed"
+const val SMS_CAPTURE_ENABLED_KEY_NAME = "sms_capture_enabled"
+const val SMS_SEEN_PREFIX_KEY_NAME = "sms_seen_"
 
 private val ONBOARDING_COMPLETED = booleanPreferencesKey(ONBOARDING_COMPLETED_KEY_NAME)
 private val EARLY_FINISH_ACTIVE = booleanPreferencesKey(EARLY_FINISH_ACTIVE_KEY_NAME)
@@ -119,6 +121,7 @@ private val PERIOD_MAPPING_MODE = stringPreferencesKey("period_mapping_mode")
 private val ANALYTICS_TUTORIAL_COMPLETED = booleanPreferencesKey(ANALYTICS_TUTORIAL_COMPLETED_KEY_NAME)
 private val ANALYTICS_SPENDS_TUTORIAL_COMPLETED = booleanPreferencesKey(ANALYTICS_SPENDS_TUTORIAL_COMPLETED_KEY_NAME)
 private val BUDGET_SPLIT_VIEW_PERIOD = stringPreferencesKey(BUDGET_SPLIT_VIEW_PERIOD_KEY_NAME)
+private val SMS_CAPTURE_ENABLED = booleanPreferencesKey(SMS_CAPTURE_ENABLED_KEY_NAME)
 private val SAVINGS_PRESET = stringPreferencesKey(SAVINGS_PRESET_KEY_NAME)
 private val SAVINGS_NEEDS_PCT = intPreferencesKey(SAVINGS_NEEDS_PCT_KEY_NAME)
 private val SAVINGS_WANTS_PCT = intPreferencesKey(SAVINGS_WANTS_PCT_KEY_NAME)
@@ -161,6 +164,7 @@ class SettingsRepositoryImpl @Inject constructor(
                 isRoundedFontEnabled = preferences[ROUNDED_FONT] ?: true,
                 isAmoledEnabled = preferences[AMOLED] ?: false,
                 showPastTransactions = preferences[SHOW_PAST_TRANSACTIONS] ?: true,
+                smsCaptureEnabled = preferences[SMS_CAPTURE_ENABLED] ?: false,
                 isCreditQuickToggleEnabled = preferences[CREDIT_QUICK_TOGGLE_FEATURE_ENABLED] ?: false,
                 categoryPickerDirectPopupEnabled = preferences[CATEGORY_PICKER_DIRECT_POPUP_ENABLED] ?: false,
                 categoryGridModeEnabled = preferences[CATEGORY_GRID_MODE_ENABLED] ?: false,
@@ -412,6 +416,22 @@ class SettingsRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun setSmsCaptureEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[SMS_CAPTURE_ENABLED] = enabled
+        }
+    }
+
+    override suspend fun isSmsSeen(key: String): Boolean {
+        return dataStore.data.first()[booleanPreferencesKey(SMS_SEEN_PREFIX_KEY_NAME + key)] ?: false
+    }
+
+    override suspend fun markSmsSeen(key: String) {
+        dataStore.edit { preferences ->
+            preferences[booleanPreferencesKey(SMS_SEEN_PREFIX_KEY_NAME + key)] = true
+        }
+    }
+
     override fun observeBudgetEndDate(): Flow<Long?> {
         return dataStore.data.map { preferences ->
             preferences[BUDGET_END_DATE]
@@ -497,6 +517,7 @@ class SettingsRepositoryImpl @Inject constructor(
         dataStore.edit { preferences ->
             preferences[TUTORIAL_BOX_COMPLETED] = false
             preferences[ANALYTICS_TUTORIAL_COMPLETED] = false
+            preferences[ANALYTICS_SPENDS_TUTORIAL_COMPLETED] = false
             preferences[FIRST_LAUNCH_TUTORIAL_STAGE] = FirstLaunchTutorialStage.TAP_ANY_NUMBER.name
         }
     }

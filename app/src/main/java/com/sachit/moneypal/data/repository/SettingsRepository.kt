@@ -78,6 +78,12 @@ interface SettingsRepository {
 
     suspend fun setBudgetSplitViewPeriod(period: BudgetPeriod)
 
+    suspend fun setSmsCaptureEnabled(enabled: Boolean)
+
+    suspend fun isSmsSeen(key: String): Boolean
+
+    suspend fun markSmsSeen(key: String)
+
     fun observeBudgetEndDate(): Flow<Long?>
 
     suspend fun setBudgetEndDate(millis: Long?)

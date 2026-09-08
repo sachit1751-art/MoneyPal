@@ -1,6 +1,7 @@
 package com.sachit.moneypal.presentation.notification
 
 import android.Manifest
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -13,6 +14,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.sachit.moneypal.R
 import com.sachit.moneypal.presentation.MainActivity
+import com.sachit.moneypal.presentation.sms.UndoSmsCaptureReceiver
 import com.sachit.moneypal.presentation.util.font.format.symbolOnlyCurrencyFormat
 import dagger.hilt.android.qualifiers.ApplicationContext
 import logcat.logcat
@@ -32,6 +34,8 @@ class NotificationHelper @Inject constructor(
         const val NOTIFICATION_ID_PERIOD_END = 1001
         const val NOTIFICATION_ID_RECURRENT = 1002
         const val NOTIFICATION_ID_CREDIT = 1003
+        const val CHANNEL_SMS_CAPTURE = "sms_capture"
+        private const val NOTIFICATION_ID_SMS_CAPTURE = 1004
     }
 
     init {
@@ -69,9 +73,19 @@ class NotificationHelper @Inject constructor(
             enableVibration(true)
         }
 
+        val smsCaptureChannel = NotificationChannel(
+            CHANNEL_SMS_CAPTURE,
+            context.getString(R.string.notification_channel_sms_capture_name),
+            NotificationManager.IMPORTANCE_DEFAULT
+        ).apply {
+            description = context.getString(R.string.notification_channel_sms_capture_description)
+            enableVibration(true)
+        }
+
         notificationManager.createNotificationChannel(periodEndChannel)
         notificationManager.createNotificationChannel(recurrentChannel)
         notificationManager.createNotificationChannel(creditChannel)
+        notificationManager.createNotificationChannel(smsCaptureChannel)
         logcat { "Notification channels created" }
     }
 
@@ -297,6 +311,73 @@ class NotificationHelper @Inject constructor(
             .build()
 
         NotificationManagerCompat.from(context).notify(NOTIFICATION_ID_CREDIT, notification)
+    }
+
+    /**
+     * Shows the "captured from bank SMS" notification with an Undo action that
+     * deletes the inserted transaction.
+     */
+    fun showSmsCaptureNotification(
+        transactionId: Long,
+        amount: String,
+        sender: String,
+        isCredit: Boolean,
+        currency: String,
+    ) {
+        val hasPermission = checkNotificationPermission()
+        if (!hasPermission) {
+            logcat { "Cannot show SMS capture notification - permission not granted" }
+            return
+        }
+
+        val formattedAmount = formatAmount(amount, currency)
+        val title = context.getString(
+            if (isCredit) R.string.notification_sms_capture_credit_title
+            else R.string.notification_sms_capture_debit_title
+        )
+        val message = context.getString(
+            R.string.notification_sms_capture_message,
+            formattedAmount,
+            sender,
+        )
+
+        val openIntent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            4,
+            openIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val undoIntent = Intent(context, UndoSmsCaptureReceiver::class.java).apply {
+            action = UndoSmsCaptureReceiver.ACTION_UNDO
+            putExtra(UndoSmsCaptureReceiver.EXTRA_TRANSACTION_ID, transactionId)
+            putExtra(UndoSmsCaptureReceiver.EXTRA_NOTIFICATION_ID, NOTIFICATION_ID_SMS_CAPTURE)
+        }
+        val undoPendingIntent = PendingIntent.getBroadcast(
+            context,
+            transactionId.toInt(),
+            undoIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(context, CHANNEL_SMS_CAPTURE)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
+            .setContentIntent(pendingIntent)
+            .addAction(0, context.getString(R.string.notification_sms_capture_undo), undoPendingIntent)
+            .setAutoCancel(true)
+            .setCategory(Notification.CATEGORY_EVENT)
+            .build()
+
+        NotificationManagerCompat.from(context).notify(NOTIFICATION_ID_SMS_CAPTURE, notification)
+        logcat { "SMS capture notification shown: $message" }
     }
 
     fun cancelAllNotifications() {

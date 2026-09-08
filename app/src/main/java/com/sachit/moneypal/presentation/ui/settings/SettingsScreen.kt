@@ -33,6 +33,12 @@ fun SettingsScreen(
         viewModel.onImportResult(uri)
     }
 
+    val smsPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+    ) { grants ->
+        viewModel.refreshSmsPermission()
+    }
+
     LaunchedEffect(Unit) {
         val manager = EntryPointAccessors
             .fromApplication(context.applicationContext, CsvTransferEntryPoint::class.java)
@@ -105,6 +111,21 @@ fun SettingsScreen(
         onExportCsv = viewModel::onExportCsv,
         onImportCsv = viewModel::onImportCsv,
         onResetTutorial = viewModel::onResetTutorial,
+        smsCaptureEnabled = uiState.smsCaptureEnabled,
+        smsPermissionGranted = uiState.smsPermissionGranted,
+        onSmsCaptureToggle = viewModel::onSmsCaptureToggle,
+        onRequestSmsPermission = {
+            smsPermissionLauncher.launch(
+                arrayOf(
+                    android.Manifest.permission.RECEIVE_SMS,
+                    android.Manifest.permission.READ_SMS,
+                )
+            )
+        },
+        onOpenSmsAppSettings = {
+            viewModel.onOpenAppSettings()
+            viewModel.refreshSmsPermission()
+        },
         onBugReportClick = viewModel::onBugReportClick,
         onNavigateToChangelog = onNavigateToChangelog,
         onNavigateToAppearance = onNavigateToAppearance,

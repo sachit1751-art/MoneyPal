@@ -8,6 +8,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.math.BigDecimal
 import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import javax.inject.Inject
@@ -48,14 +49,27 @@ class WearExpenseIngestor @Inject constructor(
             repository.findOrCreateCategory(payload.comment.trim()).id
         } else null
 
+        // Mirror the manual-entry rule in BudgetTransactionHandler: past the period
+        // end, queue the expense for the next period instead of inserting it into
+        // the (stale) period carried in the payload.
+        val settings = repository.getBudgetSettingsSync()
+        val isPastPeriodEnd = settings != null && LocalDate.now().isAfter(settings.getPeriodEndDate())
+
         val tx = Transaction.create(
             amount = amount,
             comment = payload.comment,
             date = date,
-            periodId = payload.periodId ?: 0L,
+            periodId = if (isPastPeriodEnd) 0L else payload.periodId ?: 0L,
             clientGeneratedId = payload.clientGeneratedId,
             categoryId = categoryId
         )
+
+        if (isPastPeriodEnd) {
+            repository.addQueuedTransaction(tx)
+            logcat { "ingest: queued for next period" }
+            return@withLock IngestResult.Ok
+        }
+
         val inserted = repository.addTransactionIfAbsent(tx)
         if (!inserted) {
             logcat { "ingest: duplicate on insert-ignore id=${payload.clientGeneratedId}" }

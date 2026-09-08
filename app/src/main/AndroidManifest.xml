@@ -8,6 +8,10 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
+    <!-- Bank SMS auto-capture (optional; runtime-requested during onboarding) -->
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS" />
+
     <application
         android:name=".MinusApplication"
         android:allowBackup="true"
@@ -44,6 +48,19 @@
 
         <receiver
             android:name=".presentation.notification.MidnightPeriodTransitionReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".presentation.sms.SmsReceiver"
+            android:exported="true"
+            android:permission="android.permission.BROADCAST_SMS">
+            <intent-filter android:priority="999">
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".presentation.sms.UndoSmsCaptureReceiver"
             android:exported="false" />
 
         <receiver
