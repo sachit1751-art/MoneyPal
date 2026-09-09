@@ -1,0 +1,5 @@
+- Nuevo: captura automática de gastos a partir de los SMS de tu banco, con notificación para deshacer y ajustes propios
+- Nuevo: experiencia de onboarding rediseñada
+- fix: los importes leídos de los SMS bancarios ya no se truncan
+- fix: se resolvió un caso de borde que provocaba fallos
+- perf: APKs más pequeños gracias a mejor compresión de recursos

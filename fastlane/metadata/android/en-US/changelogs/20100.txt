@@ -1,0 +1,5 @@
+- New: automatically capture expenses from bank SMS notifications, with an undo notification and settings toggles
+- New: redesigned onboarding experience
+- fix: amounts parsed from bank SMS no longer get truncated
+- fix: resolve a crash edge case
+- perf: smaller APKs thanks to better resource compression
