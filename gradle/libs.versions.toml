@@ -18,6 +18,7 @@ playServicesWearable = "19.0.0"
 composeFoundation = "1.6.1"
 wearToolingPreview = "1.0.0"
 coreSplashscreen = "1.2.0"
+biometric = "1.1.0"
 kotlinxSerializationJson = "1.7.3"
 workRuntime = "2.10.0"
 datastorePreferences = "1.1.7"
@@ -79,6 +80,7 @@ play-services-wearable = { group = "com.google.android.gms", name = "play-servic
 androidx-compose-foundation = { group = "androidx.wear.compose", name = "compose-foundation", version.ref = "composeFoundation" }
 androidx-wear-tooling-preview = { group = "androidx.wear", name = "wear-tooling-preview", version.ref = "wearToolingPreview" }
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashscreen" }
+androidx-biometric = { group = "androidx.biometric", name = "biometric", version.ref = "biometric" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workRuntime" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastorePreferences" }

@@ -44,6 +44,7 @@ const val CREDIT_QUICK_TOGGLE_FEATURE_KEY_NAME = "credit_quick_toggle_feature_en
 const val SHOW_PAST_TRANSACTIONS_KEY_NAME = "show_past_transactions"
 const val ROUNDED_FONT_KEY_NAME = "rounded_font_enabled"
 const val AMOLED_KEY_NAME = "amoled_enabled"
+const val APP_LOCK_ENABLED_KEY_NAME = "app_lock_enabled"
 const val CATEGORY_PICKER_DIRECT_POPUP_KEY_NAME = "category_picker_direct_popup_enabled"
 const val CATEGORY_GRID_MODE_KEY_NAME = "category_grid_mode_enabled"
 const val RECURRENT_PAYMENTS_VIEW_MODE_KEY_NAME = "recurrent_payments_view_mode"
@@ -92,6 +93,8 @@ private val ROUNDED_FONT =
     booleanPreferencesKey(ROUNDED_FONT_KEY_NAME)
 private val AMOLED =
     booleanPreferencesKey(AMOLED_KEY_NAME)
+private val APP_LOCK_ENABLED =
+    booleanPreferencesKey(APP_LOCK_ENABLED_KEY_NAME)
 private val CATEGORY_PICKER_DIRECT_POPUP_ENABLED =
     booleanPreferencesKey(CATEGORY_PICKER_DIRECT_POPUP_KEY_NAME)
 private val CATEGORY_GRID_MODE_ENABLED =
@@ -163,6 +166,7 @@ class SettingsRepositoryImpl @Inject constructor(
                 dynamicColorEnabled = preferences[DYNAMIC_COLOR] ?: false,
                 isRoundedFontEnabled = preferences[ROUNDED_FONT] ?: true,
                 isAmoledEnabled = preferences[AMOLED] ?: false,
+                appLockEnabled = preferences[APP_LOCK_ENABLED] ?: false,
                 showPastTransactions = preferences[SHOW_PAST_TRANSACTIONS] ?: true,
                 smsCaptureEnabled = preferences[SMS_CAPTURE_ENABLED] ?: false,
                 isCreditQuickToggleEnabled = preferences[CREDIT_QUICK_TOGGLE_FEATURE_ENABLED] ?: false,
@@ -347,6 +351,12 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun setAmoledEnabled(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[AMOLED] = enabled
+        }
+    }
+
+    override suspend fun setAppLockEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[APP_LOCK_ENABLED] = enabled
         }
     }
 

@@ -56,6 +56,8 @@ interface SettingsRepository {
 
     suspend fun setAmoledEnabled(enabled: Boolean)
 
+    suspend fun setAppLockEnabled(enabled: Boolean)
+
     suspend fun setCreditQuickToggleEnabled(enabled: Boolean)
 
     suspend fun setShowPastTransactions(enabled: Boolean)

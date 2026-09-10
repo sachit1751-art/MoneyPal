@@ -29,6 +29,7 @@ import com.sachit.moneypal.presentation.appTheme
 import com.sachit.moneypal.presentation.appTypography
 import com.sachit.moneypal.presentation.dynamicColorEnabled
 import com.sachit.moneypal.presentation.isAmoledEnabled
+import com.sachit.moneypal.presentation.lock.AppLockController
 import com.sachit.moneypal.presentation.ui.history.RecurrentPaymentsViewMode
 import com.sachit.moneypal.presentation.ui.settings.csv.CsvTransferManager
 import com.sachit.moneypal.presentation.util.CensorManager
@@ -71,11 +72,13 @@ data class SettingsUiState(
     val creditCardCutoffDay: Int? = null,
     val smsCaptureEnabled: Boolean = false,
     val smsPermissionGranted: Boolean = false,
+    val appLockEnabled: Boolean = false,
 )
 
 sealed interface SettingsUiEffect {
     data object NavigateToBugReport : SettingsUiEffect
     data object NavigateBack : SettingsUiEffect
+    data object AppLockUnavailable : SettingsUiEffect
 }
 
 @HiltViewModel
@@ -85,6 +88,7 @@ class SettingsViewModel @Inject constructor(
     private val budgetRepository: BudgetRepository,
     private val updateNotificationTimeUseCase: UpdatePeriodEndNotificationTimeUseCase,
     private val censorManager: CensorManager,
+    private val appLockController: AppLockController,
 ) : ViewModel() {
 
     private val _notificationPermissionGranted = MutableStateFlow(false)
@@ -139,6 +143,7 @@ class SettingsViewModel @Inject constructor(
             creditCardCutoffDay = budgetSettings?.creditCardCutoffDay,
             smsCaptureEnabled = settings.smsCaptureEnabled,
             smsPermissionGranted = smsGranted,
+            appLockEnabled = settings.appLockEnabled,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -169,6 +174,22 @@ class SettingsViewModel @Inject constructor(
         val newValue = !uiState.value.smsCaptureEnabled
         viewModelScope.launch {
             settingsRepository.setSmsCaptureEnabled(newValue)
+        }
+    }
+
+    /**
+     * App lock toggle (plan 009). Refuses to enable when the device has no
+     * biometric/credential authenticator enrolled — the toggle must never be
+     * left ON in a state that would permanently lock the user out.
+     */
+    fun onAppLockToggle() {
+        val newValue = !uiState.value.appLockEnabled
+        if (newValue && !appLockController.canAuthenticate()) {
+            _effects.value = SettingsUiEffect.AppLockUnavailable
+            return
+        }
+        viewModelScope.launch {
+            settingsRepository.setAppLockEnabled(newValue)
         }
     }
 

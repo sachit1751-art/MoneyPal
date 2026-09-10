@@ -56,6 +56,7 @@ import androidx.compose.material.icons.rounded.ExpandLess
 import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.HelpOutline
 import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.Publish
 import androidx.compose.material.icons.rounded.QuestionMark
 import androidx.compose.material.icons.rounded.Repeat
@@ -174,6 +175,8 @@ fun Settings(
     onSmsCaptureToggle: () -> Unit = {},
     onRequestSmsPermission: () -> Unit = {},
     onOpenSmsAppSettings: () -> Unit = {},
+    appLockEnabled: Boolean = false,
+    onAppLockToggle: () -> Unit = {},
     onBugReportClick: () -> Unit = {},
     onNavigateToChangelog: () -> Unit = {},
     onNavigateToAppearance: () -> Unit = {},
@@ -444,6 +447,28 @@ fun Settings(
                             Switch(
                                 checked = showPastTransactions,
                                 onCheckedChange = { onShowPastTransactionsToggle() },
+                            )
+                        }
+                    )
+
+                    SelectablePaddedItem(
+                        label = stringResource(R.string.settings_app_lock_title),
+                        subtitle = stringResource(R.string.settings_app_lock_subtitle),
+                        isActive = appLockEnabled,
+                        onClick = onAppLockToggle,
+                        position = PaddedListItemPosition.Middle,
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Rounded.Lock,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        },
+                        trailingContent = {
+                            Switch(
+                                checked = appLockEnabled,
+                                onCheckedChange = { onAppLockToggle() },
+                                modifier = Modifier.testTag("SettingsAppLockSwitch")
                             )
                         }
                     )

@@ -41,6 +41,8 @@ import com.sachit.moneypal.domain.time.MidnightTransitionManager
 import com.sachit.moneypal.navigation.AppNavGraph
 import com.sachit.moneypal.navigation.Screen
 import com.sachit.moneypal.presentation.notification.NotificationScheduler
+import com.sachit.moneypal.presentation.lock.AppLockController
+import com.sachit.moneypal.presentation.lock.AppLockOverlay
 import com.sachit.moneypal.presentation.permission.PermissionHandler
 import com.sachit.moneypal.presentation.ui.theme.MinusTheme
 import com.sachit.moneypal.presentation.ui.theme.ThemeManager
@@ -101,6 +103,9 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var midnightTransitionManager: MidnightTransitionManager
 
+    @Inject
+    lateinit var appLockController: AppLockController
+
     private val requestNotificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { isGranted ->
@@ -155,6 +160,7 @@ class MainActivity : AppCompatActivity() {
                 onboardingComplete.value = userSettings.onboardingCompleted
                 earlyFinishPending.value = userSettings.earlyFinishActive
                 themeManager.applyUserSettings(applicationContext, userSettings)
+                appLockController.refreshLock()
 
                 dataStoreLoaded.value = true
                 isDone.value = true
@@ -214,6 +220,7 @@ class MainActivity : AppCompatActivity() {
                         Surface(
                             color = MaterialTheme.colorScheme.background,
                         ) {
+                            val isLocked by appLockController.isLocked.collectAsStateWithLifecycle()
                             val navController = rememberNavController()
 
                             AppNavGraph(
@@ -242,7 +249,9 @@ class MainActivity : AppCompatActivity() {
                             val shouldShowMidnightDialog by midnightTransitionManager.shouldShowTransitionDialog.collectAsStateWithLifecycle()
                             val midnightTransitionData by midnightTransitionManager.midnightTransitionData.collectAsStateWithLifecycle()
 
-                            if (shouldShowMidnightDialog && midnightTransitionData != null) {
+                            // Window-based dialogs render above the lock overlay,
+                            // so suppress them while the app is locked.
+                            if (shouldShowMidnightDialog && midnightTransitionData != null && !isLocked) {
                                 val data = midnightTransitionData!!
                                 if (data.shouldNavigateToAnalyticsOnly) {
                                     LaunchedEffect(
@@ -300,6 +309,13 @@ class MainActivity : AppCompatActivity() {
                             }
 
                             val needsBudgetSetup by midnightTransitionManager.needsBudgetSetup.collectAsStateWithLifecycle()
+
+                            if (isLocked) {
+                                AppLockOverlay(
+                                    controller = appLockController,
+                                    activity = this@MainActivity,
+                                )
+                            }
                             LaunchedEffect(needsBudgetSetup, onboardingComplete.value) {
                                 if (needsBudgetSetup && onboardingComplete.value) {
                                     midnightTransitionManager.onBudgetSetupHandled()

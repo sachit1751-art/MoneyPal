@@ -72,6 +72,15 @@ fun SettingsScreen(
                     onNavigateBack()
                 }
 
+                is SettingsUiEffect.AppLockUnavailable -> {
+                    viewModel.consumeEffect()
+                    android.widget.Toast.makeText(
+                        context,
+                        com.sachit.moneypal.R.string.app_lock_no_authenticator,
+                        android.widget.Toast.LENGTH_LONG,
+                    ).show()
+                }
+
                 null -> { /* no-op */
                 }
             }
@@ -126,6 +135,8 @@ fun SettingsScreen(
             viewModel.onOpenAppSettings()
             viewModel.refreshSmsPermission()
         },
+        appLockEnabled = uiState.appLockEnabled,
+        onAppLockToggle = viewModel::onAppLockToggle,
         onBugReportClick = viewModel::onBugReportClick,
         onNavigateToChangelog = onNavigateToChangelog,
         onNavigateToAppearance = onNavigateToAppearance,

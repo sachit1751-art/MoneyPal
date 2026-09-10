@@ -31,6 +31,7 @@ data class UserSettings(
     val smsCaptureEnabled: Boolean = false,
     val isRoundedFontEnabled: Boolean = true,
     val isAmoledEnabled: Boolean = false,
+    val appLockEnabled: Boolean = false,
     val periodMappingMode: PeriodMappingMode = PeriodMappingMode.ACTIVE_BUDGET,
     val recurrentPaymentsViewMode: RecurrentPaymentsViewMode = RecurrentPaymentsViewMode.VERTICAL_LIST,
     val budgetSplitViewPeriod: BudgetPeriod? = null,

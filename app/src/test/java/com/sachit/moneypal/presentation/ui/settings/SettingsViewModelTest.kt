@@ -15,6 +15,7 @@ import com.sachit.moneypal.domain.model.ThemeMode
 import com.sachit.moneypal.domain.model.TypographyMode
 import com.sachit.moneypal.domain.model.UserSettings
 import com.sachit.moneypal.domain.usecase.UpdatePeriodEndNotificationTimeUseCase
+import com.sachit.moneypal.presentation.lock.AppLockController
 import com.sachit.moneypal.presentation.ui.history.RecurrentPaymentsViewMode
 import com.sachit.moneypal.presentation.util.CensorManager
 import io.mockk.Runs
@@ -45,6 +46,7 @@ class SettingsViewModelTest {
     private val censorManager: CensorManager = mockk()
     private val censored = MutableStateFlow(false)
     private val alarmManager: AlarmManager = mockk(relaxed = true)
+    private val appLockController: AppLockController = mockk(relaxed = true)
 
     @Before
     fun setUp() {
@@ -68,6 +70,7 @@ class SettingsViewModelTest {
         budgetRepository = budgetRepository,
         updateNotificationTimeUseCase = updateNotificationTimeUseCase,
         censorManager = censorManager,
+        appLockController = appLockController,
     )
 
     private fun budgetSettings(cutoff: Int? = null) = BudgetSettings(
@@ -230,6 +233,44 @@ class SettingsViewModelTest {
     fun `onResetTutorial delegates to the repository`() = runTest {
         newViewModel().onResetTutorial()
         coVerify { settingsRepository.resetTutorials() }
+    }
+
+    @Test
+    fun `onAppLockToggle enables the lock when the device has an authenticator`() = runTest {
+        every { appLockController.canAuthenticate() } returns true
+
+        newViewModel().onAppLockToggle()
+
+        coVerify { settingsRepository.setAppLockEnabled(true) }
+    }
+
+    @Test
+    fun `onAppLockToggle refuses to enable when no authenticator is enrolled`() = runTest {
+        every { appLockController.canAuthenticate() } returns false
+        val vm = newViewModel()
+
+        vm.onAppLockToggle()
+
+        coVerify(exactly = 0) { settingsRepository.setAppLockEnabled(any()) }
+        assertThat(vm.effects.value).isEqualTo(SettingsUiEffect.AppLockUnavailable)
+    }
+
+    @Test
+    fun `onAppLockToggle disables without an authenticator check`() = runTest {
+        every { settingsRepository.observeSettings() } returns
+            flowOf(UserSettings.DEFAULT.copy(appLockEnabled = true))
+        every { appLockController.canAuthenticate() } returns false
+
+        val vm = newViewModel()
+        vm.uiState.test {
+            // Subscribe so the WhileSubscribed state flow populates before the
+            // toggle reads it; otherwise the VM would see the default (false)
+            // and try to enable the lock instead of disabling it.
+            awaitCondition { it.appLockEnabled }
+            vm.onAppLockToggle()
+            coVerify { settingsRepository.setAppLockEnabled(false) }
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
