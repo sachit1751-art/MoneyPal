@@ -174,6 +174,16 @@ fun History(
                 creditOwed = uiState.creditOwed,
             )
 
+            item(key = "history_search_bar") {
+                HistorySearchBar(
+                    filter = uiState.filter,
+                    isFilterActive = uiState.isFilterActive,
+                    matchCount = uiState.matchCount,
+                    tags = uiState.tags,
+                    onProcessIntent = onProcessIntent,
+                )
+            }
+
             currentPeriodRecurrentSection(
                 upcomingRecurrentInPeriod = uiState.upcomingRecurrentInPeriod,
                 showUpcomingRecurrentInPeriod = uiState.showUpcomingRecurrentInPeriod,

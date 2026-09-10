@@ -7,6 +7,16 @@ import com.sachit.moneypal.presentation.ui.theme.component.expense.UpcomingRecur
 import java.math.BigDecimal
 import java.time.LocalDate
 
+/** Ephemeral filter inputs for the History screen (see [HistoryFilterState]). */
+sealed interface HistoryFilterIntent : HistoryUiIntent {
+    data class SetSearchQuery(val query: String) : HistoryFilterIntent
+    data class ToggleCategoryName(val name: String) : HistoryFilterIntent
+    data class SetAmountFilter(val min: BigDecimal?, val max: BigDecimal?) : HistoryFilterIntent
+    data class ToggleRecurrentOnly(val enabled: Boolean) : HistoryFilterIntent
+    data class ToggleCreditOnly(val enabled: Boolean) : HistoryFilterIntent
+    data object ClearFilters : HistoryFilterIntent
+}
+
 sealed interface HistoryUiIntent {
     data class ToggleExpandedDate(val date: LocalDate) : HistoryUiIntent
     data class SetEditingTransaction(val transaction: Transaction?) : HistoryUiIntent
@@ -58,6 +68,10 @@ data class HistoryUiState(
     val showUpcomingRecurrentInPeriod: Boolean = true,
     val lockSwipeable: Boolean = true,
     val recurrentPaymentsViewMode: RecurrentPaymentsViewMode = RecurrentPaymentsViewMode.VERTICAL_LIST,
+
+    val filter: HistoryFilterState = HistoryFilterState(),
+    val isFilterActive: Boolean = false,
+    val matchCount: Int = 0,
 
     val displayTransactions: List<Transaction> = emptyList(),
     val groupedCurrentTransactions: Map<LocalDate?, List<Transaction>> = emptyMap(),

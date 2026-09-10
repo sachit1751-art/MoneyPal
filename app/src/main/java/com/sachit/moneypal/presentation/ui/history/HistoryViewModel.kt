@@ -58,6 +58,7 @@ class HistoryViewModel @Inject constructor(
     private val _lockSwipeable = MutableStateFlow(true)
     private val _expandedTransactionId = MutableStateFlow<Long?>(null)
     private val _pendingRemovedTransactions = MutableStateFlow(emptyMap<Long, Transaction>())
+    private val _filter = MutableStateFlow(HistoryFilterState())
 
     private val _effects = MutableSharedFlow<HistoryUiEffect>()
     val effects: SharedFlow<HistoryUiEffect> = _effects.asSharedFlow()
@@ -76,7 +77,8 @@ class HistoryViewModel @Inject constructor(
             _showUpcomingRecurrentInPeriod,
             _lockSwipeable,
             _expandedTransactionId,
-            _pendingRemovedTransactions
+            _pendingRemovedTransactions,
+            _filter
         )
     ) { array ->
         UIInputs(
@@ -90,7 +92,8 @@ class HistoryViewModel @Inject constructor(
             showUpcomingRecurrentInPeriod = array[7] as Boolean,
             lockSwipeable = array[8] as Boolean,
             expandedTransactionId = array[9] as Long?,
-            pendingRemovedTransactions = array[10] as Map<Long, Transaction>
+            pendingRemovedTransactions = array[10] as Map<Long, Transaction>,
+            filter = array[11] as HistoryFilterState
         )
     }
 
@@ -155,6 +158,18 @@ class HistoryViewModel @Inject constructor(
             is HistoryUiIntent.SetLockSwipeable -> _lockSwipeable.value = intent.locked
             is HistoryUiIntent.ToggleExpandedTransaction -> toggleExpandedTransaction(intent.transactionId)
             is HistoryUiIntent.UpdateCreditCutoffDay -> updateCreditCutoffDay(intent.day)
+            is HistoryFilterIntent.SetSearchQuery -> _filter.update { it.copy(query = intent.query) }
+            is HistoryFilterIntent.ToggleCategoryName -> _filter.update {
+                if (it.categoryName == intent.name) {
+                    it.copy(categoryName = null)
+                } else {
+                    it.copy(categoryName = intent.name)
+                }
+            }
+            is HistoryFilterIntent.SetAmountFilter -> _filter.update { it.copy(minAmount = intent.min, maxAmount = intent.max) }
+            is HistoryFilterIntent.ToggleRecurrentOnly -> _filter.update { it.copy(recurrentOnly = intent.enabled) }
+            is HistoryFilterIntent.ToggleCreditOnly -> _filter.update { it.copy(creditOnly = intent.enabled) }
+            is HistoryFilterIntent.ClearFilters -> _filter.value = HistoryFilterState()
         }
     }
 
@@ -295,19 +310,50 @@ class HistoryViewModel @Inject constructor(
             paidOccurrences = paidOccurrences,
         )
 
-        val groupedCurrent = buildGroupedCurrentTransactions(
-            currentPeriodTransactions = currentPeriodTx,
-            displayTransactions = displayTx,
-            budgetStartDate = startDate,
-            budgetEndDate = endDate,
-            today = today,
-            paidOccurrences = paidOccurrences,
-        )
-
-        val groupedPast = if (userSettings?.showPastTransactions == false) {
-            emptyMap()
+        val categoryNames = categories.associate { it.id to it.name }
+        val groupedCurrent: Map<LocalDate?, List<Transaction>>
+        val groupedPast: Map<LocalDate?, List<Transaction>>
+        val matchCount: Int
+        if (inputs.filter.isActive) {
+            val filteredDisplay = filterTransactions(displayTx, inputs.filter, categoryNames)
+            val (fCurrent, fPast) = splitPeriodTransactions(
+                transactions = filteredDisplay,
+                budgetStartDate = startDate,
+                budgetEndDate = endDate,
+                currentPeriodStartedAtMillis = currentPeriodStartedAtMillis,
+                currentPeriodId = currentPeriodId,
+                previousPeriodId = previousPeriodId,
+            )
+            groupedCurrent = buildGroupedCurrentTransactions(
+                currentPeriodTransactions = fCurrent,
+                displayTransactions = filteredDisplay,
+                budgetStartDate = startDate,
+                budgetEndDate = endDate,
+                today = today,
+                paidOccurrences = paidOccurrences,
+            )
+            groupedPast = if (userSettings?.showPastTransactions == false) {
+                emptyMap()
+            } else {
+                groupTransactionsByDate(fPast)
+            }
+            // Count of regular (non-virtual) matches across both scopes.
+            matchCount = fCurrent.size + fPast.size
         } else {
-            groupTransactionsByDate(pastPeriodTx)
+            groupedCurrent = buildGroupedCurrentTransactions(
+                currentPeriodTransactions = currentPeriodTx,
+                displayTransactions = displayTx,
+                budgetStartDate = startDate,
+                budgetEndDate = endDate,
+                today = today,
+                paidOccurrences = paidOccurrences,
+            )
+            groupedPast = if (userSettings?.showPastTransactions == false) {
+                emptyMap()
+            } else {
+                groupTransactionsByDate(pastPeriodTx)
+            }
+            matchCount = displayTx.size
         }
 
         val creditOwed = transactions.filter { it.isCredit && !it.isDeleted && !it.isCreditPaid }
@@ -344,6 +390,9 @@ class HistoryViewModel @Inject constructor(
             lockSwipeable = inputs.lockSwipeable,
             recurrentPaymentsViewMode = userSettings?.recurrentPaymentsViewMode
                 ?: RecurrentPaymentsViewMode.VERTICAL_LIST,
+            filter = inputs.filter,
+            isFilterActive = inputs.filter.isActive,
+            matchCount = matchCount,
             displayTransactions = displayTx,
             groupedCurrentTransactions = groupedCurrent,
             groupedPastTransactions = groupedPast,
@@ -365,7 +414,8 @@ class HistoryViewModel @Inject constructor(
         val showUpcomingRecurrentInPeriod: Boolean,
         val lockSwipeable: Boolean,
         val expandedTransactionId: Long?,
-        val pendingRemovedTransactions: Map<Long, Transaction>
+        val pendingRemovedTransactions: Map<Long, Transaction>,
+        val filter: HistoryFilterState = HistoryFilterState(),
     )
 
     companion object {

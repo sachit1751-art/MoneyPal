@@ -140,6 +140,24 @@
     <string name="history_snackbar_save_transaction_failed">Could not save transaction</string>
     <string name="history_snackbar_delete_recurrent_failed">Could not delete recurring payment</string>
     <string name="history_snackbar_mark_paid_failed">Could not mark transaction as paid</string>
+    <string name="history_search_hint">Search transactions…</string>
+    <string name="history_filter_results">%1$d results</string>
+    <string name="history_filter_recurrent">Recurring</string>
+    <string name="history_filter_credit">Credit</string>
+    <string name="history_filter_clear">Clear filters</string>
+    <string name="history_filter_amount_title">Amount range</string>
+    <string name="history_filter_amount_min">Min amount</string>
+    <string name="history_filter_amount_max">Max amount</string>
+    <string name="history_filter_apply">Apply</string>
+    <string name="history_filter_more">More filters</string>
+    <string name="history_filter_amount_invalid">Enter valid amounts</string>
+    <string name="settings_app_lock_title">App lock</string>
+    <string name="settings_app_lock_subtitle">Require fingerprint or screen lock to open MoneyPal</string>
+    <string name="app_lock_prompt_title">Unlock MoneyPal</string>
+    <string name="app_lock_prompt_subtitle">Authenticate to access your budget</string>
+    <string name="app_lock_overlay_title">MoneyPal is locked</string>
+    <string name="app_lock_unlock_button">Unlock</string>
+    <string name="app_lock_no_authenticator">No screen lock found. Set up fingerprint or screen lock in system settings first.</string>
 
     <string name="add_new_category">Category</string>
     <string name="add_new_category_action">Add New Category</string>
