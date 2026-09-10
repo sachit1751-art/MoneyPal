@@ -32,7 +32,7 @@ one tiny extraction). 005 is independent. 006/007 are trivial cleanups.
 | 6 | `006-namespace-dup-cleanup.md` | Remove duplicated `namespace` assignment in `app/build.gradle.kts` | — | DONE |
 | 7 | `007-readme-link-cleanup.md` | Remove/replace post-rebrand links that 404 until listings exist | — | DONE |
 
-All plans executed on **2026-09-04** against `a2fda9c`. Deviations from plan text (all reported in the
+All round-1 plans executed on **2026-09-04** against `a2fda9c`. Deviations from plan text (all reported in the
 session): plan 002 additionally unified a third duplicate "due today" predicate discovered in
 `RecurrentExpenseNotificationWorker` (the scheduler's clamped notification was being suppressed by the
 worker's exact-match check); plan 004 hardened `sanitizeZipEntryName` to collapse dot runs/trim leading
@@ -41,6 +41,44 @@ plan 003 left `RecurrentExpenseNotificationWorker` clock reads at the `doWork` b
 WorkManager-constructed `CoroutineWorker` (not `@HiltWorker`), so a constructor param was not possible.
 No receiver/worker unit tests were added (none existed; they'd require Android fakes) — the receivers'
 logic was extracted into `internal suspend fun`s taking `today` instead.
+
+## Round 2 — feature plans (2026-09-10, against `614cb49`)
+
+User-selected product features. All are independent of each other except
+where noted; recommended order below reflects risk (DB-touching last-ish)
+and synergy.
+
+| Order | Plan | Summary | Depends on | Status |
+|:------|:-----|:--------|:-----------|:-------|
+| 8 | `008-history-search-filters.md` | Search query + category/amount/recurrent/credit filters in History | — | DONE |
+| 9 | `009-biometric-app-lock.md` | Fingerprint/device-credential gate via androidx.biometric, opt-in | — | DONE |
+| 10 | `010-backup-restore.md` | Versioned local JSON backup incl. categories/occurrences + non-destructive restore | — | TODO |
+| 11 | `011-category-envelopes.md` | Per-category budget limits (Room 17→18 auto-migration) + progress on Analytics | — | TODO |
+| 12 | `012-savings-goals.md` | Track savings-goal progress from income entries + ETA on the savings card | — | TODO |
+| 13 | `013-digest-and-shortcuts.md` | Opt-in Monday weekly digest (PeriodicWork) + static "Add expense" shortcut | — | TODO |
+
+Round-2 status (2026-09-10): plans 008 and 009 executed against `b696f9b`. Deviations from
+plan text (all reported in the session): plan 008 implemented filter state keyed by category
+*name* rather than category id (chips toggle by name; uncategorized transactions are excluded
+while a category filter is active), and the amount-range UI shipped as a
+`HistoryAmountFilterSheet` ModalBottomSheet opened from a tune icon in the search bar rather
+than inline fields; plan 009 ships the lock gate as `AppLockController` + `AppLockOverlay` in
+`presentation/lock/`, with the overlay additionally swallowing back presses and full-screen
+tap hit-testing so input can never reach the NavHost while locked, and the toggle refuses to
+enable (Toast + no persist) when no biometric/device credential is enrolled.
+
+Dependency notes:
+- 008 and 009 are fully independent of everything — good first picks.
+- 011 follows 010 in time so backup can be extended with envelope fields
+  (follow-up noted inside 011's maintenance notes; not a hard dependency).
+- 011 touches Room (schema 17→18) — run its migration gate before release.
+- 013 reuses `BudgetStateCalculator` aggregates; no ordering constraint.
+
+Correction vs. the original feature survey: **budget rollover was proposed
+but already exists** (`rollOverEnabled/rollOverLimit/rollOverCarryForward`,
+`RolloverDialog`, split-equally / carry-to-tomorrow / discard strategies,
+unit + E2E tests). It was replaced by category envelopes (011) at user
+choice.
 
 ## Considered and rejected (do not re-audit)
 
