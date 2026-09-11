@@ -1,10 +1,12 @@
 package com.sachit.moneypal.presentation.ui.analytics
 
+import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
@@ -16,9 +18,25 @@ fun AnalyticsScreen(
     viewModel: AnalyticsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     BackHandler {
         viewModel.onClose()
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.shareReportText.collect { text ->
+            if (text != null) {
+                viewModel.consumeShareReport()
+                val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TEXT, text)
+                }
+                context.startActivity(
+                    Intent.createChooser(sendIntent, null)
+                )
+            }
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -65,8 +83,10 @@ fun AnalyticsScreen(
             },
             onGranularityChanged = { granularity ->
                 viewModel.onGranularityChanged(granularity)
-            }
-        ),
+            },
+            onShareReport = {
+                viewModel.onShareReport(com.sachit.moneypal.domain.report.ReportScope.MONTHLY)
+            },
         activityResultRegistryOwner = activityResultRegistryOwner,
     )
 }

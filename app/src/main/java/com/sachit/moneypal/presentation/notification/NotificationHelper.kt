@@ -36,6 +36,11 @@ class NotificationHelper @Inject constructor(
         const val NOTIFICATION_ID_CREDIT = 1003
         const val CHANNEL_SMS_CAPTURE = "sms_capture"
         private const val NOTIFICATION_ID_SMS_CAPTURE = 1004
+        const val CHANNEL_BUDGET_THRESHOLD = "budget_threshold"
+        private const val NOTIFICATION_ID_THRESHOLD_DAILY_80 = 1005
+        private const val NOTIFICATION_ID_THRESHOLD_DAILY_100 = 1006
+        private const val NOTIFICATION_ID_THRESHOLD_PERIOD_80 = 1007
+        private const val NOTIFICATION_ID_THRESHOLD_PERIOD_100 = 1008
     }
 
     init {
@@ -82,10 +87,20 @@ class NotificationHelper @Inject constructor(
             enableVibration(true)
         }
 
+        val thresholdChannel = NotificationChannel(
+            CHANNEL_BUDGET_THRESHOLD,
+            context.getString(R.string.notification_channel_threshold_name),
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            description = context.getString(R.string.notification_channel_threshold_description)
+            enableVibration(true)
+        }
+
         notificationManager.createNotificationChannel(periodEndChannel)
         notificationManager.createNotificationChannel(recurrentChannel)
         notificationManager.createNotificationChannel(creditChannel)
         notificationManager.createNotificationChannel(smsCaptureChannel)
+        notificationManager.createNotificationChannel(thresholdChannel)
         logcat { "Notification channels created" }
     }
 
@@ -378,6 +393,65 @@ class NotificationHelper @Inject constructor(
 
         NotificationManagerCompat.from(context).notify(NOTIFICATION_ID_SMS_CAPTURE, notification)
         logcat { "SMS capture notification shown: $message" }
+    }
+
+    /**
+     * Shows a spending-threshold alert (80% / 100% of daily or period budget).
+     * Each threshold/scope combination has a stable notification id so a higher
+     * alert replaces the lower one instead of stacking.
+     */
+    fun showThresholdAlertNotification(
+        scope: String,
+        thresholdPercent: Int,
+        spentFormatted: String,
+        budgetFormatted: String,
+    ) {
+        val hasPermission = checkNotificationPermission()
+        if (!hasPermission) {
+            logcat { "Cannot show threshold alert - permission not granted" }
+            return
+        }
+
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            5,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val title = context.getString(R.string.notification_threshold_title)
+        val message = context.getString(
+            R.string.notification_threshold_message,
+            thresholdPercent,
+            scope,
+            spentFormatted,
+            budgetFormatted,
+        )
+
+        val notificationId = when (scope to thresholdPercent) {
+            "daily" to 80 -> NOTIFICATION_ID_THRESHOLD_DAILY_80
+            "daily" to 100 -> NOTIFICATION_ID_THRESHOLD_DAILY_100
+            "period" to 80 -> NOTIFICATION_ID_THRESHOLD_PERIOD_80
+            else -> NOTIFICATION_ID_THRESHOLD_PERIOD_100
+        }
+
+        val notification = NotificationCompat.Builder(context, CHANNEL_BUDGET_THRESHOLD)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .build()
+
+        NotificationManagerCompat.from(context).notify(notificationId, notification)
+        logcat { "Threshold alert shown: scope=$scope percent=$thresholdPercent" }
     }
 
     fun cancelAllNotifications() {

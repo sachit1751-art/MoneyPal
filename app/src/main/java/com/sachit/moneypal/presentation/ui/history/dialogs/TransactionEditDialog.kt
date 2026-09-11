@@ -52,7 +52,7 @@ internal fun TransactionEditDialog(
                 creditCardCutoffDay = creditCardCutoffDay,
                 onUpdateCreditCutoffDay = onUpdateCreditCutoffDay,
                 onCancel = onCancel,
-                onSave = { newAmount, newComment, newDateTime, newIsRecurrent, newFrequency, newEndDate, newSubscriptionDay, newIsCredit ->
+                onSave = { newAmount, newComment, newDateTime, newIsRecurrent, newFrequency, newEndDate, newSubscriptionDay, newIsCredit, newAttachmentPath, newOriginalAmount, newOriginalCurrency ->
                     val updatedTransaction = transaction.copy(
                         id = transaction.sourceTransactionId ?: transaction.id,
                         amount = newAmount,
@@ -64,6 +64,9 @@ internal fun TransactionEditDialog(
                         subscriptionDay = newSubscriptionDay,
                         isCredit = newIsCredit,
                         sourceTransactionId = null,
+                        attachmentUri = newAttachmentPath ?: transaction.attachmentUri,
+                        originalAmount = newOriginalAmount ?: transaction.originalAmount,
+                        originalCurrency = newOriginalCurrency ?: transaction.originalCurrency,
                     )
                     onSave(updatedTransaction)
                 },

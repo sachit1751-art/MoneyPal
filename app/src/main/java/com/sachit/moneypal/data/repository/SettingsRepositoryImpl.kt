@@ -9,6 +9,8 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.sachit.moneypal.domain.model.BudgetPeriod
 import com.sachit.moneypal.domain.model.ContrastMode
+import com.sachit.moneypal.domain.usecase.BudgetThreshold
+
 import com.sachit.moneypal.domain.model.FirstLaunchTutorialStage
 import com.sachit.moneypal.domain.model.PeriodMappingMode
 import com.sachit.moneypal.domain.model.RemainingBudgetStrategy
@@ -66,6 +68,10 @@ const val ANALYTICS_TUTORIAL_COMPLETED_KEY_NAME = "analytics_tutorial_completed"
 const val ANALYTICS_SPENDS_TUTORIAL_COMPLETED_KEY_NAME = "analytics_spends_tutorial_completed"
 const val SMS_CAPTURE_ENABLED_KEY_NAME = "sms_capture_enabled"
 const val SMS_SEEN_PREFIX_KEY_NAME = "sms_seen_"
+const val THRESHOLD_ALERTS_ENABLED_KEY_NAME = "threshold_alerts_enabled"
+const val DAILY_ALERTED_THRESHOLD_KEY_NAME = "daily_alerted_threshold"
+const val PERIOD_ALERTED_THRESHOLD_KEY_NAME = "period_alerted_threshold"
+const val DAILY_ALERTED_THRESHOLD_DATE_KEY_NAME = "daily_alerted_threshold_date"
 
 private val ONBOARDING_COMPLETED = booleanPreferencesKey(ONBOARDING_COMPLETED_KEY_NAME)
 private val EARLY_FINISH_ACTIVE = booleanPreferencesKey(EARLY_FINISH_ACTIVE_KEY_NAME)
@@ -125,6 +131,12 @@ private val ANALYTICS_TUTORIAL_COMPLETED = booleanPreferencesKey(ANALYTICS_TUTOR
 private val ANALYTICS_SPENDS_TUTORIAL_COMPLETED = booleanPreferencesKey(ANALYTICS_SPENDS_TUTORIAL_COMPLETED_KEY_NAME)
 private val BUDGET_SPLIT_VIEW_PERIOD = stringPreferencesKey(BUDGET_SPLIT_VIEW_PERIOD_KEY_NAME)
 private val SMS_CAPTURE_ENABLED = booleanPreferencesKey(SMS_CAPTURE_ENABLED_KEY_NAME)
+private val THRESHOLD_ALERTS_ENABLED =
+    booleanPreferencesKey(THRESHOLD_ALERTS_ENABLED_KEY_NAME)
+private val DAILY_ALERTED_THRESHOLD = stringPreferencesKey(DAILY_ALERTED_THRESHOLD_KEY_NAME)
+private val PERIOD_ALERTED_THRESHOLD = stringPreferencesKey(PERIOD_ALERTED_THRESHOLD_KEY_NAME)
+private val DAILY_ALERTED_THRESHOLD_DATE =
+    stringPreferencesKey(DAILY_ALERTED_THRESHOLD_DATE_KEY_NAME)
 private val SAVINGS_PRESET = stringPreferencesKey(SAVINGS_PRESET_KEY_NAME)
 private val SAVINGS_NEEDS_PCT = intPreferencesKey(SAVINGS_NEEDS_PCT_KEY_NAME)
 private val SAVINGS_WANTS_PCT = intPreferencesKey(SAVINGS_WANTS_PCT_KEY_NAME)
@@ -169,6 +181,7 @@ class SettingsRepositoryImpl @Inject constructor(
                 appLockEnabled = preferences[APP_LOCK_ENABLED] ?: false,
                 showPastTransactions = preferences[SHOW_PAST_TRANSACTIONS] ?: true,
                 smsCaptureEnabled = preferences[SMS_CAPTURE_ENABLED] ?: false,
+                thresholdAlertsEnabled = preferences[THRESHOLD_ALERTS_ENABLED] ?: false,
                 isCreditQuickToggleEnabled = preferences[CREDIT_QUICK_TOGGLE_FEATURE_ENABLED] ?: false,
                 categoryPickerDirectPopupEnabled = preferences[CATEGORY_PICKER_DIRECT_POPUP_ENABLED] ?: false,
                 categoryGridModeEnabled = preferences[CATEGORY_GRID_MODE_ENABLED] ?: false,
@@ -556,6 +569,59 @@ class SettingsRepositoryImpl @Inject constructor(
         dataStore.edit { prefs ->
             prefs.remove(LAST_PERIOD_END)
             prefs.remove(REMAINING_FROM_LAST_PERIOD)
+        }
+    }
+
+    override fun observeThresholdAlertsEnabled(): Flow<Boolean> {
+        return dataStore.data.map { it[THRESHOLD_ALERTS_ENABLED] ?: false }
+    }
+
+    override suspend fun setThresholdAlertsEnabled(enabled: Boolean) {
+        dataStore.edit { it[THRESHOLD_ALERTS_ENABLED] = enabled }
+    }
+
+    override suspend fun getDailyAlertedThreshold(todayEpochDay: Long): BudgetThreshold? {
+        val prefs = dataStore.data.first()
+        // The daily threshold is date-scoped so a new day resets alerts automatically.
+        val storedDate = prefs[DAILY_ALERTED_THRESHOLD_DATE]
+        if (storedDate != todayEpochDay.toString()) return null
+        return prefs[DAILY_ALERTED_THRESHOLD]?.toBudgetThreshold()
+    }
+
+    override suspend fun setDailyAlertedThreshold(
+        threshold: BudgetThreshold?,
+        todayEpochDay: Long,
+    ) {
+        dataStore.edit { prefs ->
+            if (threshold == null) {
+                prefs.remove(DAILY_ALERTED_THRESHOLD)
+                prefs.remove(DAILY_ALERTED_THRESHOLD_DATE)
+            } else {
+                prefs[DAILY_ALERTED_THRESHOLD] = threshold.name
+                prefs[DAILY_ALERTED_THRESHOLD_DATE] = todayEpochDay.toString()
+            }
+        }
+    }
+
+    override suspend fun getPeriodAlertedThreshold(): BudgetThreshold? {
+        return dataStore.data.first()[PERIOD_ALERTED_THRESHOLD]?.toBudgetThreshold()
+    }
+
+    override suspend fun setPeriodAlertedThreshold(threshold: BudgetThreshold?) {
+        dataStore.edit { prefs ->
+            if (threshold == null) {
+                prefs.remove(PERIOD_ALERTED_THRESHOLD)
+            } else {
+                prefs[PERIOD_ALERTED_THRESHOLD] = threshold.name
+            }
+        }
+    }
+
+    private fun String.toBudgetThreshold(): BudgetThreshold? {
+        return try {
+            BudgetThreshold.valueOf(this)
+        } catch (_: Exception) {
+            null
         }
     }
 

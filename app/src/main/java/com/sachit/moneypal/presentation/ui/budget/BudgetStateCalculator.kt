@@ -1,5 +1,6 @@
 package com.sachit.moneypal.presentation.ui.budget
 
+import com.sachit.moneypal.domain.calculator.BurnRateCalculator
 import com.sachit.moneypal.domain.calculator.RecurringExpenseCalculator
 import com.sachit.moneypal.domain.model.BudgetPeriod
 import com.sachit.moneypal.domain.model.BudgetSettings
@@ -18,6 +19,7 @@ import javax.inject.Inject
 
 class BudgetStateCalculator @Inject constructor(
     private val recurringExpenseCalculator: RecurringExpenseCalculator,
+    private val burnRateCalculator: BurnRateCalculator,
 ) {
 
     fun filterPeriodTransactions(
@@ -182,6 +184,15 @@ class BudgetStateCalculator @Inject constructor(
         }
 
         val totalSpentInPeriod = totalExpensesInPeriod.add(recurringDueToday)
+
+        val burnRate = burnRateCalculator.calculate(
+            totalBudget = effectiveTotalBudget,
+            spentInPeriod = totalSpentInPeriod,
+            periodStart = settings.startDate,
+            periodEnd = periodEnd,
+            today = currentDate,
+        )
+
         val nextAllocations = computeNextBlockAllocations(
             totalBudget = effectiveTotalBudget,
             totalSpentInPeriod = totalSpentInPeriod,
@@ -211,6 +222,9 @@ class BudgetStateCalculator @Inject constructor(
             nextBiweeklyAllocation = nextAllocations.biweeklyAllocation,
             nextMonthlyAllocation = nextAllocations.monthlyAllocation,
             periodTotalDays = originalTotalDays,
+            pacePercent = burnRate.pacePercent,
+            projectedOverspend = burnRate.projectedOverspend,
+            projectedExhaustionDate = burnRate.projectedExhaustionDate,
         )
     }
 

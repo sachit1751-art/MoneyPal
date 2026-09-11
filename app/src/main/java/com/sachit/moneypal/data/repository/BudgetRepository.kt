@@ -78,6 +78,15 @@ interface BudgetRepository {
 
     suspend fun upsertArchivedBudgets(archivedBudgets: List<ArchivedBudget>)
 
+    /**
+     * Inserts or replaces categories wholesale (backup restore path). Unlike
+     * [findOrCreateCategory], preserves the provided usageCount/isHidden.
+     */
+    suspend fun upsertCategories(categories: List<Category>)
+
+    /** Returns every transaction including soft-deleted rows (backup path). */
+    suspend fun getAllTransactionsIncludingDeleted(): List<Transaction>
+
     suspend fun archiveCurrentPeriod(
         periodId: Long,
         settings: BudgetSettings,

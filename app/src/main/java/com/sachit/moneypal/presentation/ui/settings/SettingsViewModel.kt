@@ -73,6 +73,7 @@ data class SettingsUiState(
     val smsCaptureEnabled: Boolean = false,
     val smsPermissionGranted: Boolean = false,
     val appLockEnabled: Boolean = false,
+    val thresholdAlertsEnabled: Boolean = false,
 )
 
 sealed interface SettingsUiEffect {
@@ -144,6 +145,7 @@ class SettingsViewModel @Inject constructor(
             smsCaptureEnabled = settings.smsCaptureEnabled,
             smsPermissionGranted = smsGranted,
             appLockEnabled = settings.appLockEnabled,
+            thresholdAlertsEnabled = settings.thresholdAlertsEnabled,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -174,6 +176,13 @@ class SettingsViewModel @Inject constructor(
         val newValue = !uiState.value.smsCaptureEnabled
         viewModelScope.launch {
             settingsRepository.setSmsCaptureEnabled(newValue)
+        }
+    }
+
+    fun onThresholdAlertsToggle() {
+        val newValue = !uiState.value.thresholdAlertsEnabled
+        viewModelScope.launch {
+            settingsRepository.setThresholdAlertsEnabled(newValue)
         }
     }
 
@@ -404,6 +413,63 @@ class SettingsViewModel @Inject constructor(
                 )
             }
             csvTransferManager?.enqueueImport(uri.toString())
+        }
+    }
+
+    // ---- Full backup / restore (plan 010 + SAF folder target) ----
+
+    private var backupTransferManager: com.sachit.moneypal.presentation.ui.settings.backup.BackupTransferManager? = null
+    private var backupFolderLauncher: androidx.activity.result.ActivityResultLauncher<Uri>? = null
+    private var restoreLauncher: androidx.activity.result.ActivityResultLauncher<Array<String>>? = null
+
+    fun setBackupTransferManager(manager: com.sachit.moneypal.presentation.ui.settings.backup.BackupTransferManager) {
+        backupTransferManager = manager
+    }
+
+    fun setBackupFolderLauncher(launcher: androidx.activity.result.ActivityResultLauncher<Uri>) {
+        backupFolderLauncher = launcher
+    }
+
+    fun setRestoreBackupLauncher(launcher: androidx.activity.result.ActivityResultLauncher<Array<String>>) {
+        restoreLauncher = launcher
+    }
+
+    fun onCreateBackup() {
+        viewModelScope.launch {
+            val uri = backupTransferManager?.exportBackup()
+            if (uri != null) backupTransferManager?.toastSaved()
+        }
+    }
+
+    fun onExportBackupToFolder() {
+        backupFolderLauncher?.launch(null)
+    }
+
+    fun onBackupFolderResult(uri: Uri?) {
+        uri ?: return
+        viewModelScope.launch {
+            runCatching {
+                context.contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+                )
+            }
+            val saved = backupTransferManager?.exportToFolder(uri) ?: false
+            if (saved) backupTransferManager?.toastSaved()
+        }
+    }
+
+    fun onRestoreBackup() {
+        restoreLauncher?.launch(arrayOf("application/json"))
+    }
+
+    fun onRestoreBackupResult(uri: Uri?) {
+        uri ?: return
+        viewModelScope.launch {
+            val message = backupTransferManager?.restoreFrom(uri)
+            message?.let {
+                android.widget.Toast.makeText(context, it, android.widget.Toast.LENGTH_LONG).show()
+            }
         }
     }
 

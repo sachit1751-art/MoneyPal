@@ -756,4 +756,55 @@
     <string name="budget_graph_page_indicator" translatable="false">%1$d / %2$d</string>
     <string name="unit_thousands">K</string>
     <string name="unit_millions">M</string>
+
+    <!-- Burn-rate pace projection -->
+    <string name="burn_rate_title">Spending pace</string>
+    <string name="burn_rate_no_spending">No spending yet this period — you\'re right on track.</string>
+    <string name="burn_rate_over_pace_title">Spending %1$d%% faster than budget</string>
+    <string name="burn_rate_over_pace_detail">At this pace you\'ll exceed your budget by %1$s.</string>
+    <string name="burn_rate_over_pace_detail_with_date">At this pace you\'ll exceed your budget by %1$s and run out around %2$s.</string>
+    <string name="burn_rate_under_pace_title">Spending %1$d%% slower than budget</string>
+    <string name="burn_rate_under_pace_detail">Nice — you\'re on track to finish under budget.</string>
+    <string name="burn_rate_on_pace_title">Right on pace</string>
+    <string name="burn_rate_on_pace_detail">Your spending matches your budget so far.</string>
+
+    <!-- Spending-threshold alerts -->
+    <string name="settings_threshold_alerts_title">Budget threshold alerts</string>
+    <string name="settings_threshold_alerts_subtitle">Warn me at 80% and 100% of my daily and period budget</string>
+    <string name="notification_channel_threshold_name">Budget threshold alerts</string>
+    <string name="notification_channel_threshold_description">Alerts when you reach 80% or 100% of your budget</string>
+    <string name="notification_threshold_title">Budget alert</string>
+    <string name="notification_threshold_message">You\'ve used %1$d%% of your %2$s budget — %3$s of %4$s spent.</string>
+    <string name="threshold_scope_daily">daily</string>
+    <string name="threshold_scope_period">period</string>
+
+    <!-- Receipt attachments -->
+    <string name="attachment_add">Attach receipt photo</string>
+    <string name="attachment_added">Receipt attached</string>
+    <string name="attachment_remove">Remove receipt</string>
+
+    <!-- Multi-currency entry -->
+    <string name="currency_convert_cd">Convert from another currency</string>
+    <string name="currency_convert_title">Enter in another currency</string>
+    <string name="currency_convert_pick">Currency</string>
+    <string name="currency_convert_more">Other…</string>
+    <string name="currency_convert_amount_in">Amount in %1$s</string>
+    <string name="currency_convert_rate_hint">1 %1$s = ? %2$s</string>
+    <string name="currency_convert_rate_example">How many budget currency units one unit of the foreign currency is worth</string>
+    <string name="currency_convert_preview">Converts to %1$s</string>
+
+    <!-- Full backup / restore -->
+    <string name="settings_backup_create_title">Create full backup</string>
+    <string name="settings_backup_create_subtitle">Transactions, categories, history and settings as JSON in Downloads</string>
+    <string name="settings_backup_folder_title">Back up to folder</string>
+    <string name="settings_backup_folder_subtitle">Save a backup copy into any folder — great for sync apps</string>
+    <string name="settings_backup_restore_title">Restore backup</string>
+    <string name="settings_backup_restore_subtitle">Restore from a backup file — nothing is deleted</string>
+    <string name="backup_saved_toast">Backup saved</string>
+    <string name="backup_restore_result">Restored %1$d new transactions (%2$d already present), %3$d categories</string>
+    <string name="backup_restore_invalid_file">That file isn\'t a valid MoneyPal backup</string>
+    <string name="backup_restore_failed">Restore failed</string>
+
+    <!-- Share report -->
+    <string name="share_report_cd">Share spending report</string>
 </resources>

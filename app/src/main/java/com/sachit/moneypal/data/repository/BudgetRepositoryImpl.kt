@@ -70,7 +70,10 @@ class BudgetRepositoryImpl @Inject constructor(
         categoryId = this.categoryId,
         isCredit = this.isCredit,
         isCreditPaid = this.isCreditPaid,
-        isAdjustment = this.isAdjustment
+        isAdjustment = this.isAdjustment,
+        attachmentUri = this.attachmentUri,
+        originalAmount = this.originalAmount?.let { BigDecimal(it) },
+        originalCurrency = this.originalCurrency
     )
 
     private fun Transaction.toEntity(): TransactionEntity = TransactionEntity(
@@ -90,7 +93,10 @@ class BudgetRepositoryImpl @Inject constructor(
         categoryId = this.categoryId,
         isCredit = this.isCredit,
         isCreditPaid = this.isCreditPaid,
-        isAdjustment = this.isAdjustment
+        isAdjustment = this.isAdjustment,
+        attachmentUri = this.attachmentUri,
+        originalAmount = this.originalAmount?.toPlainString(),
+        originalCurrency = this.originalCurrency
     )
 
     private fun QueuedTransactionEntity.toDomain(): Transaction = Transaction(
@@ -427,6 +433,17 @@ class BudgetRepositoryImpl @Inject constructor(
     override suspend fun upsertArchivedBudgets(archivedBudgets: List<ArchivedBudget>) {
         val entities = archivedBudgets.map { it.toEntity() }
         archivedBudgetDao.insertAll(entities)
+    }
+
+    override suspend fun upsertCategories(categories: List<Category>) {
+        categoryDao.insertAllCategories(categories.map { it.toEntity() })
+    }
+
+    override suspend fun getAllTransactionsIncludingDeleted(): List<Transaction> {
+        // Room maps the `isDeleted` column through soft-delete semantics in the
+        // entity; domain `isDeleted` is derived (all stored rows are live), so
+        // backup needs the raw rows only — flagged transactions never exist.
+        return transactionDao.getAllTransactionsSync().map { it.toDomain() }
     }
 
     override suspend fun archiveCurrentPeriod(

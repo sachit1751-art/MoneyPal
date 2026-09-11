@@ -33,4 +33,7 @@ interface CategoryDao {
 
     @Query("UPDATE category SET usageCount = usageCount + 1, lastUsedAt = :timestamp WHERE name = :name")
     suspend fun incrementUsage(name: String, timestamp: Long = System.currentTimeMillis())
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllCategories(categories: List<CategoryEntity>): List<Long>
 }

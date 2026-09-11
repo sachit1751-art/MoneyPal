@@ -28,6 +28,7 @@ import androidx.compose.material.icons.automirrored.rounded.HelpOutline
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CreditCard
@@ -50,6 +51,9 @@ import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.Alarm
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Backup
+import androidx.compose.material.icons.rounded.FolderCopy
+import androidx.compose.material.icons.rounded.Restore
+import androidx.compose.material.icons.rounded.SaveAlt
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.CreditCard
 import androidx.compose.material.icons.rounded.ExpandLess
@@ -169,6 +173,9 @@ fun Settings(
     onSavingsPreferencesChange: (SavingsPreferences) -> Unit = {},
     onExportCsv: () -> Unit = {},
     onImportCsv: () -> Unit = {},
+    onCreateBackup: () -> Unit = {},
+    onExportBackupToFolder: () -> Unit = {},
+    onRestoreBackup: () -> Unit = {},
     onResetTutorial: () -> Unit = {},
     smsCaptureEnabled: Boolean = false,
     smsPermissionGranted: Boolean = false,
@@ -177,6 +184,8 @@ fun Settings(
     onOpenSmsAppSettings: () -> Unit = {},
     appLockEnabled: Boolean = false,
     onAppLockToggle: () -> Unit = {},
+    thresholdAlertsEnabled: Boolean = false,
+    onThresholdAlertsToggle: () -> Unit = {},
     onBugReportClick: () -> Unit = {},
     onNavigateToChangelog: () -> Unit = {},
     onNavigateToAppearance: () -> Unit = {},
@@ -469,6 +478,28 @@ fun Settings(
                                 checked = appLockEnabled,
                                 onCheckedChange = { onAppLockToggle() },
                                 modifier = Modifier.testTag("SettingsAppLockSwitch")
+                            )
+                        }
+                    )
+
+                    SelectablePaddedItem(
+                        label = stringResource(R.string.settings_threshold_alerts_title),
+                        subtitle = stringResource(R.string.settings_threshold_alerts_subtitle),
+                        isActive = thresholdAlertsEnabled,
+                        onClick = onThresholdAlertsToggle,
+                        position = PaddedListItemPosition.Middle,
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Rounded.NotificationsActive,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        },
+                        trailingContent = {
+                            Switch(
+                                checked = thresholdAlertsEnabled,
+                                onCheckedChange = { onThresholdAlertsToggle() },
+                                modifier = Modifier.testTag("SettingsThresholdAlertsSwitch")
                             )
                         }
                     )
@@ -915,6 +946,84 @@ fun Settings(
                             )
                             Text(
                                 text = stringResource(R.string.settings_backup_subtitle),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    CustomPaddedListItem(
+                        onClick = {
+                            onCreateBackup()
+                            view.toggleFeedback()
+                        }, position = PaddedListItemPosition.Middle
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.SaveAlt,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.settings_backup_create_title),
+                                style = MaterialTheme.typography.bodyMediumEmphasized,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = stringResource(R.string.settings_backup_create_subtitle),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    CustomPaddedListItem(
+                        onClick = {
+                            onExportBackupToFolder()
+                            view.toggleFeedback()
+                        }, position = PaddedListItemPosition.Middle
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.FolderCopy,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.settings_backup_folder_title),
+                                style = MaterialTheme.typography.bodyMediumEmphasized,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = stringResource(R.string.settings_backup_folder_subtitle),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    CustomPaddedListItem(
+                        onClick = {
+                            onRestoreBackup()
+                            view.toggleFeedback()
+                        }, position = PaddedListItemPosition.Last
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Restore,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.settings_backup_restore_title),
+                                style = MaterialTheme.typography.bodyMediumEmphasized,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = stringResource(R.string.settings_backup_restore_subtitle),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

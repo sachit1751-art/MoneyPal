@@ -1,8 +1,12 @@
 package com.sachit.moneypal.presentation.ui.history.edit
 
-import androidx.compose.foundation.clickable
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,11 +18,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AttachFile
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.CreditCard
+import androidx.compose.material.icons.rounded.CurrencyExchange
 import androidx.compose.material3.ElevatedToggleButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
@@ -60,6 +68,7 @@ import com.sachit.moneypal.presentation.ui.theme.component.numpad.EditorState
 import com.sachit.moneypal.presentation.ui.theme.component.numpad.Numpad
 import com.sachit.moneypal.presentation.ui.theme.displayLargeCondensed
 import com.sachit.moneypal.presentation.util.font.format.symbolOnlyCurrencyFormat
+import com.sachit.moneypal.presentation.ui.history.edit.AttachmentEntryPoint
 import com.sachit.moneypal.presentation.util.handleHardwareNumpadKeyEvent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -92,12 +101,25 @@ fun TransactionEditScreen(
         newFrequency: RecurrentFrequency?,
         newEndDate: LocalDate?,
         newSubscriptionDay: Int?,
-        newIsCredit: Boolean
-    ) -> Unit = { _, _, _, _, _, _, _, _ -> },
+        newIsCredit: Boolean,
+        newAttachmentPath: String?,
+        newOriginalAmount: BigDecimal?,
+        newOriginalCurrency: String?
+    ) -> Unit = { _, _, _, _, _, _, _, _, _, _, _ -> },
     modifier: Modifier = Modifier
 ) {
     val currencyFormat = symbolOnlyCurrencyFormat(currencyCode)
     val scope = rememberCoroutineScope()
+    val context = androidx.compose.ui.platform.LocalContext.current
+    var attachmentStore by remember { mutableStateOf<com.sachit.moneypal.data.attachments.AttachmentStore?>(null) }
+    LaunchedEffect(Unit) {
+        attachmentStore = runCatching {
+            dagger.hilt.android.EntryPointAccessors.fromApplication(
+                context.applicationContext,
+                AttachmentEntryPoint::class.java,
+            ).attachmentStore()
+        }.getOrNull()
+    }
 
     var editedAmount by remember { mutableStateOf(transaction.amount.toString()) }
     var editedComment by remember { mutableStateOf(transaction.comment) }
@@ -119,6 +141,22 @@ fun TransactionEditScreen(
         mutableStateOf(transaction.recurrentEndDate?.toLocalDate() ?: budgetEndDate.plusMonths(3))
     }
     var isCredit by remember { mutableStateOf(transaction.isCredit) }
+
+    var attachmentPath by remember { mutableStateOf(transaction.attachmentUri) }
+    val attachmentPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+    ) { uri ->
+        if (uri != null) {
+            scope.launch {
+                attachmentPath = attachmentStore?.importReceipt(uri)
+            }
+        }
+    }
+
+    // Multi-currency snapshot: the amount as entered in a foreign currency.
+    var originalAmount by remember { mutableStateOf(transaction.originalAmount) }
+    var originalCurrency by remember { mutableStateOf(transaction.originalCurrency) }
+    var showCurrencySheet by remember { mutableStateOf(false) }
 
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
@@ -220,7 +258,10 @@ fun TransactionEditScreen(
                                 if (isRecurrent) selectedFrequency else null,
                                 if (isRecurrent) recurrentEndDate else null,
                                 if (isRecurrent && selectedFrequency == RecurrentFrequency.MONTHLY) subscriptionDay else null,
-                                isCredit
+                                isCredit,
+                                attachmentPath,
+                                originalAmount,
+                                originalCurrency
                             )
                         }
 
@@ -328,6 +369,70 @@ fun TransactionEditScreen(
             )
         }
 
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            IconButton(
+                onClick = {
+                    attachmentPicker.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    )
+                },
+                modifier = Modifier.size(40.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.AttachFile,
+                    contentDescription = stringResource(R.string.attachment_add),
+                    tint = if (attachmentPath != null) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                )
+            }
+            IconButton(
+                onClick = { showCurrencySheet = true },
+                modifier = Modifier.size(40.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.CurrencyExchange,
+                    contentDescription = stringResource(R.string.currency_convert_cd),
+                    tint = if (originalCurrency != null) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                )
+            }
+            if (attachmentPath != null) {
+                Text(
+                    text = stringResource(R.string.attachment_added),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
+                )
+                IconButton(
+                    onClick = {
+                        val removed = attachmentPath
+                        attachmentPath = null
+                        if (removed != null) {
+                            scope.launch { attachmentStore?.deleteReceipt(removed) }
+                        }
+                    },
+                    modifier = Modifier.size(40.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Close,
+                        contentDescription = stringResource(R.string.attachment_remove),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
 
         Numpad(
@@ -379,7 +484,10 @@ fun TransactionEditScreen(
                     frequency,
                     endDate,
                     subDay,
-                    isCredit
+                    isCredit,
+                    attachmentPath,
+                    originalAmount,
+                    originalCurrency
                 )
             },
             isCalculation = isCalculation,
@@ -473,6 +581,23 @@ fun TransactionEditScreen(
             }
         )
     }
+
+    if (showCurrencySheet) {
+        CurrencyConversionSheet(
+            budgetCurrencyCode = currencyCode,
+            initialForeignCurrency = originalCurrency,
+            initialForeignAmount = originalAmount,
+            calculator = remember { com.sachit.moneypal.domain.calculator.CurrencyConversionCalculator() },
+            onApply = { foreignCurrency, foreignAmount, _, convertedAmount ->
+                originalCurrency = foreignCurrency
+                originalAmount = foreignAmount
+                // The numpad amount becomes the budget-currency equivalent.
+                editedAmount = convertedAmount.toPlainString()
+                showCurrencySheet = false
+            },
+            onDismiss = { showCurrencySheet = false },
+        )
+    }
 }
 
 @Preview(showBackground = true, device = "id:pixel_5")
@@ -492,7 +617,7 @@ fun TransactionEditScreenPreview() {
             currencyCode = "USD",
             isCreditQuickToggleEnabled = true,
             onCancel = {},
-            onSave = { _, _, _, _, _, _, _, _ -> }
+            onSave = { _, _, _, _, _, _, _, _, _, _, _ -> }
         )
     }
 }
@@ -518,7 +643,7 @@ fun TransactionEditScreenRecurringPreview() {
             currencyCode = "USD",
             isCreditQuickToggleEnabled = true,
             onCancel = {},
-            onSave = { _, _, _, _, _, _, _, _ -> }
+            onSave = { _, _, _, _, _, _, _, _, _, _, _ -> }
         )
     }
 }

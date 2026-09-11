@@ -33,6 +33,18 @@ fun SettingsScreen(
         viewModel.onImportResult(uri)
     }
 
+    val backupFolderLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocumentTree(),
+    ) { uri ->
+        viewModel.onBackupFolderResult(uri)
+    }
+
+    val restoreBackupLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument(),
+    ) { uri ->
+        viewModel.onRestoreBackupResult(uri)
+    }
+
     val smsPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
     ) { grants ->
@@ -45,6 +57,16 @@ fun SettingsScreen(
             .csvTransferManager()
         viewModel.setCsvTransferManager(manager)
         viewModel.setImportLauncher(importLauncher)
+
+        val backupManager = EntryPointAccessors
+            .fromApplication(
+                context.applicationContext,
+                com.sachit.moneypal.presentation.ui.settings.backup.BackupTransferEntryPoint::class.java,
+            )
+            .backupTransferManager()
+        viewModel.setBackupTransferManager(backupManager)
+        viewModel.setBackupFolderLauncher(backupFolderLauncher)
+        viewModel.setRestoreBackupLauncher(restoreBackupLauncher)
     }
 
     DisposableEffect(lifecycleOwner) {
@@ -119,6 +141,9 @@ fun SettingsScreen(
         onSavingsPreferencesChange = viewModel::onSavingsPreferencesChange,
         onExportCsv = viewModel::onExportCsv,
         onImportCsv = viewModel::onImportCsv,
+        onCreateBackup = viewModel::onCreateBackup,
+        onExportBackupToFolder = viewModel::onExportBackupToFolder,
+        onRestoreBackup = viewModel::onRestoreBackup,
         onResetTutorial = viewModel::onResetTutorial,
         smsCaptureEnabled = uiState.smsCaptureEnabled,
         smsPermissionGranted = uiState.smsPermissionGranted,
@@ -137,6 +162,8 @@ fun SettingsScreen(
         },
         appLockEnabled = uiState.appLockEnabled,
         onAppLockToggle = viewModel::onAppLockToggle,
+        thresholdAlertsEnabled = uiState.thresholdAlertsEnabled,
+        onThresholdAlertsToggle = viewModel::onThresholdAlertsToggle,
         onBugReportClick = viewModel::onBugReportClick,
         onNavigateToChangelog = onNavigateToChangelog,
         onNavigateToAppearance = onNavigateToAppearance,

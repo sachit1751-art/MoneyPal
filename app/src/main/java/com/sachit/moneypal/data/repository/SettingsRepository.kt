@@ -7,6 +7,7 @@ import com.sachit.moneypal.domain.model.SavingsPreferences
 import com.sachit.moneypal.domain.model.ThemeMode
 import com.sachit.moneypal.domain.model.TypographyMode
 import com.sachit.moneypal.domain.model.UserSettings
+import com.sachit.moneypal.domain.usecase.BudgetThreshold
 import kotlinx.coroutines.flow.Flow
 import java.math.BigDecimal
 
@@ -81,6 +82,18 @@ interface SettingsRepository {
     suspend fun setBudgetSplitViewPeriod(period: BudgetPeriod)
 
     suspend fun setSmsCaptureEnabled(enabled: Boolean)
+
+    fun observeThresholdAlertsEnabled(): Flow<Boolean>
+
+    suspend fun setThresholdAlertsEnabled(enabled: Boolean)
+
+    suspend fun getDailyAlertedThreshold(todayEpochDay: Long): BudgetThreshold?
+
+    suspend fun setDailyAlertedThreshold(threshold: BudgetThreshold?, todayEpochDay: Long)
+
+    suspend fun getPeriodAlertedThreshold(): BudgetThreshold?
+
+    suspend fun setPeriodAlertedThreshold(threshold: BudgetThreshold?)
 
     suspend fun isSmsSeen(key: String): Boolean
 

@@ -80,7 +80,10 @@ class TransactionEditE2ETests {
             newEndDate: LocalDate?,
             newSubscriptionDay: Int?,
             newIsCredit: Boolean,
-        ) -> Unit = { _, _, _, _, _, _, _, _ -> },
+            newAttachmentPath: String?,
+            newOriginalAmount: java.math.BigDecimal?,
+            newOriginalCurrency: String?,
+        ) -> Unit = { _, _, _, _, _, _, _, _, _, _, _ -> },
     ) {
         composeTestRule.setContent {
             MinusTheme {
@@ -126,7 +129,7 @@ class TransactionEditE2ETests {
 
         setEditContent(
             transaction = tx,
-            onSave = { amount, comment, dateTime, isRecurrent, frequency, endDate, subDay, isCredit ->
+            onSave = { amount, comment, dateTime, isRecurrent, frequency, endDate, subDay, isCredit, _, _, _ ->
                 captured =
                     SavePayload(amount, comment, dateTime, isRecurrent, frequency, endDate, subDay, isCredit)
             },
@@ -177,7 +180,7 @@ class TransactionEditE2ETests {
 
         setEditContent(
             transaction = tx,
-            onSave = { amount, comment, dateTime, isRecurrent, frequency, endDate, subDay, isCredit ->
+            onSave = { amount, comment, dateTime, isRecurrent, frequency, endDate, subDay, isCredit, _, _, _ ->
                 captured =
                     SavePayload(amount, comment, dateTime, isRecurrent, frequency, endDate, subDay, isCredit)
             },
@@ -215,7 +218,7 @@ class TransactionEditE2ETests {
 
         setEditContent(
             transaction = tx,
-            onSave = { amount, comment, dateTime, isRecurrent, frequency, endDate, subDay, isCredit ->
+            onSave = { amount, comment, dateTime, isRecurrent, frequency, endDate, subDay, isCredit, _, _, _ ->
                 captured =
                     SavePayload(amount, comment, dateTime, isRecurrent, frequency, endDate, subDay, isCredit)
             },
@@ -273,7 +276,7 @@ class TransactionEditE2ETests {
 
         setEditContent(
             transaction = tx,
-            onSave = { amount, comment, dateTime, isRecurrent, frequency, endDate, subDay, isCredit ->
+            onSave = { amount, comment, dateTime, isRecurrent, frequency, endDate, subDay, isCredit, _, _, _ ->
                 captured =
                     SavePayload(amount, comment, dateTime, isRecurrent, frequency, endDate, subDay, isCredit)
             },
@@ -317,7 +320,7 @@ class TransactionEditE2ETests {
 
         setEditContent(
             transaction = tx,
-            onSave = { amount, comment, dateTime, isRecurrent, frequency, endDate, subDay, isCredit ->
+            onSave = { amount, comment, dateTime, isRecurrent, frequency, endDate, subDay, isCredit, _, _, _ ->
                 captured =
                     SavePayload(amount, comment, dateTime, isRecurrent, frequency, endDate, subDay, isCredit)
             },
@@ -369,7 +372,7 @@ class TransactionEditE2ETests {
 
         setEditContent(
             transaction = tx,
-            onSave = { amount, comment, dateTime, isRecurrent, frequency, endDate, subDay, isCredit ->
+            onSave = { amount, comment, dateTime, isRecurrent, frequency, endDate, subDay, isCredit, _, _, _ ->
                 captured =
                     SavePayload(amount, comment, dateTime, isRecurrent, frequency, endDate, subDay, isCredit)
             },
@@ -410,7 +413,7 @@ class TransactionEditE2ETests {
 
         setEditContent(
             transaction = tx,
-            onSave = { amount, comment, dateTime, isRecurrent, frequency, endDate, subDay, isCredit ->
+            onSave = { amount, comment, dateTime, isRecurrent, frequency, endDate, subDay, isCredit, _, _, _ ->
                 captured =
                     SavePayload(amount, comment, dateTime, isRecurrent, frequency, endDate, subDay, isCredit)
             },
@@ -444,7 +447,7 @@ class TransactionEditE2ETests {
 
         setEditContent(
             transaction = tx,
-            onSave = { amount, comment, dateTime, isRecurrent, frequency, endDate, subDay, isCredit ->
+            onSave = { amount, comment, dateTime, isRecurrent, frequency, endDate, subDay, isCredit, _, _, _ ->
                 captured =
                     SavePayload(amount, comment, dateTime, isRecurrent, frequency, endDate, subDay, isCredit)
             },
@@ -478,7 +481,7 @@ class TransactionEditE2ETests {
 
         setEditContent(
             transaction = tx,
-            onSave = { amount, comment, dateTime, isRecurrent, frequency, endDate, subDay, isCredit ->
+            onSave = { amount, comment, dateTime, isRecurrent, frequency, endDate, subDay, isCredit, _, _, _ ->
                 captured =
                     SavePayload(amount, comment, dateTime, isRecurrent, frequency, endDate, subDay, isCredit)
             },

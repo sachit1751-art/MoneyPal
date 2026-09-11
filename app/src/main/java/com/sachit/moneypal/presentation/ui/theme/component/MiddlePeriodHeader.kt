@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.History
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +31,7 @@ fun MiddlePeriodHeader(
     modifier: Modifier = Modifier,
     onClose: () -> Unit = {},
     onShowPastPeriods: () -> Unit = {},
+    onShareReport: () -> Unit = {},
     historyIconModifier: Modifier = Modifier,
 ) {
     val localBottomSheetScrollState = LocalBottomSheetScrollState.current
@@ -61,6 +63,15 @@ fun MiddlePeriodHeader(
                 fontSize = MaterialTheme.typography.titleLarge.fontSize,
             )
             Spacer(Modifier.weight(1F))
+            IconButton(
+                onClick = onShareReport,
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Share,
+                    contentDescription = stringResource(R.string.share_report_cd),
+                    modifier = Modifier.size(24.dp)
+                )
+            }
             IconButton(
                 onClick = onShowPastPeriods,
                 modifier = historyIconModifier,

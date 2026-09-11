@@ -25,6 +25,12 @@ data class BudgetState(
     val nextBiweeklyAllocation: BigDecimal = BigDecimal.ZERO,
     val nextMonthlyAllocation: BigDecimal = BigDecimal.ZERO,
     val periodTotalDays: Int = 0,
+    /** Spending pace relative to elapsed time, 100 = on pace. See [com.sachit.moneypal.domain.calculator.BurnRateCalculator]. */
+    val pacePercent: Int = 0,
+    /** Projected overspend at the current pace (zero when on/under pace). */
+    val projectedOverspend: BigDecimal = BigDecimal.ZERO,
+    /** Date the budget is expected to run out at the current pace, null when it lasts through period end. */
+    val projectedExhaustionDate: java.time.LocalDate? = null,
 ) {
     companion object {
         val EMPTY = BudgetState(

@@ -91,6 +91,7 @@ import com.sachit.moneypal.presentation.ui.theme.component.FinishedPeriodHeader
 import com.sachit.moneypal.presentation.ui.theme.component.MiddlePeriodHeader
 import com.sachit.moneypal.presentation.ui.theme.component.SavingsRecommendationCard
 import com.sachit.moneypal.presentation.ui.theme.component.budget.AverageSpendCard
+import com.sachit.moneypal.presentation.ui.theme.component.budget.BurnRateCard
 import com.sachit.moneypal.presentation.ui.theme.component.budget.CreditOwedCard
 import com.sachit.moneypal.presentation.ui.theme.component.budget.CreditTransactionsBottomSheet
 import com.sachit.moneypal.presentation.ui.theme.component.budget.DeductedBudgetCard
@@ -164,6 +165,7 @@ data class AnalyticsActions(
     val onHistoricalPeriodSelected: (Long) -> Unit = {},
     val onTutorialCompleted: (Boolean) -> Unit = {},
     val onGranularityChanged: (GraphGranularity) -> Unit = {},
+    val onShareReport: () -> Unit = {},
 )
 
 data class Size(val width: Dp, val height: Dp)
@@ -360,6 +362,7 @@ fun Analytics(
                     MiddlePeriodHeader(
                         onClose = actions.onClose,
                         onShowPastPeriods = { showPastPeriodsSheet = true },
+                        onShareReport = actions.onShareReport,
                         historyIconModifier = Modifier.bringIntoViewRequester(
                             bringIntoViewRequesters[1]!!
                         ).markIfInOrder(1)
@@ -453,6 +456,15 @@ fun Analytics(
                                 .bringIntoViewRequester(bringIntoViewRequesters[5]!!)
                                 .markIfInOrder(5),
                         )
+
+                        if (!state.isHistoricalView && state.budgetStateForDisplay != null) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            BurnRateCard(
+                                budgetState = state.budgetStateForDisplay,
+                                currency = state.currencyCode,
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                            )
+                        }
 
                         Spacer(modifier = Modifier.height(80.dp + navigationBarHeight))
                     }

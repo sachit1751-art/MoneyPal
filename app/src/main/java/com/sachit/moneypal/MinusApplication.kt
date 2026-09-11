@@ -25,6 +25,9 @@ class MinusApplication : Application(), Configuration.Provider {
     @Inject
     lateinit var backfillOrphanedPeriodsUseCase: BackfillOrphanedPeriodsUseCase
 
+    @Inject
+    lateinit var thresholdAlertObserver: com.sachit.moneypal.presentation.notification.ThresholdAlertObserver
+
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
             .setWorkerFactory(workerFactory)
@@ -35,6 +38,7 @@ class MinusApplication : Application(), Configuration.Provider {
         AndroidLogcatLogger.installOnDebuggableApp(this, minPriority = LogPriority.VERBOSE)
 
         phoneWearMessageListener.start()
+        thresholdAlertObserver.start()
 
         CoroutineScope(Dispatchers.IO).launch {
             backfillOrphanedPeriodsUseCase()

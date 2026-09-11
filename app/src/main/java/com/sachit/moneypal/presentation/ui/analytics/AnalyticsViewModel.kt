@@ -65,6 +65,7 @@ class AnalyticsViewModel @Inject constructor(
     private val clearEarlyFinishStateUseCase: ClearEarlyFinishStateUseCase,
     private val persistBudgetSettingsUseCase: PersistBudgetSettingsUseCase,
     private val errorLogRecorder: ErrorLogRecorder,
+    private val application: dagger.Lazy<android.app.Application>,
 ) : ViewModel() {
 
     private val _selectedPeriodId = MutableStateFlow<Long?>(null)
@@ -573,6 +574,41 @@ class AnalyticsViewModel @Inject constructor(
 
     fun onGranularityChanged(granularity: GraphGranularity) {
         _granularity.value = granularity
+    }
+
+    /**
+     * Builds and fires a share intent with a daily or monthly spending report.
+     * Scope is chosen by the caller (daily pill / monthly header), the data
+     * always reflects the currently displayed period.
+     */
+    fun onShareReport(scope: com.sachit.moneypal.domain.report.ReportScope) {
+        val state = uiState.value
+        val settings = state.budgetSettings ?: return
+        val builder = com.sachit.moneypal.domain.report.SpendingReportBuilder()
+        val report = builder.build(
+            scope = scope,
+            transactions = state.allTransactions,
+            date = java.time.LocalDate.now(),
+            currencySymbol = com.sachit.moneypal.domain.model.SupportedCurrency
+                .findByCode(settings.currencyCode)?.symbol ?: "",
+            dailyBudget = displayBudgetState(state)?.dailyBudget,
+        )
+        val shareText = builder.toShareText(
+            report,
+            appName = application.getString(com.sachit.moneypal.R.string.app_name),
+        )
+        _shareReportText.value = shareText
+    }
+
+    private fun displayBudgetState(state: AnalyticsUiState): com.sachit.moneypal.domain.model.BudgetState? {
+        return state.displayState.budgetStateForDisplay
+    }
+
+    private val _shareReportText = MutableStateFlow<String?>(null)
+    val shareReportText: StateFlow<String?> = _shareReportText.asStateFlow()
+
+    fun consumeShareReport() {
+        _shareReportText.value = null
     }
 
     fun consumeEffect() {
