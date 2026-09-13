@@ -1,7 +1,6 @@
 package com.sachit.moneypal.presentation.ui.home
 
 import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,7 +22,6 @@ import logcat.logcat
 
 private const val TAG = "SACHIT:MainScreen"
 
-@RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun MainScreen(
     onNavigateToAnalytics: () -> Unit = {},
@@ -99,11 +97,18 @@ fun MainScreen(
 
     ChangelogGate(
         currentVersionCode = run {
+            @Suppress("DEPRECATION")
             val info = context.packageManager.getPackageInfo(
                 context.packageName,
                 0,
             )
-            @Suppress("DEPRECATION") info.longVersionCode.toInt()
+            // longVersionCode exists only on API 28+; fall back to the old
+            // versionCode field on API 27 so the home screen doesn't crash.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                info.longVersionCode.toInt()
+            } else {
+                info.versionCode
+            }
         },
     ) {
         TutorialBox(

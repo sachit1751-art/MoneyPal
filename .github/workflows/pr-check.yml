@@ -3,7 +3,7 @@ name: Build App for PR
 on:
   pull_request:
     branches:
-      - master
+      - main
   workflow_dispatch:
 
 concurrency:
@@ -42,3 +42,6 @@ jobs:
 
       - name: Verify screenshots
         run: ./gradlew :app:verifyPaparazziFossDebug
+
+      - name: Unit tests
+        run: ./gradlew :app:testFossDebugUnitTest

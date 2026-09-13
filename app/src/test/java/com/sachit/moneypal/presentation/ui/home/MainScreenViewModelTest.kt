@@ -1,5 +1,6 @@
 package com.sachit.moneypal.presentation.ui.home
 
+import android.content.Context
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
@@ -29,6 +30,7 @@ import kotlin.time.Duration.Companion.milliseconds
 class MainScreenViewModelTest {
     private val settingsRepository: SettingsRepository = mockk(relaxed = true)
     private val settingsFlow = MutableStateFlow(UserSettings())
+    private val applicationContext: Context = mockk(relaxed = true)
 
     @Before
     fun setUp() {
@@ -41,7 +43,7 @@ class MainScreenViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun newViewModel() = MainScreenViewModel(settingsRepository)
+    private fun newViewModel() = MainScreenViewModel(settingsRepository, applicationContext)
 
     private fun sampleTransaction(
         id: Long = 1L,

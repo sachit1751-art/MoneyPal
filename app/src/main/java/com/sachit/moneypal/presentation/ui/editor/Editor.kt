@@ -97,6 +97,7 @@ import com.sachit.moneypal.presentation.ui.editor.category.CategoryToolbar
 import com.sachit.moneypal.presentation.ui.editor.category.EditableCategoryTag
 import com.sachit.moneypal.presentation.ui.editor.category.FocusController
 import com.sachit.moneypal.presentation.ui.editor.dialogs.CreditCutoffDayDialog
+import com.sachit.moneypal.presentation.ui.editor.dialogs.DuplicateConfirmDialog
 import com.sachit.moneypal.presentation.ui.editor.dialogs.RecurrentExpenseDialog
 import com.sachit.moneypal.presentation.ui.editor.sheets.BudgetPeriodSheet
 import com.sachit.moneypal.presentation.ui.theme.MinusTheme
@@ -154,6 +155,7 @@ fun Editor(
     onSaveBudget: (BudgetSettings) -> Unit = {},
     onCommentUpdate: (String) -> Unit = {},
     onDeleteTag: (String) -> Unit = {},
+    onStyleCategory: ((com.sachit.moneypal.domain.model.Category) -> Unit)? = null,
     onCategoryEditingChanged: (Boolean) -> Unit = {},
     onRecurrentToggle: (Boolean) -> Unit = {},
     onCreditToggle: (Boolean) -> Unit = {},
@@ -167,6 +169,8 @@ fun Editor(
     onDisableCalculationMode: () -> Unit = {},
     onDismissRecurrentDialog: () -> Unit = {},
     onDismissCreditCutoffDialog: () -> Unit = {},
+    onDuplicateSaveAnyway: () -> Unit = {},
+    onDismissDuplicateDialog: () -> Unit = {},
     onRecurrentExpenseConfirm: (RecurrentFrequency, LocalDate, Int?, String) -> Unit = { _, _, _, _ -> },
     onCreditCutoffConfirm: (Int) -> Unit = {},
     onApply: () -> Unit = {},
@@ -219,6 +223,22 @@ fun Editor(
             initialDay = uiState.budgetSettings?.creditCardCutoffDay ?: 15,
             onDismiss = onDismissCreditCutoffDialog,
             onConfirm = onCreditCutoffConfirm
+        )
+    }
+
+    if (uiState.showDuplicateConfirmDialog && uiState.pendingDuplicateAmount != null) {
+        val duplicateCurrencyCode = uiState.budgetSettings?.currencyCode ?: "USD"
+        val duplicateFormatter = remember(duplicateCurrencyCode) {
+            java.text.NumberFormat.getCurrencyInstance().apply {
+                runCatching { java.util.Currency.getInstance(duplicateCurrencyCode) }
+                    .getOrNull()?.let { currency = it }
+            }
+        }
+        DuplicateConfirmDialog(
+            formattedAmount = duplicateFormatter.format(uiState.pendingDuplicateAmount),
+            comment = uiState.pendingDuplicateComment,
+            onDismiss = onDismissDuplicateDialog,
+            onSaveAnyway = onDuplicateSaveAnyway,
         )
     }
 
@@ -570,6 +590,8 @@ private fun EditingContent(
     currentComment: String,
     onCommentUpdate: (String) -> Unit,
     onDeleteTag: (String) -> Unit,
+    categories: List<com.sachit.moneypal.domain.model.Category> = emptyList(),
+    onStyleCategory: ((com.sachit.moneypal.domain.model.Category) -> Unit)? = null,
     onCategoryEditingChanged: (Boolean) -> Unit = {},
     editorFocusController: FocusController,
     directCategoryPopupEnabled: Boolean = false,
@@ -895,6 +917,8 @@ private fun EditingContent(
                         onEdit = onCategoryEditingChanged,
                         onDeleteTag = onDeleteTag,
                         directCategoryPopupEnabled = directCategoryPopupEnabled,
+                        categories = categories,
+                        onStyleCategory = onStyleCategory,
                         categoryGridModeEnabled = categoryGridModeEnabled,
                         isCategoryGridVisible = isCategoryGridVisible,
                         isCalculation = isCalculation,
@@ -910,6 +934,8 @@ private fun EditingContent(
                     stage = EditStage.EDIT_SPENT,
                     onCommentUpdate = onCommentUpdate,
                     onDeleteTag = onDeleteTag,
+                    categories = categories,
+                    onStyleCategory = onStyleCategory,
                     onEditingChanged = onCategoryEditingChanged,
                     editorFocusController = editorFocusController,
                     directCategoryPopupEnabled = directCategoryPopupEnabled,

@@ -153,6 +153,8 @@ data class AnalyticsState(
     val previousPeriodTransactions: List<Transaction> = emptyList(),
     val categories: List<Category> = emptyList(),
     val graphGranularity: GraphGranularity = GraphGranularity.TOTAL,
+    /** No-spend streak snapshot for the current period window. */
+    val noSpendStreak: com.sachit.moneypal.domain.calculator.NoSpendStreak? = null,
 )
 
 data class AnalyticsActions(
@@ -807,6 +809,15 @@ private fun AnalyticsCompactLayout(
                 )
             }
         }
+        if (state.noSpendStreak != null && state.noSpendStreak.totalNoSpendDays > 0) {
+            Spacer(modifier = Modifier.height(16.dp))
+            NoSpendStreakCard(
+                streak = state.noSpendStreak,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth(),
+            )
+        }
         if (state.incomes.isNotEmpty()) {
             Spacer(modifier = Modifier.height(16.dp))
             IncomeAddedCard(
@@ -1041,6 +1052,46 @@ fun PreviewAnalyticsFinished() {
             Analytics(
                 state = previewAnalyticsState(periodFinished = true),
             )
+        }
+    }
+}
+
+/** Banner celebrating the current no-spend streak. */
+@Composable
+fun NoSpendStreakCard(
+    streak: com.sachit.moneypal.domain.calculator.NoSpendStreak,
+    modifier: Modifier = Modifier,
+) {
+    val emoji = if (streak.currentStreakDays > 0) "🔥" else "🎯"
+    val title = androidx.compose.ui.res.stringResource(
+        com.sachit.moneypal.R.string.no_spend_streak_title,
+        streak.currentStreakDays,
+    )
+    val subtitle = androidx.compose.ui.res.stringResource(
+        com.sachit.moneypal.R.string.no_spend_streak_subtitle,
+        streak.longestStreakDays,
+        streak.totalNoSpendDays,
+    )
+    Surface(
+        modifier = modifier,
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+        ) {
+            Text(text = emoji, style = MaterialTheme.typography.headlineMedium)
+            Spacer(modifier = Modifier.width(12.dp))
+            Column {
+                Text(text = title, style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f),
+                )
+            }
         }
     }
 }

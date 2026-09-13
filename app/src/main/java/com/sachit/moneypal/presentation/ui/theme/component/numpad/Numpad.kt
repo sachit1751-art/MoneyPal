@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -102,6 +103,9 @@ fun Numpad(
     enableCalcModeSwipe: Boolean = enableCalculationMode,
     leftContent: (@Composable ColumnScope.() -> Unit)? = null,
     tutorialBoxState: TutorialBoxState? = null,
+    /** Optional quick-amount chips shown above the number grid (e.g. +10/+50/+100). */
+    quickAmounts: List<java.math.BigDecimal> = emptyList(),
+    onQuickAmount: ((java.math.BigDecimal) -> Unit)? = null,
 ) {
     val view = LocalView.current
     var debugProgress by remember { mutableIntStateOf(0) }
@@ -195,6 +199,12 @@ fun Numpad(
                 onApply = onApply
             )
         } else {
+            if (quickAmounts.isNotEmpty() && onQuickAmount != null && !isCalculation) {
+                QuickAmountChipsRow(
+                    amounts = quickAmounts,
+                    onQuickAmount = onQuickAmount,
+                )
+            }
             if (effectiveDragProgress > 0.01f || isCalculation) {
                 OperatorRow(
                     effectiveDragProgress = effectiveDragProgress,
@@ -531,5 +541,30 @@ fun NumpadPreviewCalculationMode() {
             ),
             isCalculation = true
         )
+    }
+}
+
+/** Row of tappable quick-amount chips shown above the number grid. */
+@Composable
+fun QuickAmountChipsRow(
+    amounts: List<java.math.BigDecimal>,
+    onQuickAmount: (java.math.BigDecimal) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
+    ) {
+        amounts.forEach { amount ->
+            val label = amount.stripTrailingZeros().toPlainString()
+            NumpadButton(
+                modifier = Modifier.weight(1f).heightIn(min = 36.dp),
+                type = NumpadButtonType.TERTIARY,
+                text = "+$label",
+                onClick = { onQuickAmount(amount) },
+            )
+        }
     }
 }

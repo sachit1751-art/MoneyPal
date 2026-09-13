@@ -34,6 +34,9 @@ interface CategoryDao {
     @Query("UPDATE category SET usageCount = usageCount + 1, lastUsedAt = :timestamp WHERE name = :name")
     suspend fun incrementUsage(name: String, timestamp: Long = System.currentTimeMillis())
 
+    @Query("UPDATE category SET emoji = :emoji, colorArgb = :colorArgb WHERE id = :id")
+    suspend fun setCategoryStyle(id: Long, emoji: String?, colorArgb: String?)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAllCategories(categories: List<CategoryEntity>): List<Long>
 }

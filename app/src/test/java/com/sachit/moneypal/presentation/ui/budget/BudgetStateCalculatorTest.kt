@@ -14,7 +14,10 @@ import java.time.LocalDate
 
 class BudgetStateCalculatorTest {
 
-    private val calculator = BudgetStateCalculator(RecurringExpenseCalculator())
+    private val calculator = BudgetStateCalculator(
+        RecurringExpenseCalculator(),
+        com.sachit.moneypal.domain.calculator.BurnRateCalculator(),
+    )
 
     private fun settings(
         totalBudget: BigDecimal,

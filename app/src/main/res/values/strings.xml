@@ -667,6 +667,32 @@
     <string name="mark_as_paid">Mark as paid</string>
     <string name="mark_as_paid_success">Marked as paid</string>
 
+    <!-- Quick wins: repeat / clone, refunds, quick amounts -->
+    <string name="repeat_action">Repeat</string>
+    <string name="repeat_done_snackbar">Entry duplicated with today\'s date</string>
+    <string name="refund_expected_label">Refund</string>
+    <string name="refund_pending">Pending</string>
+    <string name="refund_received">Received</string>
+    <string name="refund_expect_action">Expect refund</string>
+    <string name="refund_mark_received">Refund received</string>
+    <string name="quick_amounts_add">Add quick amount</string>
+
+    <!-- Category personalization -->
+    <string name="category_style_pick_emoji">Pick an emoji</string>
+    <string name="category_style_pick_color">Pick a color</string>
+    <string name="category_style_clear">Clear</string>
+    <string name="category_style_apply">Apply</string>
+    <string name="category_style">Personalize</string>
+
+    <!-- Duplicate detection -->
+    <string name="duplicate_dialog_title">Possible duplicate</string>
+    <string name="duplicate_dialog_message">You already recorded %1$s for “%2$s” today. Save it again anyway?</string>
+    <string name="duplicate_save_anyway">Save anyway</string>
+
+    <!-- No-spend streaks -->
+    <string name="no_spend_streak_title">%1$d-day no-spend streak</string>
+    <string name="no_spend_streak_subtitle">Longest: %1$d days · %2$d no-spend days in the last 90</string>
+
     <!-- Notifications -->
     <string name="notification_channel_period_end_name">Budget Period End</string>
     <string name="notification_channel_period_end_description">Notifications when your budget period ends with remaining balance</string>

@@ -48,6 +48,9 @@ interface BudgetRepository {
 
     suspend fun getTransactionById(transactionId: Long): Transaction?
 
+    /** Returns an existing transaction with the same amount+comment on [day], or null. */
+    suspend fun findDuplicateTransaction(amount: BigDecimal, comment: String, day: LocalDate): Transaction?
+
     fun calculateBudgetState(settings: BudgetSettings, currentDate: LocalDate): Flow<BudgetState>
 
     fun getActiveCategories(): Flow<List<Category>>
@@ -57,6 +60,15 @@ interface BudgetRepository {
     suspend fun findOrCreateCategory(name: String): Category
 
     suspend fun hideCategory(name: String)
+
+    /** Sets (or clears, with nulls) the emoji/color avatar of a category. */
+    suspend fun setCategoryStyle(categoryId: Long, emoji: String?, colorArgb: String?)
+
+    /** Marks an expense as expecting a refund (clears any refund timestamp). */
+    suspend fun setRefundExpected(transactionId: Long, expected: Boolean)
+
+    /** Marks a refund as received; clears the pending flag and stamps the time. */
+    suspend fun markRefunded(transactionId: Long)
 
     suspend fun incrementCategoryUsage(name: String)
 

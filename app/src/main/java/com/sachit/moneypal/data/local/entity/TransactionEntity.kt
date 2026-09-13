@@ -39,7 +39,13 @@ data class TransactionEntity(
     val originalAmount: String? = null,
     /** ISO 4217 code of the currency the amount was originally entered in. */
     @ColumnInfo(defaultValue = "NULL")
-    val originalCurrency: String? = null
+    val originalCurrency: String? = null,
+    /** True when the user expects this expense to be refunded. */
+    @ColumnInfo(defaultValue = "0")
+    val refundExpected: Boolean = false,
+    /** Epoch millis when the refund arrived; null until settled. */
+    @ColumnInfo(defaultValue = "NULL")
+    val refundedAt: Long? = null
 ) {
     companion object {
         fun fromDomain(

@@ -54,6 +54,8 @@ data class BackupTransaction(
     val attachmentUri: String? = null,
     val originalAmount: String? = null,
     val originalCurrency: String? = null,
+    val refundExpected: Boolean = false,
+    val refundedAt: Long? = null,
 )
 
 @Serializable
@@ -63,6 +65,8 @@ data class BackupCategory(
     val usageCount: Int = 0,
     val lastUsedAt: Long? = null,
     val createdAt: Long = 0,
+    val emoji: String? = null,
+    val colorArgb: String? = null,
 )
 
 @Serializable

@@ -25,6 +25,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 /**
@@ -39,15 +40,9 @@ class CreateBackupUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(): MoneyPalBackup {
         val transactions = budgetRepository.getAllTransactionsIncludingDeleted()
-        val categories = budgetRepository.getAllCategories().let { flow ->
-            kotlinx.coroutines.flow.first(flow)
-        }
-        val archives = budgetRepository.getArchivedBudgets().let { flow ->
-            kotlinx.coroutines.flow.first(flow)
-        }
-        val paidOccurrences = budgetRepository.getPaidRecurrentOccurrences().let { flow ->
-            kotlinx.coroutines.flow.first(flow)
-        }
+        val categories = budgetRepository.getAllCategories().first()
+        val archives = budgetRepository.getArchivedBudgets().first()
+        val paidOccurrences = budgetRepository.getPaidRecurrentOccurrences().first()
         val budgetSettings = budgetRepository.getBudgetSettingsSync()
         val settings = settingsRepository.getSettings()
 
@@ -88,6 +83,8 @@ internal fun Transaction.toBackup(): BackupTransaction = BackupTransaction(
     attachmentUri = attachmentUri,
     originalAmount = originalAmount?.toPlainString(),
     originalCurrency = originalCurrency,
+    refundExpected = refundExpected,
+    refundedAt = refundedAt,
 )
 
 internal fun Category.toBackup(): BackupCategory = BackupCategory(
@@ -96,6 +93,8 @@ internal fun Category.toBackup(): BackupCategory = BackupCategory(
     usageCount = usageCount,
     lastUsedAt = lastUsedAt,
     createdAt = createdAt,
+    emoji = emoji,
+    colorArgb = colorArgb,
 )
 
 internal fun ArchivedBudget.toBackup(): BackupArchivedBudget = BackupArchivedBudget(

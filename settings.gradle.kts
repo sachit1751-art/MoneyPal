@@ -28,7 +28,7 @@ plugins {
 }
 
 include(":app")
-if (providers.gradleProperty("minus.includeWearModule").orNull != "false") {
+if (providers.gradleProperty("moneypal.includeWearModule").orNull != "false") {
 	include(":wear")
 }
 include(":sync-contract")

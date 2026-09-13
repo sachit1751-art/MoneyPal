@@ -27,7 +27,11 @@ data class Transaction(
     /** Amount as entered in [originalCurrency]; null when the entry used the budget currency. */
     val originalAmount: BigDecimal? = null,
     /** ISO 4217 code of the currency the amount was originally entered in. */
-    val originalCurrency: String? = null
+    val originalCurrency: String? = null,
+    /** True when the user expects this expense to be refunded. */
+    val refundExpected: Boolean = false,
+    /** Instant (epoch millis) the refund arrived; null until settled. */
+    val refundedAt: Long? = null
 ) {
     companion object {
         fun create(
@@ -46,7 +50,9 @@ data class Transaction(
             isAdjustment: Boolean = false,
             attachmentUri: String? = null,
             originalAmount: BigDecimal? = null,
-            originalCurrency: String? = null
+            originalCurrency: String? = null,
+            refundExpected: Boolean = false,
+            refundedAt: Long? = null
         ): Transaction = Transaction(
             id = 0,
             amount = amount,
@@ -65,7 +71,9 @@ data class Transaction(
             isAdjustment = isAdjustment,
             attachmentUri = attachmentUri,
             originalAmount = originalAmount,
-            originalCurrency = originalCurrency
+            originalCurrency = originalCurrency,
+            refundExpected = refundExpected,
+            refundedAt = refundedAt
         )
     }
 }

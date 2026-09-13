@@ -6,8 +6,10 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.heightIn
@@ -18,6 +20,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -42,7 +45,10 @@ import com.sachit.moneypal.presentation.ui.theme.bodyMediumCondensed
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CategoryTag(
-    value: String, onClick: () -> Unit, onDelete: () -> Unit, modifier: Modifier = Modifier
+    value: String, onClick: () -> Unit, onDelete: () -> Unit, modifier: Modifier = Modifier,
+    emoji: String? = null,
+    colorArgb: String? = null,
+    onStyle: (() -> Unit)? = null,
 ) {
     var showDeleteButton by remember { mutableStateOf(false) }
 
@@ -65,6 +71,23 @@ fun CategoryTag(
         Row(
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            if (emoji != null) {
+                Text(
+                    text = emoji,
+                    style = MaterialTheme.typography.bodyMediumCondensed,
+                    modifier = Modifier.padding(start = 12.dp),
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+            } else if (colorArgb != null) {
+                Box(
+                    modifier = Modifier
+                        .padding(start = 12.dp)
+                        .size(10.dp)
+                        .clip(CircleShape)
+                        .background(parseArgbSafe(colorArgb)),
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+            }
             Text(
                 text = value,
                 style = MaterialTheme.typography.bodyMediumCondensed,
@@ -81,21 +104,38 @@ fun CategoryTag(
                 enter = scaleIn(tween(durationMillis = 150)) + fadeIn(tween(durationMillis = 150)),
                 exit = scaleOut(tween(durationMillis = 150)) + fadeOut(tween(durationMillis = 150)),
             ) {
-                IconButton(
-                    onClick = {
-                        onDelete()
-                        showDeleteButton = false
-                    },
-                    modifier = Modifier.size(32.dp),
-                    colors = IconButtonDefaults.iconButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error,
-                    ),
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = stringResource(R.string.delete_category),
-                        modifier = Modifier.size(16.dp),
-                    )
+                Row {
+                    if (onStyle != null) {
+                        IconButton(
+                            onClick = {
+                                showDeleteButton = false
+                                onStyle()
+                            },
+                            modifier = Modifier.size(32.dp),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Palette,
+                                contentDescription = stringResource(R.string.category_style),
+                                modifier = Modifier.size(16.dp),
+                            )
+                        }
+                    }
+                    IconButton(
+                        onClick = {
+                            onDelete()
+                            showDeleteButton = false
+                        },
+                        modifier = Modifier.size(32.dp),
+                        colors = IconButtonDefaults.iconButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error,
+                        ),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = stringResource(R.string.delete_category),
+                            modifier = Modifier.size(16.dp),
+                        )
+                    }
                 }
             }
 

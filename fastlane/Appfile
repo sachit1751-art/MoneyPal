@@ -1,2 +1,2 @@
-json_key_file("fastlane/minus-app-504107-53ece865faf4.json")
+json_key_file("fastlane/moneypal-play-service-account.json")
 package_name("com.sachit.moneypal")

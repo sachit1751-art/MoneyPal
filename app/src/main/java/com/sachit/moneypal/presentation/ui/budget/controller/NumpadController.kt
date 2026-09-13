@@ -4,6 +4,7 @@ import com.sachit.moneypal.presentation.ui.budget.BudgetExpressionEvaluator
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.math.BigDecimal
 
 class NumpadController(
     private val expressionEvaluator: BudgetExpressionEvaluator = BudgetExpressionEvaluator(),
@@ -31,12 +32,36 @@ class NumpadController(
         is NumpadIntent.DotTapped -> handleDot()
         is NumpadIntent.BackspaceTapped -> handleBackspace(currentIsCalculation)
         NumpadIntent.ApplyTapped -> emptyList() // Side effect handled by the parent VM
+        NumpadIntent.DuplicateSaveConfirmed -> emptyList() // Side effect handled by the parent VM
         is NumpadIntent.OperatorTapped -> handleOperator(intent.operator, currentIsCalculation)
         is NumpadIntent.EqualsTapped -> handleEquals(currentIsCalculation)
         is NumpadIntent.ResetInputTapped -> handleReset(currentIsCalculation)
         is NumpadIntent.SetCalculationMode -> setCalculationMode(intent.enabled)
         is NumpadIntent.SetDragProgress -> setDragProgress(intent.progress)
         is NumpadIntent.TriggerTestNotifications -> emptyList()
+        is NumpadIntent.QuickAmountTapped -> handleQuickAmount(intent.amount, currentIsCalculation)
+    }
+
+    /**
+     * Adds a quick amount to the current input. Appends `+<amount>` when in
+     * calculation mode or when the input already holds a plain value (so chips
+     * accumulate), otherwise sets the input directly.
+     */
+    private fun handleQuickAmount(amount: BigDecimal, currentIsCalculation: Boolean): List<NumpadChange> {
+        val current = _input.value
+        val plain = amount.stripTrailingZeros().toPlainString()
+        val updated = when {
+            current.isEmpty() -> plain
+            else -> "$current+$plain"
+        }
+        _input.value = updated
+        return buildList {
+            add(NumpadChange.InputChanged(updated))
+            if (current.isNotEmpty() && !currentIsCalculation) {
+                _isCalculation.value = true
+                add(NumpadChange.CalculationModeChanged(true))
+            }
+        }
     }
 
     private fun appendDigit(digit: String): NumpadChange {
@@ -150,10 +175,14 @@ sealed interface NumpadIntent {
     data object DotTapped : NumpadIntent
     data object BackspaceTapped : NumpadIntent
     data object ApplyTapped : NumpadIntent
+    /** User confirmed saving an entry that looked like a duplicate. */
+    data object DuplicateSaveConfirmed : NumpadIntent
     data class OperatorTapped(val operator: Char) : NumpadIntent
     data object EqualsTapped : NumpadIntent
     data object ResetInputTapped : NumpadIntent
     data class SetCalculationMode(val enabled: Boolean) : NumpadIntent
     data class SetDragProgress(val progress: Float) : NumpadIntent
     data object TriggerTestNotifications : NumpadIntent
+    /** Quick-amount chip tapped: adds [amount] to the current input. */
+    data class QuickAmountTapped(val amount: BigDecimal) : NumpadIntent
 }

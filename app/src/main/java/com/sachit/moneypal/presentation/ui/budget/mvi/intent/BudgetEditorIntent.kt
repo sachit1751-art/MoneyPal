@@ -14,10 +14,17 @@ sealed interface BudgetEditorIntent : BudgetUiIntent {
     data class SetAnimState(val state: AnimState) : BudgetEditorIntent
     data class CommentUpdated(val comment: String) : BudgetEditorIntent
     data class DeleteTag(val tag: String) : BudgetEditorIntent
+    /** Sets (or clears with nulls) the emoji/color avatar of a category. */
+    data class StyleCategory(
+        val categoryId: Long,
+        val emoji: String?,
+        val colorArgb: String?,
+    ) : BudgetEditorIntent
     data class SetRecurrentEnabled(val enabled: Boolean) : BudgetEditorIntent
     data class SetCreditEnabled(val enabled: Boolean) : BudgetEditorIntent
     data object DismissRecurrentDialog : BudgetEditorIntent
     data object DismissCreditCutoffDialog : BudgetEditorIntent
+    data object DismissDuplicateConfirmDialog : BudgetEditorIntent
     data class RecurrentExpenseApplied(
         val frequency: RecurrentFrequency,
         val endDate: LocalDate,

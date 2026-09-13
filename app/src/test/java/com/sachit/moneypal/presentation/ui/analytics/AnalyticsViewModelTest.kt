@@ -81,7 +81,8 @@ class AnalyticsViewModelTest {
         observeCurrentPeriodBoundaryUseCase,
         clearEarlyFinishStateUseCase,
         persistBudgetSettingsUseCase,
-        errorLogRecorder
+        errorLogRecorder,
+        application = mockk(relaxed = true),
     )
 
     @Test

@@ -305,7 +305,7 @@ dependencies {
 }
 
 val prepareReleaseNotes by tasks.registering {
-    group = "minus"
+    group = "moneypal"
     description =
         "Generate fastlane/metadata/android/en-US/changelogs/<versionCode>.txt from git log between tags, then regenerate the compiled-in GeneratedChangelog.kt."
 
@@ -358,7 +358,7 @@ val prepareReleaseNotes by tasks.registering {
 }
 
 val generateChangelogKotlin by tasks.registering {
-    group = "minus"
+    group = "moneypal"
     description =
         "Generate app/build/generated/source/changelog/GeneratedChangelog.kt from fastlane/metadata/android/en-US/changelogs/*.txt. The runtime reads the generated Kotlin directly — no assets/changelog.json intermediate."
 

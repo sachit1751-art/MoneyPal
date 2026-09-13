@@ -71,6 +71,8 @@ class AnalyticsViewModel @Inject constructor(
     private val _selectedPeriodId = MutableStateFlow<Long?>(null)
     private val _granularity = MutableStateFlow(GraphGranularity.DAYS)
 
+    private val noSpendStreakCalculator = com.sachit.moneypal.domain.calculator.NoSpendStreakCalculator()
+
     val uiState: StateFlow<AnalyticsUiState> = combine(
         budgetRepository.getBudgetSettings().distinctUntilChanged(),
         budgetRepository.getTransactions().distinctUntilChanged(),
@@ -426,6 +428,10 @@ class AnalyticsViewModel @Inject constructor(
             previousPeriodTransactions = previousTransactions,
             categories = categories,
             graphGranularity = granularity,
+            noSpendStreak = noSpendStreakCalculator.compute(
+                transactions = allTransactions,
+                today = today,
+            ),
         )
     }
 
@@ -595,7 +601,7 @@ class AnalyticsViewModel @Inject constructor(
         )
         val shareText = builder.toShareText(
             report,
-            appName = application.getString(com.sachit.moneypal.R.string.app_name),
+            appName = application.get().getString(com.sachit.moneypal.R.string.app_name),
         )
         _shareReportText.value = shareText
     }

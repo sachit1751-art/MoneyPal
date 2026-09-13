@@ -83,6 +83,8 @@ fun CategoryToolbar(
     onCommentUpdate: (String) -> Unit,
     editorFocusController: FocusController,
     onDeleteTag: (String) -> Unit = {},
+    categories: List<com.sachit.moneypal.domain.model.Category> = emptyList(),
+    onStyleCategory: ((com.sachit.moneypal.domain.model.Category) -> Unit)? = null,
     directCategoryPopupEnabled: Boolean = false,
     categoryGridModeEnabled: Boolean = false,
     isCategoryGridVisible: Boolean = false,
@@ -123,6 +125,7 @@ fun CategoryToolbar(
             horizontalArrangement = Arrangement.End,
         ) {
             tags.take(5).reversed().filter { it != currentComment }.forEach { tag ->
+                val category = categories.firstOrNull { it.name == tag }
                 AnimatedVisibility(
                     visible = showAddComment,
                     enter = fadeIn(
@@ -148,11 +151,19 @@ fun CategoryToolbar(
                         )
                     ) { with(localDensity) { 24.dp.toPx().toInt() } },
                 ) {
-                    CategoryTag(value = tag, onClick = {
-                        onCommentUpdate(tag)
-                    }, onDelete = {
-                        onDeleteTag(tag)
-                    })
+                    CategoryTag(
+                        value = tag,
+                        emoji = category?.emoji,
+                        colorArgb = category?.colorArgb,
+                        onStyle = if (onStyleCategory != null && category != null) {
+                            { onStyleCategory(category) }
+                        } else null,
+                        onClick = {
+                            onCommentUpdate(tag)
+                        },
+                        onDelete = {
+                            onDeleteTag(tag)
+                        })
                 }
                 Spacer(modifier = Modifier.width(8.dp))
             }

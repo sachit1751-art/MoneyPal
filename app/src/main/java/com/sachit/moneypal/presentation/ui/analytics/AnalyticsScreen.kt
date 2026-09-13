@@ -87,6 +87,7 @@ fun AnalyticsScreen(
             onShareReport = {
                 viewModel.onShareReport(com.sachit.moneypal.domain.report.ReportScope.MONTHLY)
             },
+        ),
         activityResultRegistryOwner = activityResultRegistryOwner,
     )
 }

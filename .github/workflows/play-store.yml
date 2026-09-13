@@ -87,39 +87,39 @@ jobs:
 
       - name: Validate release signing secrets
         env:
-          MINUS_RELEASE_KEYSTORE_BASE64: ${{ secrets.MINUS_RELEASE_KEYSTORE_BASE64 }}
-          MINUS_RELEASE_STORE_PASSWORD: ${{ secrets.MINUS_RELEASE_STORE_PASSWORD }}
-          MINUS_RELEASE_KEY_ALIAS: ${{ secrets.MINUS_RELEASE_KEY_ALIAS }}
-          MINUS_RELEASE_KEY_PASSWORD: ${{ secrets.MINUS_RELEASE_KEY_PASSWORD }}
+          MONEYPAL_RELEASE_KEYSTORE_BASE64: ${{ secrets.MONEYPAL_RELEASE_KEYSTORE_BASE64 }}
+          MONEYPAL_RELEASE_STORE_PASSWORD: ${{ secrets.MONEYPAL_RELEASE_STORE_PASSWORD }}
+          MONEYPAL_RELEASE_KEY_ALIAS: ${{ secrets.MONEYPAL_RELEASE_KEY_ALIAS }}
+          MONEYPAL_RELEASE_KEY_PASSWORD: ${{ secrets.MONEYPAL_RELEASE_KEY_PASSWORD }}
         run: |
-          test -n "$MINUS_RELEASE_KEYSTORE_BASE64"
-          test -n "$MINUS_RELEASE_STORE_PASSWORD"
-          test -n "$MINUS_RELEASE_KEY_ALIAS"
-          test -n "$MINUS_RELEASE_KEY_PASSWORD"
+          test -n "$MONEYPAL_RELEASE_KEYSTORE_BASE64"
+          test -n "$MONEYPAL_RELEASE_STORE_PASSWORD"
+          test -n "$MONEYPAL_RELEASE_KEY_ALIAS"
+          test -n "$MONEYPAL_RELEASE_KEY_PASSWORD"
 
       - name: Decode release keystore
         env:
-          MINUS_RELEASE_KEYSTORE_BASE64: ${{ secrets.MINUS_RELEASE_KEYSTORE_BASE64 }}
+          MONEYPAL_RELEASE_KEYSTORE_BASE64: ${{ secrets.MONEYPAL_RELEASE_KEYSTORE_BASE64 }}
         run: |
-          echo "$MINUS_RELEASE_KEYSTORE_BASE64" | base64 --decode > release-keystore.jks
+          echo "$MONEYPAL_RELEASE_KEYSTORE_BASE64" | base64 --decode > release-keystore.jks
 
       - name: Write Google Play Service Account Key
         env:
           GOOGLE_PLAY_KEY_JSON: ${{ secrets.GOOGLE_PLAY_KEY_JSON }}
         run: |
-          echo "$GOOGLE_PLAY_KEY_JSON" > fastlane/minus-app-504107-53ece865faf4.json
+          echo "$GOOGLE_PLAY_KEY_JSON" > fastlane/moneypal-play-service-account.json
 
       - name: Write keystore.properties for CI build
         env:
-          MINUS_RELEASE_STORE_PASSWORD: ${{ secrets.MINUS_RELEASE_STORE_PASSWORD }}
-          MINUS_RELEASE_KEY_ALIAS: ${{ secrets.MINUS_RELEASE_KEY_ALIAS }}
-          MINUS_RELEASE_KEY_PASSWORD: ${{ secrets.MINUS_RELEASE_KEY_PASSWORD }}
+          MONEYPAL_RELEASE_STORE_PASSWORD: ${{ secrets.MONEYPAL_RELEASE_STORE_PASSWORD }}
+          MONEYPAL_RELEASE_KEY_ALIAS: ${{ secrets.MONEYPAL_RELEASE_KEY_ALIAS }}
+          MONEYPAL_RELEASE_KEY_PASSWORD: ${{ secrets.MONEYPAL_RELEASE_KEY_PASSWORD }}
         run: |
           cat > keystore.properties << EOF
           storeFile=${{ github.workspace }}/release-keystore.jks
-          storePassword=${MINUS_RELEASE_STORE_PASSWORD}
-          keyAlias=${MINUS_RELEASE_KEY_ALIAS}
-          keyPassword=${MINUS_RELEASE_KEY_PASSWORD}
+          storePassword=${MONEYPAL_RELEASE_STORE_PASSWORD}
+          keyAlias=${MONEYPAL_RELEASE_KEY_ALIAS}
+          keyPassword=${MONEYPAL_RELEASE_KEY_PASSWORD}
           EOF
 
       - name: Run Detekt

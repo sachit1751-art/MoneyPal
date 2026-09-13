@@ -23,6 +23,7 @@ class EditorStateController {
         data class CreditEnabledChanged(val enabled: Boolean) : EditorChange
         data class RecurrentDialogVisibilityChanged(val visible: Boolean) : EditorChange
         data class CreditCutoffDialogVisibilityChanged(val visible: Boolean) : EditorChange
+        data class DuplicateDialogVisibilityChanged(val visible: Boolean) : EditorChange
         data class PendingRecurrentAmountChanged(val amount: BigDecimal?) : EditorChange
         data class PendingRecurrentCommentChanged(val comment: String) : EditorChange
         data class SelectedDateChanged(val date: LocalDate) : EditorChange
@@ -41,6 +42,7 @@ class EditorStateController {
         is EditorIntent.SetCreditEnabled -> setCreditEnabled(intent.enabled, hasCreditCardCutoffDay)
         is EditorIntent.DismissRecurrentDialog -> dismissRecurrentDialog()
         is EditorIntent.DismissCreditCutoffDialog -> dismissCreditCutoffDialog()
+        is EditorIntent.DismissDuplicateConfirmDialog -> dismissDuplicateConfirmDialog()
         is EditorIntent.DateSelected -> setSelectedDate(intent.date)
     }
 
@@ -124,9 +126,33 @@ class EditorStateController {
         )
     }
 
+    /** Closes the duplicate-confirmation dialog without saving. */
+    fun dismissDuplicateConfirmDialog(): List<EditorChange> {
+        val updated = _state.value.copy(
+            showDuplicateConfirmDialog = false,
+            pendingDuplicateAmount = null,
+            pendingDuplicateComment = "",
+        )
+        _state.value = updated
+        return listOf(EditorChange.DuplicateDialogVisibilityChanged(false))
+    }
+
     private fun setSelectedDate(date: LocalDate): List<EditorChange> {
         _state.value = _state.value.copy(selectedDate = date)
         return listOf(EditorChange.SelectedDateChanged(date))
+    }
+
+    /** Opens the "possible duplicate" confirmation for the current input. */
+    fun showDuplicateConfirmDialog(amount: BigDecimal, comment: String): List<EditorChange> {
+        val updated = _state.value.copy(
+            showDuplicateConfirmDialog = true,
+            pendingDuplicateAmount = amount,
+            pendingDuplicateComment = comment,
+        )
+        _state.value = updated
+        return listOf(
+            EditorChange.DuplicateDialogVisibilityChanged(true),
+        )
     }
 
     fun showRecurrentDialog(amount: BigDecimal, comment: String): List<EditorChange> {
@@ -193,6 +219,9 @@ data class EditorLocalState(
     val isCreditEnabled: Boolean = false,
     val showRecurrentDialog: Boolean = false,
     val showCreditCutoffDialog: Boolean = false,
+    val showDuplicateConfirmDialog: Boolean = false,
+    val pendingDuplicateAmount: BigDecimal? = null,
+    val pendingDuplicateComment: String = "",
     val pendingRecurrentAmount: BigDecimal? = null,
     val pendingRecurrentComment: String = "",
     val selectedDate: LocalDate = LocalDate.now(),
@@ -208,5 +237,6 @@ sealed interface EditorIntent {
     data class SetCreditEnabled(val enabled: Boolean) : EditorIntent
     data object DismissRecurrentDialog : EditorIntent
     data object DismissCreditCutoffDialog : EditorIntent
+    data object DismissDuplicateConfirmDialog : EditorIntent
     data class DateSelected(val date: LocalDate) : EditorIntent
 }

@@ -112,3 +112,51 @@ fun CreditCutoffDayDialog(
         },
     )
 }
+
+/**
+ * Shown when the entry about to be saved matches an existing transaction
+ * (same amount + comment, same day). [onSaveAnyway] saves regardless.
+ */
+@Composable
+fun DuplicateConfirmDialog(
+    formattedAmount: String,
+    comment: String,
+    onDismiss: () -> Unit,
+    onSaveAnyway: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = stringResource(R.string.duplicate_dialog_title),
+                style = MaterialTheme.typography.titleMediumEmphasized,
+            )
+        },
+        text = {
+            Text(
+                text = stringResource(
+                    R.string.duplicate_dialog_message,
+                    formattedAmount,
+                    comment.ifEmpty { stringResource(R.string.generic_expense) },
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        },
+        confirmButton = {
+            Button(onClick = onSaveAnyway) {
+                Text(
+                    stringResource(R.string.duplicate_save_anyway),
+                    style = MaterialTheme.typography.labelSmallEmphasized,
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(
+                    stringResource(R.string.cancel),
+                    style = MaterialTheme.typography.labelSmallEmphasized,
+                )
+            }
+        },
+    )
+}

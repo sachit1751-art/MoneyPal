@@ -73,7 +73,9 @@ class BudgetRepositoryImpl @Inject constructor(
         isAdjustment = this.isAdjustment,
         attachmentUri = this.attachmentUri,
         originalAmount = this.originalAmount?.let { BigDecimal(it) },
-        originalCurrency = this.originalCurrency
+        originalCurrency = this.originalCurrency,
+        refundExpected = this.refundExpected,
+        refundedAt = this.refundedAt
     )
 
     private fun Transaction.toEntity(): TransactionEntity = TransactionEntity(
@@ -96,7 +98,9 @@ class BudgetRepositoryImpl @Inject constructor(
         isAdjustment = this.isAdjustment,
         attachmentUri = this.attachmentUri,
         originalAmount = this.originalAmount?.toPlainString(),
-        originalCurrency = this.originalCurrency
+        originalCurrency = this.originalCurrency,
+        refundExpected = this.refundExpected,
+        refundedAt = this.refundedAt
     )
 
     private fun QueuedTransactionEntity.toDomain(): Transaction = Transaction(
@@ -183,7 +187,9 @@ class BudgetRepositoryImpl @Inject constructor(
         isHidden = this.isHidden,
         usageCount = this.usageCount,
         lastUsedAt = this.lastUsedAt,
-        createdAt = this.createdAt
+        createdAt = this.createdAt,
+        emoji = this.emoji,
+        colorArgb = this.colorArgb
     )
 
     private fun Category.toEntity(): CategoryEntity = CategoryEntity(
@@ -192,7 +198,9 @@ class BudgetRepositoryImpl @Inject constructor(
         isHidden = this.isHidden,
         usageCount = this.usageCount,
         lastUsedAt = this.lastUsedAt,
-        createdAt = this.createdAt
+        createdAt = this.createdAt,
+        emoji = this.emoji,
+        colorArgb = this.colorArgb
     )
 
     private fun ArchivedBudgetEntity.toDomain(): ArchivedBudget = ArchivedBudget(
@@ -378,6 +386,33 @@ class BudgetRepositoryImpl @Inject constructor(
 
     override suspend fun incrementCategoryUsage(name: String) {
         categoryDao.incrementUsage(name)
+    }
+
+    override suspend fun setCategoryStyle(categoryId: Long, emoji: String?, colorArgb: String?) {
+        categoryDao.setCategoryStyle(categoryId, emoji, colorArgb)
+    }
+
+    override suspend fun findDuplicateTransaction(
+        amount: BigDecimal,
+        comment: String,
+        day: LocalDate,
+    ): Transaction? {
+        val startOfDay = day.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+        val endOfDay = day.plusDays(1).atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+        return transactionDao.findDuplicate(
+            amount = amount.toDouble(),
+            comment = comment,
+            startOfDay = startOfDay,
+            endOfDay = endOfDay,
+        )?.toDomain()
+    }
+
+    override suspend fun setRefundExpected(transactionId: Long, expected: Boolean) {
+        transactionDao.setRefundExpected(transactionId, expected)
+    }
+
+    override suspend fun markRefunded(transactionId: Long) {
+        transactionDao.markRefunded(transactionId)
     }
 
     override suspend fun getPeriodCount(): Int {

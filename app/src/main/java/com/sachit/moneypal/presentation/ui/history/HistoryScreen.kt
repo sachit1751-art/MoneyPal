@@ -255,6 +255,13 @@ fun History(
                     onProcessIntent(HistoryUiIntent.MarkTransactionAsPaid(expense))
                     onShowInfoSnackbar(resources.getString(R.string.mark_as_paid_success))
                 },
+                onClone = { expense ->
+                    onProcessIntent(HistoryUiIntent.CloneTransaction(expense))
+                    onShowInfoSnackbar(resources.getString(R.string.repeat_done_snackbar))
+                },
+                onToggleRefund = { expense ->
+                    onProcessIntent(HistoryUiIntent.ToggleRefundExpected(expense))
+                },
                 onClick = { expense ->
                     onProcessIntent(
                         HistoryUiIntent.ToggleExpandedTransaction(
@@ -336,6 +343,13 @@ fun History(
                     },
                     onMarkAsPaid = { expense ->
                         onShowInfoSnackbar(resources.getString(R.string.mark_as_paid_success))
+                    },
+                    onClone = { expense ->
+                        onProcessIntent(HistoryUiIntent.CloneTransaction(expense))
+                        onShowInfoSnackbar(resources.getString(R.string.repeat_done_snackbar))
+                    },
+                    onToggleRefund = { expense ->
+                        onProcessIntent(HistoryUiIntent.ToggleRefundExpected(expense))
                     },
                     onClick = { expense ->
                         onProcessIntent(

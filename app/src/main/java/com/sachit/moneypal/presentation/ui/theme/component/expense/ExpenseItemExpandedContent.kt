@@ -52,6 +52,8 @@ fun ExpenseItemExpandedContent(
     readOnly: Boolean,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
+    onClone: () -> Unit = {},
+    onToggleRefund: () -> Unit = {},
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
     creditCardCutoffDay: Int? = null,
@@ -114,6 +116,13 @@ fun ExpenseItemExpandedContent(
                     ),
                 )
             }
+        }
+        if (transaction.refundExpected) {
+            val refundLabel = stringResource(R.string.refund_expected_label)
+            add(refundLabel to stringResource(R.string.refund_pending))
+        } else if (transaction.refundedAt != null) {
+            val refundLabel = stringResource(R.string.refund_expected_label)
+            add(refundLabel to stringResource(R.string.refund_received))
         }
     }
 
@@ -206,6 +215,49 @@ fun ExpenseItemExpandedContent(
                     text = stringResource(R.string.mark_as_paid),
                     style = MaterialTheme.typography.labelSmallEmphasized,
                 )
+            }
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            if (transaction.amount > BigDecimal.ZERO && !transaction.isAdjustment) {
+                Button(
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (transaction.refundExpected) {
+                            MaterialTheme.colorScheme.tertiary
+                        } else {
+                            MaterialTheme.colorScheme.surfaceVariant
+                        },
+                        contentColor = if (transaction.refundExpected) {
+                            MaterialTheme.colorScheme.onTertiary
+                        } else {
+                            MaterialTheme.colorScheme.primary
+                        },
+                    ),
+                    onClick = onToggleRefund,
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Text(
+                        text = stringResource(
+                            if (transaction.refundExpected) R.string.refund_mark_received
+                            else R.string.refund_expect_action
+                        ),
+                        style = MaterialTheme.typography.labelSmallEmphasized,
+                    )
+                }
+            }
+
+            Button(
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = MaterialTheme.colorScheme.primary,
+                ),
+                onClick = onClone,
+                modifier = Modifier.weight(1f),
+            ) {
+                Text(stringResource(R.string.repeat_action), style = MaterialTheme.typography.labelSmallEmphasized)
             }
         }
 

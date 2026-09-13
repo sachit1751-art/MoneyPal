@@ -64,8 +64,11 @@ class SpendingReportBuilder @Inject constructor() {
         val totalSpent = spends.fold(BigDecimal.ZERO) { acc, tx -> acc.add(tx.amount) }
         val totalIncome = incomes.fold(BigDecimal.ZERO) { acc, tx -> acc.add(tx.amount).abs() }
 
+        // Uncategorized entries count toward totals but are not ranked as a
+        // category (there is no name to rank by).
         val categoryTotals = spends
-            .groupBy { it.comment.ifBlank { "" } }
+            .filter { it.comment.isNotBlank() }
+            .groupBy { it.comment }
             .map { (name, txs) -> name to txs.fold(BigDecimal.ZERO) { acc, tx -> acc.add(tx.amount) } }
             .sortedByDescending { it.second }
             .take(5)

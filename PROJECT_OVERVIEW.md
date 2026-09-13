@@ -178,26 +178,37 @@ MoneyPal includes a companion Wear OS application that provides a lightweight ex
 flowchart TB
     subgraph Watch["Wear OS App"]
         WearScreen["Wear Compose UI"]
-        WearDataLayer["DataStore Shared\n(across devices)"]
+        PendingStore["PendingExpenseStore\n(DataStore, offline queue)"]
+        WearSync["WearSyncManager\n(MessageClient)"]
+    end
+
+    subgraph Contract[":sync-contract"]
+        Protocol["WearSyncProtocol\n(shared serialization)"]
     end
 
     subgraph Phone["Phone App (Companion)"]
-        PhoneScreen["Compose UI"]
+        Listener["PhoneWearListenerService"]
+        Ingestor["WearExpenseIngestor"]
         RoomDB["Room Database"]
         AlarmScheduler["Notification Scheduler"]
     end
 
-    Watch <-->|Shared Preferences\nDataStore| Phone
-    WearScreen --> WearDataLayer
+    WearScreen --> PendingStore
+    PendingStore --> WearSync
+    WearSync <-->|"Data Layer API\n(/expense/* paths)"| Listener
+    Listener --> Ingestor --> RoomDB
+    Protocol --- WearSync
+    Protocol --- Ingestor
     AlarmScheduler -->|Notifications| Watch
 ```
 
 ### Technical Details
 
 - Built with **Jetpack Compose for Wear OS**
-- Shares a `DataStore` instance with the phone app via the standard Android shared storage mechanism, so both devices see the same budget state.
-- Does **not** require the phone app to be running — reads budget state directly from the shared preferences.
-- Notifications are still handled by the phone app's `AlarmManager` / `WorkManager` and surface on the watch via standard Android notification sync.
+- Phone and watch sync through the **Wear OS Data Layer API** (`MessageClient`): the watch queues expenses in a local DataStore-backed store and sends them to the phone via `/expense/add`, with per-item acks and a snapshot request/response path for reconciliation.
+- The wire format (`ExpensePayload`, `AckPayload`, snapshot types) lives in the shared pure-Kotlin **`:sync-contract`** module, so phone and watch can never drift apart on serialization.
+- The watch app works **fully offline** — entries persist in the pending queue until the phone is reachable, then sync (with WorkManager retry via `PendingExpenseSyncWorker`).
+- Notifications are handled by the phone app's `AlarmManager` / `WorkManager` and surface on the watch via standard Android notification sync.
 
 ---
 

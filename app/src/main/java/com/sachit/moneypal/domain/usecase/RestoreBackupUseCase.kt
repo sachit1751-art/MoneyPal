@@ -18,6 +18,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 /**
@@ -36,9 +37,7 @@ class RestoreBackupUseCase @Inject constructor(
         var paidOccurrencesRestored = 0
 
         // Categories first so restored transactions can link to real ids by name.
-        val existingByName = budgetRepository.getAllCategories().let { flow ->
-            kotlinx.coroutines.flow.first(flow)
-        }.associateBy { it.name }
+        val existingByName = budgetRepository.getAllCategories().first().associateBy { it.name }
 
         val categoriesToUpsert = backup.categories
             .filter { it.name.isNotBlank() }
@@ -60,15 +59,15 @@ class RestoreBackupUseCase @Inject constructor(
                     createdAt = backupCategory.createdAt.takeIf { it > 0 }
                         ?: existing?.createdAt
                         ?: System.currentTimeMillis(),
+                    emoji = backupCategory.emoji,
+                    colorArgb = backupCategory.colorArgb,
                 )
             }
         if (categoriesToUpsert.isNotEmpty()) {
             budgetRepository.upsertCategories(categoriesToUpsert)
         }
 
-        val categoryNameToId = budgetRepository.getAllCategories().let { flow ->
-            kotlinx.coroutines.flow.first(flow)
-        }.associate { it.name to it.id }
+        val categoryNameToId = budgetRepository.getAllCategories().first().associate { it.name to it.id }
 
         val transactionsToUpsert = mutableListOf<Transaction>()
         for (backupTransaction in backup.transactions) {
@@ -115,16 +114,18 @@ class RestoreBackupUseCase @Inject constructor(
                     LocalDateTime.ofEpochSecond(it / 1000, 0, ZoneOffset.UTC)
                 },
                 subscriptionDay = backupTransaction.subscriptionDay,
-                categoryId = backupTransaction.categoryId
-                    ?.let { backupTransaction.comment.takeIf { c -> c.isNotBlank() } }
-                    ?.let { categoryNameToId[it] }
-                    ?: backupTransaction.categoryId,
+                categoryId = backupTransaction.categoryId?.let { id ->
+                    val name = backupTransaction.comment.takeIf { c -> c.isNotBlank() }
+                    name?.let { categoryNameToId[it] } ?: id
+                } ?: backupTransaction.categoryId,
                 isCredit = backupTransaction.isCredit,
                 isCreditPaid = backupTransaction.isCreditPaid,
                 isAdjustment = backupTransaction.isAdjustment,
                 attachmentUri = backupTransaction.attachmentUri,
                 originalAmount = backupTransaction.originalAmount?.let { BigDecimal(it) },
                 originalCurrency = backupTransaction.originalCurrency,
+                refundExpected = backupTransaction.refundExpected,
+                refundedAt = backupTransaction.refundedAt,
             )
         }
         if (transactionsToUpsert.isNotEmpty()) {

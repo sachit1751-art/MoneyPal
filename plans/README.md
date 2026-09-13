@@ -80,6 +80,40 @@ but already exists** (`rollOverEnabled/rollOverLimit/rollOverCarryForward`,
 unit + E2E tests). It was replaced by category envelopes (011) at user
 choice.
 
+## Round 3 — quick wins (2026-09-12, against `8fa3ab3`)
+
+User-selected feature batch. Executed together because 015/016/019/020 share
+one Room migration (18→19) and one strings drop. Note: the base commit
+`8fa3ab3` did not compile (6 Kotlin errors, missing `18.json` schema export,
+2 failing tests) — repaired as part of this round before the features landed.
+
+| Order | Plan | Summary | Depends on | Status |
+|:------|:-----|:--------|:-----------|:-------|
+| 14 | — | Repair broken build: `AnalyticsScreen`/`EditorDialogs`/`SettingsViewModel` compile errors, missing `18.json`, bad `first(flow)` calls, `AnalyticsViewModelTest`/`BudgetStateCalculatorTest` ctor drift | — | DONE |
+| 15 | `015-transaction-clone.md` (inline) | Expanded expense row gains a **Repeat** button: clones the entry with today's date, fresh id, cleared `clientGeneratedId`/`isCreditPaid` | — | DONE |
+| 16 | `016-refund-tracker.md` (inline) | `refundExpected`/`refundedAt` columns (18→19); expanded row gains "Expect refund" toggle + detail row; carried through backup v1 fields | — | DONE |
+| 17 | `017-category-style.md` (inline) | `emoji`/`colorArgb` columns (18→19); long-press a category tag → palette action opens `CategoryStyleSheet` (emoji grid + 16 swatches); tags render their emoji/dot | 16 | DONE |
+| 18 | `018-no-spend-streaks.md` (inline) | Pure `NoSpendStreakCalculator` (spend-free day = no positive non-adjustment/non-recurrent spend); streak banner on Analytics; unit-tested | — | DONE |
+| 19 | `019-quick-amount-chips.md` (inline) | `QuickAmountTapped` numpad intent + chips row (+10/+50/+100/+500) above the grid; accumulates via `+` expression when input exists | — | DONE |
+| 20 | `020-duplicate-detection.md` (inline) | Same amount+comment saved already today → `PossibleDuplicate` result → confirm dialog; "Save anyway" re-applies with the check skipped | — | DONE |
+
+Round-3 deviations: the plan order merged the two 18→19 column groups into a
+single AutoMigration (16/17→18→19 chain preserved; `18.json` was bootstrapped
+by temporarily building at v18 and stripping the new columns so the real
+pre-migration schema is exact). Backup format (`BackupCategory`/
+`BackupTransaction`) carries the new fields losslessly with `ignoreUnknownKeys`
+so older backups still restore. Paparazzi fixtures were NOT updated for the
+new expanded-row buttons — run `verifyPaparazziFossDebug` before release.
+
+## Round 3b — remaining selected features (TODO backlog)
+
+Selected by the user from the same survey, not yet planned/implemented:
+heatmap calendar, subscription calendar, payment-method tags, planned
+purchases, auto-backup to SAF folder, encrypted backup, freeform tags, Wear
+quick-add, notification quick-add, year-wrapped, multi-wallet, auto-detect
+recurring, voice quick-add, runway projection. Also still open from round 2:
+011 (envelopes), 012 (savings goals), 013 (digest + shortcuts).
+
 ## Considered and rejected (do not re-audit)
 
 - **Internal `Minus*` identifiers retained** (`MinusApplication`,

@@ -21,6 +21,14 @@ sealed interface ApplyTransactionResult {
         val normalizedInput: String,
     ) : ApplyTransactionResult
 
+    /** A transaction with the same amount+comment was already saved today. */
+    data class PossibleDuplicate(
+        val amount: BigDecimal,
+        val normalizedInput: String,
+        val comment: String,
+        val isAdjustment: Boolean,
+    ) : ApplyTransactionResult
+
     data class QueuedForNextPeriod(
         val normalizedInput: String,
     ) : ApplyTransactionResult
@@ -53,6 +61,7 @@ class BudgetTransactionHandler @Inject constructor(
         comment: String,
         budgetSettings: BudgetSettings?,
         resolveActivePeriodId: suspend () -> Long,
+        skipDuplicateCheck: Boolean = false,
     ): ApplyTransactionResult {
         var normalizedInput = input
 
@@ -87,6 +96,21 @@ class BudgetTransactionHandler @Inject constructor(
 
         val isAdjustment = input.startsWith("+") || input.startsWith("-")
         val today = LocalDate.now()
+
+        // Duplicate guard: warn when an entry with the same amount+comment was
+        // already saved today. Queued (next-period) saves bypass this check.
+        val wouldQueue = budgetSettings != null && today.isAfter(budgetSettings.getPeriodEndDate())
+        if (!wouldQueue && !skipDuplicateCheck) {
+            val duplicate = budgetRepository.findDuplicateTransaction(amount, comment.trim(), today)
+            if (duplicate != null) {
+                return ApplyTransactionResult.PossibleDuplicate(
+                    amount = amount,
+                    normalizedInput = normalizedInput,
+                    comment = comment,
+                    isAdjustment = isAdjustment,
+                )
+            }
+        }
         return try {
             val categoryId: Long? = if (comment.isNotBlank()) {
                 budgetRepository.findOrCreateCategory(comment.trim()).id

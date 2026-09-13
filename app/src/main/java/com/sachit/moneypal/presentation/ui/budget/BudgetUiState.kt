@@ -2,6 +2,7 @@ package com.sachit.moneypal.presentation.ui.budget
 
 import com.sachit.moneypal.domain.model.BudgetSettings
 import com.sachit.moneypal.domain.model.BudgetState
+import com.sachit.moneypal.domain.model.Category
 import com.sachit.moneypal.domain.model.Transaction
 import com.sachit.moneypal.presentation.ui.editor.AnimState
 import com.sachit.moneypal.presentation.ui.editor.EditMode
@@ -21,11 +22,16 @@ data class BudgetUiState(
     val animState: AnimState = AnimState.IDLE,
     val currentComment: String = "",
     val tags: List<String> = emptyList(),
+    /** Full category objects (incl. emoji/color styling) backing [tags]. */
+    val categories: List<Category> = emptyList(),
     val isFirstLaunch: Boolean = true,
     val isRecurrentEnabled: Boolean = false,
     val isCreditEnabled: Boolean = false,
     val showRecurrentDialog: Boolean = false,
     val showCreditCutoffDialog: Boolean = false,
+    val showDuplicateConfirmDialog: Boolean = false,
+    val pendingDuplicateAmount: BigDecimal? = null,
+    val pendingDuplicateComment: String = "",
     val pendingRecurrentAmount: BigDecimal? = null,
     val pendingRecurrentComment: String = "",
     val currentPeriodStartedAtMillis: Long = 0L,
@@ -39,6 +45,8 @@ data class BudgetUiState(
     val debtAdjustedBalance: BigDecimal = BigDecimal.ZERO,
     val calculationPreview: String? = null,
     val numpadDraftAmount: BigDecimal? = null,
+    /** No-spend streak snapshot (see [com.sachit.moneypal.domain.calculator.NoSpendStreak]). */
+    val noSpendStreak: com.sachit.moneypal.domain.calculator.NoSpendStreak? = null,
 ) {
     companion object {
         val INITIAL = BudgetUiState()

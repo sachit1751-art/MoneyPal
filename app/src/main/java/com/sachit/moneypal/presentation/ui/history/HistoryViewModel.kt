@@ -155,6 +155,9 @@ class HistoryViewModel @Inject constructor(
             is HistoryUiIntent.SaveEditedTransaction -> saveEditedTransaction(intent.transaction)
             is HistoryUiIntent.ConfirmDeleteRecurrent -> confirmDeleteRecurrent(intent.transaction)
             is HistoryUiIntent.MarkTransactionAsPaid -> markTransactionAsPaid(intent.transaction)
+            is HistoryUiIntent.CloneTransaction -> cloneTransaction(intent.transaction)
+            is HistoryUiIntent.ToggleRefundExpected -> toggleRefundExpected(intent.transaction)
+            is HistoryUiIntent.MarkRefunded -> markRefunded(intent.transaction)
             is HistoryUiIntent.SetLockSwipeable -> _lockSwipeable.value = intent.locked
             is HistoryUiIntent.ToggleExpandedTransaction -> toggleExpandedTransaction(intent.transactionId)
             is HistoryUiIntent.UpdateCreditCutoffDay -> updateCreditCutoffDay(intent.day)
@@ -252,6 +255,36 @@ class HistoryViewModel @Inject constructor(
                     )
                 )
             }
+        }
+    }
+
+    /** Duplicates [transaction] with a fresh id, today's date and a clean clientGeneratedId. */
+    private fun cloneTransaction(transaction: Transaction) {
+        viewModelScope.launch {
+            val clone = transaction.copy(
+                id = 0L,
+                createdAt = System.currentTimeMillis(),
+                clientGeneratedId = null,
+                date = java.time.LocalDateTime.now(),
+                isCreditPaid = false,
+            )
+            budgetTransactionHandler.budgetRepository.addTransaction(clone)
+        }
+    }
+
+    private fun toggleRefundExpected(transaction: Transaction) {
+        viewModelScope.launch {
+            if (transaction.refundExpected) {
+                budgetTransactionHandler.budgetRepository.setRefundExpected(transaction.id, false)
+            } else {
+                budgetTransactionHandler.budgetRepository.setRefundExpected(transaction.id, true)
+            }
+        }
+    }
+
+    private fun markRefunded(transaction: Transaction) {
+        viewModelScope.launch {
+            budgetTransactionHandler.budgetRepository.markRefunded(transaction.id)
         }
     }
 

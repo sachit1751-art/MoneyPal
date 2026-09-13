@@ -419,14 +419,14 @@ class SettingsViewModel @Inject constructor(
     // ---- Full backup / restore (plan 010 + SAF folder target) ----
 
     private var backupTransferManager: com.sachit.moneypal.presentation.ui.settings.backup.BackupTransferManager? = null
-    private var backupFolderLauncher: androidx.activity.result.ActivityResultLauncher<Uri>? = null
+    private var backupFolderLauncher: androidx.activity.result.ActivityResultLauncher<Uri?>? = null
     private var restoreLauncher: androidx.activity.result.ActivityResultLauncher<Array<String>>? = null
 
     fun setBackupTransferManager(manager: com.sachit.moneypal.presentation.ui.settings.backup.BackupTransferManager) {
         backupTransferManager = manager
     }
 
-    fun setBackupFolderLauncher(launcher: androidx.activity.result.ActivityResultLauncher<Uri>) {
+    fun setBackupFolderLauncher(launcher: androidx.activity.result.ActivityResultLauncher<Uri?>) {
         backupFolderLauncher = launcher
     }
 

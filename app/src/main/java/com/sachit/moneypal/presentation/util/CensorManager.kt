@@ -14,14 +14,17 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import logcat.logcat
+import com.sachit.moneypal.ApplicationScope
 import com.sachit.moneypal.R
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class CensorManager @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    @ApplicationScope private val scope: CoroutineScope,
 ) : SensorEventListener {
 
     private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -32,7 +35,6 @@ class CensorManager @Inject constructor(
 
     private var wasNear = false
     private var censorToggleJob: Job? = null
-    private val scope = CoroutineScope(Dispatchers.Main)
 
     fun start() {
         proximitySensor?.let {
@@ -67,19 +69,20 @@ class CensorManager @Inject constructor(
             toggleCensor()
         }
     }
-
     private fun cancelCensorTimer() {
         censorToggleJob?.cancel()
         censorToggleJob = null
     }
 
-    fun toggleCensor() {
+    suspend fun toggleCensor() {
         val newState = !_isCensored.value
         _isCensored.value = newState
 
-        val messageRes = if (newState) R.string.censor_mode_toast_enabled
-        else R.string.censor_mode_toast_disabled
-        Toast.makeText(context, context.getString(messageRes), Toast.LENGTH_SHORT).show()
+        withContext(Dispatchers.Main) {
+            val messageRes = if (newState) R.string.censor_mode_toast_enabled
+            else R.string.censor_mode_toast_disabled
+            Toast.makeText(context, context.getString(messageRes), Toast.LENGTH_SHORT).show()
+        }
 
         logcat { "Censor mode toggled: $newState (after 0.8s hold)" }
     }

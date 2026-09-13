@@ -28,6 +28,14 @@ class TransactionActionsController(
             val comment: String,
         ) : TransactionAction
 
+        /** Ask the user before saving an entry that looks like a duplicate. */
+        data class ConfirmPossibleDuplicate(
+            val normalizedInput: String,
+            val amount: BigDecimal,
+            val comment: String,
+            val isAdjustment: Boolean,
+        ) : TransactionAction
+
         data class ShowMessage(val message: String) : TransactionAction
         data object DeleteFailed : TransactionAction
         data object RestoreFailed : TransactionAction
@@ -41,6 +49,7 @@ class TransactionActionsController(
         comment: String,
         budgetSettings: BudgetSettings?,
         resolveActivePeriodId: suspend () -> Long,
+        forceSave: Boolean = false,
     ): List<TransactionAction> {
         val result = handler.apply(
             input = input,
@@ -50,6 +59,7 @@ class TransactionActionsController(
             comment = comment,
             budgetSettings = budgetSettings,
             resolveActivePeriodId = resolveActivePeriodId,
+            skipDuplicateCheck = forceSave,
         )
         return when (result) {
             is ApplyTransactionResult.InvalidInput -> emptyList()
@@ -58,6 +68,15 @@ class TransactionActionsController(
                     normalizedInput = result.normalizedInput,
                     amount = result.amount,
                     comment = comment,
+                ),
+            )
+
+            is ApplyTransactionResult.PossibleDuplicate -> listOf(
+                TransactionAction.ConfirmPossibleDuplicate(
+                    normalizedInput = result.normalizedInput,
+                    amount = result.amount,
+                    comment = result.comment,
+                    isAdjustment = result.isAdjustment,
                 ),
             )
 
@@ -139,6 +158,7 @@ interface TransactionHandler {
         comment: String,
         budgetSettings: BudgetSettings?,
         resolveActivePeriodId: suspend () -> Long,
+        skipDuplicateCheck: Boolean = false,
     ): ApplyTransactionResult
 
     suspend fun applyRecurrent(

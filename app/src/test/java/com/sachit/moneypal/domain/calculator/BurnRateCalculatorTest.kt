@@ -92,7 +92,8 @@ class BurnRateCalculatorTest {
 
     @Test
     fun `today clamped into period bounds`() {
-        // Period finished; projecting with a late "today" must not crash or go negative.
+        // Period finished; projecting with a late "today" must not crash or go
+        // negative. With all time elapsed, pace = 800/1000 of budget = 80.
         val projection = calculator.calculate(
             totalBudget = BigDecimal(1000),
             spentInPeriod = BigDecimal(800),
@@ -100,6 +101,6 @@ class BurnRateCalculatorTest {
             periodEnd = LocalDate.of(2026, 9, 10),
             today = LocalDate.of(2026, 10, 1),
         )
-        assertEquals(100, projection.pacePercent)
+        assertEquals(80, projection.pacePercent)
     }
 }

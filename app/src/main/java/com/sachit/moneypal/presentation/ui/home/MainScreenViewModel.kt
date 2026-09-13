@@ -1,12 +1,15 @@
 ﻿package com.sachit.moneypal.presentation.ui.home
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sachit.moneypal.R
 import com.sachit.moneypal.data.repository.SettingsRepository
 import com.sachit.moneypal.domain.model.BudgetPeriod
 import com.sachit.moneypal.domain.model.FirstLaunchTutorialStage
 import com.sachit.moneypal.domain.model.Transaction
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -25,6 +28,7 @@ import kotlin.time.Duration.Companion.milliseconds
 @HiltViewModel
 class MainScreenViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
+    @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
     private val _localState = MutableStateFlow(MainScreenLocalState())
@@ -91,7 +95,7 @@ class MainScreenViewModel @Inject constructor(
                 pendingDeleteTransaction = transaction,
                 isSnackbarVisible = true,
                 snackbarMessage = message,
-                snackbarActionLabel = "UNDO",
+                snackbarActionLabel = context.getString(R.string.undo),
                 snackbarHasUndo = true,
             )
         }
@@ -100,7 +104,7 @@ class MainScreenViewModel @Inject constructor(
             _effects.emit(
                 MainScreenUiEffect.ShowUndoSnackbar(
                     message = message,
-                    actionLabel = "UNDO",
+                    actionLabel = context.getString(R.string.undo),
                 )
             )
         }

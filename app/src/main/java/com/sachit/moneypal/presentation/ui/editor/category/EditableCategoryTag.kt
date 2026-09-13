@@ -85,6 +85,8 @@ fun EditableCategoryTag(
     onlyIcon: Boolean = false,
     onEdit: (Boolean) -> Unit = {},
     onDeleteTag: (String) -> Unit = {},
+    categories: List<com.sachit.moneypal.domain.model.Category> = emptyList(),
+    onStyleCategory: ((com.sachit.moneypal.domain.model.Category) -> Unit)? = null,
     directCategoryPopupEnabled: Boolean = false,
     categoryGridModeEnabled: Boolean = false,
     isCategoryGridVisible: Boolean = false,

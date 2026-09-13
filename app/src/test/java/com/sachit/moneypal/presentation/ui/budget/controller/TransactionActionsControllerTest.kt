@@ -29,6 +29,7 @@ class TransactionActionsControllerTest {
             comment: String,
             budgetSettings: BudgetSettings?,
             resolveActivePeriodId: suspend () -> Long,
+            skipDuplicateCheck: Boolean,
         ): ApplyTransactionResult = applyResult
 
         override suspend fun applyRecurrent(

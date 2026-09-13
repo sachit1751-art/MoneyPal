@@ -62,6 +62,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -110,6 +111,7 @@ import com.sachit.moneypal.presentation.ui.theme.component.animatedRequiredHeigh
 import com.sachit.moneypal.presentation.ui.theme.component.numpad.EditStage
 import com.sachit.moneypal.presentation.ui.theme.component.numpad.EditorState
 import com.sachit.moneypal.presentation.ui.theme.component.numpad.Numpad
+import com.sachit.moneypal.presentation.ui.editor.category.CategoryStyleSheet
 import com.sachit.moneypal.presentation.ui.theme.component.numpad.SavedCategoriesGrid
 import com.sachit.moneypal.presentation.ui.theme.isNightMode
 import com.sachit.moneypal.presentation.ui.tutorial.TutorialBoxState
@@ -1318,6 +1320,19 @@ private fun MainScreenNumpadSection(
         enableCalcModeSwipe = !showCategoryGrid,
         leftContent = categoryGridContent,
         tutorialBoxState = tutorialBoxState,
+        quickAmounts = remember { listOf(
+            java.math.BigDecimal(10),
+            java.math.BigDecimal(50),
+            java.math.BigDecimal(100),
+            java.math.BigDecimal(500),
+        ) },
+        onQuickAmount = { amount ->
+            actions.onProcessIntent(
+                MainScreenUiIntent.ProcessBudgetNumpadIntent(
+                    BudgetNumpadIntent.QuickAmountTapped(amount),
+                ),
+            )
+        },
     )
 }
 
@@ -1341,6 +1356,23 @@ private fun MainScreenEditorSection(
     onApply: () -> Unit = {},
     onCategoryEditingChanged: (Boolean) -> Unit = {},
 ) {
+    var stylingCategory by remember { mutableStateOf<com.sachit.moneypal.domain.model.Category?>(null) }
+
+    if (stylingCategory != null) {
+        CategoryStyleSheet(
+            category = stylingCategory!!,
+            onDismiss = { stylingCategory = null },
+            onApply = { emoji, color ->
+                actions.onProcessIntent(
+                    MainScreenUiIntent.ProcessBudgetEditorIntent(
+                        BudgetEditorIntent.StyleCategory(stylingCategory!!.id, emoji, color),
+                    ),
+                )
+                stylingCategory = null
+            },
+        )
+    }
+
     Editor(
         uiState = budgetUiState,
         animState = budgetUiState.animState,
@@ -1376,6 +1408,7 @@ private fun MainScreenEditorSection(
         },
         onFocus = onFocus,
         onCategoryEditingChanged = onCategoryEditingChanged,
+        onStyleCategory = { category -> stylingCategory = category },
         onCommentClick = {},
         onCommentUpdate = { comment ->
             actions.onProcessIntent(
@@ -1430,6 +1463,20 @@ private fun MainScreenEditorSection(
             actions.onProcessIntent(
                 MainScreenUiIntent.ProcessBudgetEditorIntent(
                     BudgetEditorIntent.DismissCreditCutoffDialog,
+                ),
+            )
+        },
+        onDuplicateSaveAnyway = {
+            actions.onProcessIntent(
+                MainScreenUiIntent.ProcessBudgetNumpadIntent(
+                    BudgetNumpadIntent.ConfirmDuplicateSaveTapped,
+                ),
+            )
+        },
+        onDismissDuplicateDialog = {
+            actions.onProcessIntent(
+                MainScreenUiIntent.ProcessBudgetEditorIntent(
+                    BudgetEditorIntent.DismissDuplicateConfirmDialog,
                 ),
             )
         },
