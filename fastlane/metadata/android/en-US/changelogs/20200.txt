@@ -1,9 +1,13 @@
-- New: opt-in biometric app lock to protect your data with fingerprint or device credential
-- New: search plus category and amount filters in your transaction history
+- New: biometric app lock
+- New: history search and filters
 - New: full backup and restore
 - New: repeat a past expense in one tap
-- New: track expected refunds on your expenses
-- New: personalize categories with emoji and colors
-- New: quick-amount chips for faster entry
-- New: no-spend streak tracking with a celebration banner
-- New: burn-rate pacing and threshold alerts
+- New: refund tracking
+- New: category emoji, colors, envelopes
+- New: cash/card payment tags
+- New: quick-amount chips, duplicate warnings
+- New: no-spend streaks and burn-rate alerts
+- New: tracked savings goal with progress
+- New: Monday weekly summary notification
+- New: log expenses from notifications
+- New: automatic backups to your folder
