@@ -694,6 +694,42 @@
     <string name="payment_method_cash">Cash</string>
     <string name="payment_method_card">Card</string>
 
+    <!-- Savings goal progress -->
+    <string name="savings_goal_title">Savings goal</string>
+    <string name="savings_goal_saved_of">Saved %1$s of %2$s</string>
+    <string name="savings_goal_eta">On track to finish around %1$s %2$d</string>
+    <string name="savings_goal_eta_unknown">Keep saving — not enough history to estimate a finish date yet</string>
+
+    <!-- Weekly digest -->
+    <string name="notification_channel_digest_name">Weekly digest</string>
+    <string name="notification_channel_digest_description">Weekly summary of your spending</string>
+    <string name="notification_digest_title">Your weekly summary</string>
+    <string name="notification_digest_message">You spent %1$s in the last 7 days.</string>
+    <string name="notification_digest_message_with_category">You spent %1$s in the last 7 days — top category: %2$s.</string>
+    <string name="notification_digest_remaining">Remaining budget: %1$s.</string>
+    <string name="settings_weekly_digest">Weekly summary notification</string>
+    <string name="settings_weekly_digest_summary">Every Monday morning, get a recap of last week\'s spending</string>
+
+    <!-- Shortcut -->
+    <string name="shortcut_add_expense_short_label">Add expense</string>
+    <string name="shortcut_add_expense_long_label">Log a new expense</string>
+    <string name="shortcut_add_expense_disabled">Add expense unavailable</string>
+
+    <!-- Quick add -->
+    <string name="quick_add_action_label">Log expense</string>
+    <string name="quick_add_hint">e.g. 12.50 groceries</string>
+    <string name="quick_add_title">Quick add</string>
+    <string name="quick_add_logged_amount">Logged %1$s</string>
+    <string name="quick_add_logged_amount_category">Logged %1$s · %2$s</string>
+    <string name="quick_add_queued">Saved for next period: %1$s</string>
+    <string name="quick_add_error">Couldn\'t read that — try something like “12.50 groceries”</string>
+
+    <!-- Auto backup -->
+    <string name="settings_auto_backup">Automatic backup</string>
+    <string name="settings_auto_backup_summary">Back up all data to a folder you choose every 15 days</string>
+    <string name="settings_auto_backup_choose_folder">Choose folder</string>
+    <string name="settings_auto_backup_back_up_now">Back up now</string>
+
     <!-- Duplicate detection -->
     <string name="duplicate_dialog_title">Possible duplicate</string>
     <string name="duplicate_dialog_message">You already recorded %1$s for “%2$s” today. Save it again anyway?</string>

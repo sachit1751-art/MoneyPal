@@ -18,6 +18,17 @@ Six user-selected features, executed this session:
 | 4 | `004-auto-backup-saf.md` | Scheduled full-data backup into a user-picked SAF folder (15-day cadence, opt-in) | none | DONE |
 | 5 | `005-notification-quick-add.md` | Reply "12.5 groceries" to period/subscription notifications to log an expense | none | DONE |
 
+## Round-4 execution notes (2026-09-15)
+
+All five plans were executed and verified: `:app:testFossDebugUnitTest` passes
+(650+ tests incl. the new `SavingsGoalCalculatorTest`), both debug APKs build,
+and `schema 20.json` was committed. Deviations from plan text: the weekly
+digest uses `EntryPointAccessors` (matching `RecurrentExpenseNotificationWorker`)
+rather than `@HiltWorker`; the savings-goal saved amount is derived from
+archived budgets' savings share rather than a new transaction field; the
+quick-add action ships on the period-end notification channel first; the
+`es-ES`/`fr` string translations for the new features are pending (Crowdin).
+
 ## Key ground rules for executors
 
 - Verification gates are flavor-qualified — `:app` has no default flavor.

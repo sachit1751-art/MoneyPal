@@ -5,6 +5,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.app.RemoteInput
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -41,6 +42,8 @@ class NotificationHelper @Inject constructor(
         private const val NOTIFICATION_ID_THRESHOLD_DAILY_100 = 1006
         private const val NOTIFICATION_ID_THRESHOLD_PERIOD_80 = 1007
         private const val NOTIFICATION_ID_THRESHOLD_PERIOD_100 = 1008
+        const val CHANNEL_DIGEST = "weekly_digest"
+        private const val NOTIFICATION_ID_DIGEST = 1009
     }
 
     init {
@@ -96,11 +99,20 @@ class NotificationHelper @Inject constructor(
             enableVibration(true)
         }
 
+        val digestChannel = NotificationChannel(
+            CHANNEL_DIGEST,
+            context.getString(R.string.notification_channel_digest_name),
+            NotificationManager.IMPORTANCE_LOW
+        ).apply {
+            description = context.getString(R.string.notification_channel_digest_description)
+        }
+
         notificationManager.createNotificationChannel(periodEndChannel)
         notificationManager.createNotificationChannel(recurrentChannel)
         notificationManager.createNotificationChannel(creditChannel)
         notificationManager.createNotificationChannel(smsCaptureChannel)
         notificationManager.createNotificationChannel(thresholdChannel)
+        notificationManager.createNotificationChannel(digestChannel)
         logcat { "Notification channels created" }
     }
 
@@ -149,10 +161,92 @@ class NotificationHelper @Inject constructor(
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .addQuickAddAction()
             .build()
-
         NotificationManagerCompat.from(context).notify(NOTIFICATION_ID_PERIOD_END, notification)
         logcat { "Period end notification shown successfully" }
+    }
+
+    /**
+     * Direct-reply "Log expense" action (plan 005). No lock-bypass concern:
+     * nothing is displayed in the reply UI, and the entry is written exactly
+     * like a manual one.
+     */
+    private fun NotificationCompat.Builder.addQuickAddAction(): NotificationCompat.Builder {
+        val remoteInput = androidx.core.app.RemoteInput.Builder(QuickAddReceiver.KEY_QUICK_ADD_TEXT)
+            .setLabel(context.getString(R.string.quick_add_hint))
+            .build()
+        val quickAddIntent = Intent(context, QuickAddReceiver::class.java).apply {
+            action = QuickAddReceiver.ACTION_QUICK_ADD
+        }
+        val quickAddPending = PendingIntent.getBroadcast(
+            context,
+            2000,
+            quickAddIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE,
+        )
+        return addAction(
+            NotificationCompat.Action.Builder(
+                R.drawable.ic_notification,
+                context.getString(R.string.quick_add_action_label),
+                quickAddPending,
+            )
+                .addRemoteInput(remoteInput)
+                .build(),
+        )
+    }
+
+    /**
+     * Weekly digest notification (plan 003): last-7-days spend, top category
+     * and remaining budget. Low importance; tap opens the app.
+     */
+    fun showWeeklyDigest(
+        weekTotal: BigDecimal,
+        topCategoryName: String?,
+        remainingBudget: BigDecimal?,
+    ) {
+        val hasPermission = checkNotificationPermission()
+        if (!hasPermission) {
+            logcat { "Cannot show digest notification - permission not granted" }
+            return
+        }
+
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            NOTIFICATION_ID_DIGEST,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val currency = "USD"
+        val format = symbolOnlyCurrencyFormat(currency)
+        val message = if (topCategoryName != null) {
+            context.getString(
+                R.string.notification_digest_message_with_category,
+                format.format(weekTotal),
+                topCategoryName,
+            )
+        } else {
+            context.getString(R.string.notification_digest_message, format.format(weekTotal))
+        }
+        val fullMessage = remainingBudget?.let {
+            "$message ${context.getString(R.string.notification_digest_remaining, format.format(it))}"
+        } ?: message
+
+        val notification = NotificationCompat.Builder(context, CHANNEL_DIGEST)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(context.getString(R.string.notification_digest_title))
+            .setContentText(fullMessage)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(fullMessage))
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build()
+        NotificationManagerCompat.from(context).notify(NOTIFICATION_ID_DIGEST, notification)
+        logcat { "Weekly digest notification shown" }
     }
 
     private fun buildPeriodEndMessage(remainingBudget: String, formattedAmount: String): String {

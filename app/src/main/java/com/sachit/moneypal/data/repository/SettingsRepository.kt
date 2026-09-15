@@ -59,6 +59,16 @@ interface SettingsRepository {
 
     suspend fun setAppLockEnabled(enabled: Boolean)
 
+    /** Opt-in weekly digest notification (plan 003). */
+    suspend fun setWeeklyDigestEnabled(enabled: Boolean)
+
+    /** Auto-backup preferences (plan 004). */
+    suspend fun setAutoBackupEnabled(enabled: Boolean)
+
+    suspend fun setAutoBackupTreeUri(uri: String)
+
+    suspend fun setAutoBackupLastRunAt(epochMillis: Long)
+
     suspend fun setCreditQuickToggleEnabled(enabled: Boolean)
 
     suspend fun setShowPastTransactions(enabled: Boolean)

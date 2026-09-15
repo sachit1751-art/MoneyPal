@@ -157,6 +157,8 @@ data class AnalyticsState(
     val noSpendStreak: com.sachit.moneypal.domain.calculator.NoSpendStreak? = null,
     /** Envelope progress for categories with a monthly limit (plan 001). */
     val envelopeProgress: List<com.sachit.moneypal.domain.calculator.EnvelopeProgress> = emptyList(),
+    /** Tracked savings-goal progress (plan 002); null when no goal is set. */
+    val savingsGoalProgress: com.sachit.moneypal.domain.calculator.SavingsGoalProgress? = null,
 )
 
 data class AnalyticsActions(
@@ -460,6 +462,15 @@ fun Analytics(
                                 .bringIntoViewRequester(bringIntoViewRequesters[5]!!)
                                 .markIfInOrder(5),
                         )
+
+                        state.savingsGoalProgress?.let { goal ->
+                            Spacer(modifier = Modifier.height(12.dp))
+                            SavingsGoalProgressSection(
+                                progress = goal,
+                                currency = state.currencyCode,
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                            )
+                        }
 
                         if (!state.isHistoricalView && state.budgetStateForDisplay != null) {
                             Spacer(modifier = Modifier.height(16.dp))
@@ -1175,6 +1186,57 @@ fun EnvelopeProgressCard(
                 }
                 Spacer(modifier = Modifier.height(10.dp))
             }
+        }
+    }
+}
+
+/**
+ * Tracked savings-goal progress (plan 002): progress bar, saved-vs-target and
+ * a finish-date ETA estimated by [com.sachit.moneypal.domain.calculator.SavingsGoalCalculator].
+ */
+@Composable
+fun SavingsGoalProgressSection(
+    progress: com.sachit.moneypal.domain.calculator.SavingsGoalProgress,
+    currency: String,
+    modifier: Modifier = Modifier,
+) {
+    val currencyFormat = com.sachit.moneypal.presentation.util.font.format.symbolOnlyCurrencyFormat(currency)
+    Surface(
+        modifier = modifier,
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = stringResource(com.sachit.moneypal.R.string.savings_goal_title),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = stringResource(
+                    com.sachit.moneypal.R.string.savings_goal_saved_of,
+                    currencyFormat.format(progress.saved),
+                    currencyFormat.format(progress.target),
+                ),
+                style = MaterialTheme.typography.bodySmall,
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            androidx.compose.material3.LinearProgressIndicator(
+                progress = { progress.progressFraction },
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            )
+            val etaText = progress.estimatedFinishDate?.let {
+                stringResource(
+                    com.sachit.moneypal.R.string.savings_goal_eta,
+                    it.month.name.lowercase().replaceFirstChar { c -> c.uppercase() },
+                    it.year,
+                )
+            } ?: stringResource(com.sachit.moneypal.R.string.savings_goal_eta_unknown)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = etaText, style = MaterialTheme.typography.labelMedium)
         }
     }
 }

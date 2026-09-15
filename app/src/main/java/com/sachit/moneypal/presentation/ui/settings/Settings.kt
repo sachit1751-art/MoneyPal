@@ -186,6 +186,11 @@ fun Settings(
     onAppLockToggle: () -> Unit = {},
     thresholdAlertsEnabled: Boolean = false,
     onThresholdAlertsToggle: () -> Unit = {},
+    weeklyDigestEnabled: Boolean = false,
+    onWeeklyDigestToggle: () -> Unit = {},
+    autoBackupEnabled: Boolean = false,
+    onAutoBackupToggle: () -> Unit = {},
+    onAutoBackupBackUpNow: () -> Unit = {},
     onBugReportClick: () -> Unit = {},
     onNavigateToChangelog: () -> Unit = {},
     onNavigateToAppearance: () -> Unit = {},
@@ -502,6 +507,64 @@ fun Settings(
                                 modifier = Modifier.testTag("SettingsThresholdAlertsSwitch")
                             )
                         }
+                    )
+
+                    SelectablePaddedItem(
+                        label = stringResource(R.string.settings_weekly_digest),
+                        subtitle = stringResource(R.string.settings_weekly_digest_summary),
+                        isActive = weeklyDigestEnabled,
+                        onClick = onWeeklyDigestToggle,
+                        position = PaddedListItemPosition.Middle,
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Rounded.AutoAwesome,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        },
+                        trailingContent = {
+                            Switch(
+                                checked = weeklyDigestEnabled,
+                                onCheckedChange = { onWeeklyDigestToggle() },
+                                modifier = Modifier.testTag("SettingsWeeklyDigestSwitch")
+                            )
+                        }
+                    )
+
+                    SelectablePaddedItem(
+                        label = stringResource(R.string.settings_auto_backup),
+                        subtitle = stringResource(R.string.settings_auto_backup_summary),
+                        isActive = autoBackupEnabled,
+                        onClick = onAutoBackupToggle,
+                        position = PaddedListItemPosition.Middle,
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Rounded.FolderCopy,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        },
+                        trailingContent = {
+                            Switch(
+                                checked = autoBackupEnabled,
+                                onCheckedChange = { onAutoBackupToggle() },
+                                modifier = Modifier.testTag("SettingsAutoBackupSwitch")
+                            )
+                        }
+                    )
+
+                    SelectablePaddedItem(
+                        label = stringResource(R.string.settings_auto_backup_back_up_now),
+                        isActive = false,
+                        onClick = onAutoBackupBackUpNow,
+                        position = PaddedListItemPosition.Middle,
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Rounded.Backup,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        },
                     )
 
                     PaddedExpandableList(

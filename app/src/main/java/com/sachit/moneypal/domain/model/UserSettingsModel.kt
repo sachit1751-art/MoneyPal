@@ -33,6 +33,14 @@ data class UserSettings(
     val isRoundedFontEnabled: Boolean = true,
     val isAmoledEnabled: Boolean = false,
     val appLockEnabled: Boolean = false,
+    /** Opt-in weekly digest notification (plan 003). */
+    val weeklyDigestEnabled: Boolean = false,
+    /** Opt-in automatic SAF-folder backup (plan 004). */
+    val autoBackupEnabled: Boolean = false,
+    /** SAF tree URI of the auto-backup folder (plan 004). */
+    val autoBackupTreeUri: String = "",
+    /** Epoch millis of the last successful auto-backup (plan 004). */
+    val autoBackupLastRunAt: Long = 0L,
     val periodMappingMode: PeriodMappingMode = PeriodMappingMode.ACTIVE_BUDGET,
     val recurrentPaymentsViewMode: RecurrentPaymentsViewMode = RecurrentPaymentsViewMode.VERTICAL_LIST,
     val budgetSplitViewPeriod: BudgetPeriod? = null,

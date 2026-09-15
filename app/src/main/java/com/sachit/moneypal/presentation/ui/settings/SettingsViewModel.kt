@@ -74,6 +74,10 @@ data class SettingsUiState(
     val smsPermissionGranted: Boolean = false,
     val appLockEnabled: Boolean = false,
     val thresholdAlertsEnabled: Boolean = false,
+    val weeklyDigestEnabled: Boolean = false,
+    val autoBackupEnabled: Boolean = false,
+    val autoBackupTreeUri: String = "",
+    val autoBackupLastRunAt: Long = 0L,
 )
 
 sealed interface SettingsUiEffect {
@@ -146,6 +150,10 @@ class SettingsViewModel @Inject constructor(
             smsPermissionGranted = smsGranted,
             appLockEnabled = settings.appLockEnabled,
             thresholdAlertsEnabled = settings.thresholdAlertsEnabled,
+            weeklyDigestEnabled = settings.weeklyDigestEnabled,
+            autoBackupEnabled = settings.autoBackupEnabled,
+            autoBackupTreeUri = settings.autoBackupTreeUri,
+            autoBackupLastRunAt = settings.autoBackupLastRunAt,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -185,6 +193,62 @@ class SettingsViewModel @Inject constructor(
             settingsRepository.setThresholdAlertsEnabled(newValue)
         }
     }
+
+    /** Weekly digest toggle (plan 003): also enqueues/cancels the periodic work. */
+    fun onWeeklyDigestToggle() {
+        val newValue = !uiState.value.weeklyDigestEnabled
+        viewModelScope.launch {
+            settingsRepository.setWeeklyDigestEnabled(newValue)
+            weeklyDigestScheduler.reschedule(newValue)
+        }
+    }
+
+    /** Auto-backup toggle (plan 004): also enqueues/cancels the periodic work. */
+    fun onAutoBackupToggle() {
+        val newValue = !uiState.value.autoBackupEnabled
+        viewModelScope.launch {
+            settingsRepository.setAutoBackupEnabled(newValue)
+            autoBackupScheduler.reschedule(newValue)
+        }
+    }
+
+    fun onAutoBackupFolderChosen(treeUriString: String) {
+        viewModelScope.launch {
+            settingsRepository.setAutoBackupTreeUri(treeUriString)
+        }
+    }
+
+    /** Manual "Back up now" via the same write path as the scheduled backup. */
+    fun onAutoBackupNow() {
+        viewModelScope.launch {
+            val ok = autoBackupScheduler.runNow()
+            _effects.value = if (ok) {
+                SettingsUiEffect.NavigateBack
+            } else {
+                null
+            }
+        }
+    }
+
+    @dagger.hilt.EntryPoint
+    @dagger.hilt.InstallIn(dagger.hilt.components.SingletonComponent::class)
+    interface SchedulerEntryPoint {
+        fun weeklyDigestScheduler(): com.sachit.moneypal.presentation.notification.WeeklyDigestScheduler
+
+        fun autoBackupScheduler(): com.sachit.moneypal.presentation.notification.AutoBackupScheduler
+    }
+
+    private val weeklyDigestScheduler: com.sachit.moneypal.presentation.notification.WeeklyDigestScheduler
+        get() = dagger.hilt.android.EntryPointAccessors.fromApplication(
+            context.applicationContext,
+            SchedulerEntryPoint::class.java,
+        ).weeklyDigestScheduler()
+
+    private val autoBackupScheduler: com.sachit.moneypal.presentation.notification.AutoBackupScheduler
+        get() = dagger.hilt.android.EntryPointAccessors.fromApplication(
+            context.applicationContext,
+            SchedulerEntryPoint::class.java,
+        ).autoBackupScheduler()
 
     /**
      * App lock toggle (plan 009). Refuses to enable when the device has no

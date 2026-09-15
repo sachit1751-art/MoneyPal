@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Static shortcuts (plan 003). FOSS-safe: no Play Services required. -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="add_expense"
+        android:enabled="true"
+        android:icon="@drawable/ic_tile_new_transaction"
+        android:shortcutShortLabel="@string/shortcut_add_expense_short_label"
+        android:shortcutLongLabel="@string/shortcut_add_expense_long_label"
+        android:shortcutDisabledMessage="@string/shortcut_add_expense_disabled">
+        <intent
+            android:action="com.sachit.moneypal.action.ADD_EXPENSE"
+            android:targetPackage="com.sachit.moneypal"
+            android:targetClass="com.sachit.moneypal.presentation.MainActivity" />
+    </shortcut>
+</shortcuts>
