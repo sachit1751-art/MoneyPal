@@ -683,6 +683,16 @@
     <string name="category_style_clear">Clear</string>
     <string name="category_style_apply">Apply</string>
     <string name="category_style">Personalize</string>
+    <string name="category_style_monthly_limit">Monthly limit (optional)</string>
+    <string name="category_style_monthly_limit_hint">e.g. 200</string>
+
+    <!-- Envelope budgets -->
+    <string name="envelope_title">Category envelopes</string>
+
+    <!-- Payment methods -->
+    <string name="payment_method_label">Paid with</string>
+    <string name="payment_method_cash">Cash</string>
+    <string name="payment_method_card">Card</string>
 
     <!-- Duplicate detection -->
     <string name="duplicate_dialog_title">Possible duplicate</string>

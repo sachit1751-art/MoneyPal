@@ -36,7 +36,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.CreditCard
 import androidx.compose.material.icons.rounded.EventRepeat
+import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.Wallet
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ButtonGroupDefaults
@@ -159,6 +161,7 @@ fun Editor(
     onCategoryEditingChanged: (Boolean) -> Unit = {},
     onRecurrentToggle: (Boolean) -> Unit = {},
     onCreditToggle: (Boolean) -> Unit = {},
+    onPaymentMethodSelected: (com.sachit.moneypal.domain.model.PaymentMethod) -> Unit = {},
     showCreditQuickToggleFeature: Boolean = false,
     directCategoryPopupEnabled: Boolean = false,
     categoryGridModeEnabled: Boolean = false,
@@ -528,6 +531,8 @@ fun Editor(
                     onDisableCalculationMode = onDisableCalculationMode,
                     onApply = onApply,
                     tutorialBoxState = tutorialBoxState,
+                    selectedPaymentMethod = uiState.selectedPaymentMethod,
+                    onPaymentMethodSelected = onPaymentMethodSelected,
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
@@ -593,6 +598,8 @@ private fun EditingContent(
     categories: List<com.sachit.moneypal.domain.model.Category> = emptyList(),
     onStyleCategory: ((com.sachit.moneypal.domain.model.Category) -> Unit)? = null,
     onCategoryEditingChanged: (Boolean) -> Unit = {},
+    selectedPaymentMethod: com.sachit.moneypal.domain.model.PaymentMethod = com.sachit.moneypal.domain.model.PaymentMethod.OTHER,
+    onPaymentMethodSelected: (com.sachit.moneypal.domain.model.PaymentMethod) -> Unit = {},
     editorFocusController: FocusController,
     directCategoryPopupEnabled: Boolean = false,
     categoryGridModeEnabled: Boolean = false,
@@ -894,6 +901,14 @@ private fun EditingContent(
                 }
             }
 
+            PaymentMethodChipRow(
+                selected = selectedPaymentMethod,
+                onSelected = onPaymentMethodSelected,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 24.dp, end = 24.dp, bottom = 8.dp),
+            )
+
             if (categoryGridModeEnabled) {
                 Row(
                     modifier = Modifier
@@ -954,6 +969,47 @@ private fun EditingContent(
                                 index = 3
                             ) else m
                         },
+                )
+            }
+        }
+    }
+}
+
+/** Compact CASH/CARD/OTHER selector shown while composing an expense entry. */
+@Composable
+private fun PaymentMethodChipRow(
+    selected: com.sachit.moneypal.domain.model.PaymentMethod,
+    onSelected: (com.sachit.moneypal.domain.model.PaymentMethod) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val options = listOf(
+        com.sachit.moneypal.domain.model.PaymentMethod.CASH to Icons.Rounded.Payments,
+        com.sachit.moneypal.domain.model.PaymentMethod.CARD to Icons.Rounded.CreditCard,
+        com.sachit.moneypal.domain.model.PaymentMethod.OTHER to Icons.Rounded.Wallet,
+    )
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        options.forEach { (method, icon) ->
+            val isSelected = method == selected
+            ToggleButton(
+                checked = isSelected,
+                onCheckedChange = { if (it) onSelected(method) },
+                modifier = Modifier.padding(start = 4.dp),
+                shapes = ToggleButtonDefaults.shapes(),
+                colors = ToggleButtonDefaults.toggleButtonColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f),
+                    checkedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    checkedContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                ),
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = method.name,
+                    modifier = Modifier.size(18.dp),
                 )
             }
         }

@@ -124,6 +124,17 @@ fun ExpenseItemExpandedContent(
             val refundLabel = stringResource(R.string.refund_expected_label)
             add(refundLabel to stringResource(R.string.refund_received))
         }
+        if (transaction.paymentMethod != com.sachit.moneypal.domain.model.PaymentMethod.OTHER) {
+            val methodLabel = stringResource(R.string.payment_method_label)
+            val methodText = stringResource(
+                if (transaction.paymentMethod == com.sachit.moneypal.domain.model.PaymentMethod.CASH) {
+                    R.string.payment_method_cash
+                } else {
+                    R.string.payment_method_card
+                }
+            )
+            add(methodLabel to methodText)
+        }
     }
 
     Column(

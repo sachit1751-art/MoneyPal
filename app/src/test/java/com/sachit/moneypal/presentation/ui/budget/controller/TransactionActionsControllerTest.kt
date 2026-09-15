@@ -3,6 +3,7 @@ package com.sachit.moneypal.presentation.ui.budget.controller
 import com.google.common.truth.Truth.assertThat
 import com.sachit.moneypal.domain.model.BudgetPeriod
 import com.sachit.moneypal.domain.model.BudgetSettings
+import com.sachit.moneypal.domain.model.PaymentMethod
 import com.sachit.moneypal.domain.model.RecurrentFrequency
 import com.sachit.moneypal.domain.model.Transaction
 import com.sachit.moneypal.presentation.ui.budget.ApplyTransactionResult
@@ -30,6 +31,7 @@ class TransactionActionsControllerTest {
             budgetSettings: BudgetSettings?,
             resolveActivePeriodId: suspend () -> Long,
             skipDuplicateCheck: Boolean,
+            paymentMethod: PaymentMethod,
         ): ApplyTransactionResult = applyResult
 
         override suspend fun applyRecurrent(

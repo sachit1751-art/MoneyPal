@@ -1,6 +1,7 @@
 package com.sachit.moneypal.presentation.ui.budget.controller
 
 import com.sachit.moneypal.domain.model.BudgetSettings
+import com.sachit.moneypal.domain.model.PaymentMethod
 import com.sachit.moneypal.domain.model.RecurrentFrequency
 import com.sachit.moneypal.domain.model.Transaction
 import com.sachit.moneypal.presentation.ui.budget.ApplyTransactionResult
@@ -50,6 +51,7 @@ class TransactionActionsController(
         budgetSettings: BudgetSettings?,
         resolveActivePeriodId: suspend () -> Long,
         forceSave: Boolean = false,
+        paymentMethod: PaymentMethod = PaymentMethod.OTHER,
     ): List<TransactionAction> {
         val result = handler.apply(
             input = input,
@@ -60,6 +62,7 @@ class TransactionActionsController(
             budgetSettings = budgetSettings,
             resolveActivePeriodId = resolveActivePeriodId,
             skipDuplicateCheck = forceSave,
+            paymentMethod = paymentMethod,
         )
         return when (result) {
             is ApplyTransactionResult.InvalidInput -> emptyList()
@@ -159,6 +162,7 @@ interface TransactionHandler {
         budgetSettings: BudgetSettings?,
         resolveActivePeriodId: suspend () -> Long,
         skipDuplicateCheck: Boolean = false,
+        paymentMethod: PaymentMethod = PaymentMethod.OTHER,
     ): ApplyTransactionResult
 
     suspend fun applyRecurrent(

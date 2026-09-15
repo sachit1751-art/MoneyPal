@@ -2,6 +2,7 @@ package com.sachit.moneypal.presentation.ui.budget
 
 import com.sachit.moneypal.data.repository.BudgetRepository
 import com.sachit.moneypal.domain.model.BudgetSettings
+import com.sachit.moneypal.domain.model.PaymentMethod
 import com.sachit.moneypal.domain.model.RecurrentFrequency
 import com.sachit.moneypal.domain.model.Transaction
 import com.sachit.moneypal.domain.usecase.AddTransactionUseCase
@@ -62,6 +63,7 @@ class BudgetTransactionHandler @Inject constructor(
         budgetSettings: BudgetSettings?,
         resolveActivePeriodId: suspend () -> Long,
         skipDuplicateCheck: Boolean = false,
+        paymentMethod: PaymentMethod = PaymentMethod.OTHER,
     ): ApplyTransactionResult {
         var normalizedInput = input
 
@@ -127,7 +129,8 @@ class BudgetTransactionHandler @Inject constructor(
                     periodId = 0L,
                     categoryId = categoryId,
                     isCredit = isCreditEnabled,
-                    isAdjustment = isAdjustment
+                    isAdjustment = isAdjustment,
+                    paymentMethod = paymentMethod
                 )
                 budgetRepository.addQueuedTransaction(pendingTransaction)
                 return ApplyTransactionResult.QueuedForNextPeriod(normalizedInput = normalizedInput)
@@ -141,7 +144,8 @@ class BudgetTransactionHandler @Inject constructor(
                 periodId = activePeriodId,
                 categoryId = categoryId,
                 isCredit = isCreditEnabled,
-                isAdjustment = isAdjustment
+                isAdjustment = isAdjustment,
+                paymentMethod = paymentMethod
             )
             addTransactionUseCase(transaction)
             ApplyTransactionResult.Added(normalizedInput = normalizedInput)

@@ -14,6 +14,7 @@ sealed interface HistoryFilterIntent : HistoryUiIntent {
     data class SetAmountFilter(val min: BigDecimal?, val max: BigDecimal?) : HistoryFilterIntent
     data class ToggleRecurrentOnly(val enabled: Boolean) : HistoryFilterIntent
     data class ToggleCreditOnly(val enabled: Boolean) : HistoryFilterIntent
+    data class SetPaymentMethodFilter(val method: com.sachit.moneypal.domain.model.PaymentMethod?) : HistoryFilterIntent
     data object ClearFilters : HistoryFilterIntent
 }
 

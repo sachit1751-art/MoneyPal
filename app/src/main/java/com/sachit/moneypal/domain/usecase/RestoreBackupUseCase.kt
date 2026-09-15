@@ -61,6 +61,7 @@ class RestoreBackupUseCase @Inject constructor(
                         ?: System.currentTimeMillis(),
                     emoji = backupCategory.emoji,
                     colorArgb = backupCategory.colorArgb,
+                    monthlyLimit = backupCategory.monthlyLimit?.let { BigDecimal(it) },
                 )
             }
         if (categoriesToUpsert.isNotEmpty()) {
@@ -126,6 +127,11 @@ class RestoreBackupUseCase @Inject constructor(
                 originalCurrency = backupTransaction.originalCurrency,
                 refundExpected = backupTransaction.refundExpected,
                 refundedAt = backupTransaction.refundedAt,
+                paymentMethod = try {
+                    com.sachit.moneypal.domain.model.PaymentMethod.valueOf(backupTransaction.paymentMethod)
+                } catch (_: Exception) {
+                    com.sachit.moneypal.domain.model.PaymentMethod.OTHER
+                },
             )
         }
         if (transactionsToUpsert.isNotEmpty()) {

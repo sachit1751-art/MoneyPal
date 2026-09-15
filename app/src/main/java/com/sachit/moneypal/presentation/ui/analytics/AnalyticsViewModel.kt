@@ -72,6 +72,7 @@ class AnalyticsViewModel @Inject constructor(
     private val _granularity = MutableStateFlow(GraphGranularity.DAYS)
 
     private val noSpendStreakCalculator = com.sachit.moneypal.domain.calculator.NoSpendStreakCalculator()
+    private val envelopeCalculator = com.sachit.moneypal.domain.calculator.EnvelopeCalculator()
 
     val uiState: StateFlow<AnalyticsUiState> = combine(
         budgetRepository.getBudgetSettings().distinctUntilChanged(),
@@ -431,6 +432,10 @@ class AnalyticsViewModel @Inject constructor(
             noSpendStreak = noSpendStreakCalculator.compute(
                 transactions = allTransactions,
                 today = today,
+            ),
+            envelopeProgress = envelopeCalculator.compute(
+                transactions = transactions,
+                categories = categories,
             ),
         )
     }

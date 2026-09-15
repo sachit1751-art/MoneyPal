@@ -22,5 +22,8 @@ data class CategoryEntity(
     val emoji: String? = null,
     /** ARGB hex color (e.g. "FFE91E63") used for the category avatar/chip; null = theme default. */
     @ColumnInfo(defaultValue = "NULL")
-    val colorArgb: String? = null
+    val colorArgb: String? = null,
+    /** Optional monthly envelope limit for this category; null = unbounded. Stored as plain string (money never floats). */
+    @ColumnInfo(defaultValue = "NULL")
+    val monthlyLimit: String? = null
 )

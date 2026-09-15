@@ -1,5 +1,6 @@
 package com.sachit.moneypal.presentation.ui.history
 
+import com.sachit.moneypal.domain.model.PaymentMethod
 import com.sachit.moneypal.domain.model.Transaction
 import java.math.BigDecimal
 import java.util.Locale
@@ -16,6 +17,7 @@ data class HistoryFilterState(
     val maxAmount: BigDecimal? = null,
     val recurrentOnly: Boolean = false,
     val creditOnly: Boolean = false,
+    val paymentMethod: PaymentMethod? = null,
 ) {
     val isActive: Boolean
         get() = query.isNotBlank() ||
@@ -23,7 +25,8 @@ data class HistoryFilterState(
             minAmount != null ||
             maxAmount != null ||
             recurrentOnly ||
-            creditOnly
+            creditOnly ||
+            paymentMethod != null
 }
 
 /**
@@ -60,6 +63,9 @@ internal fun filterTransactions(
         }
         if (filter.recurrentOnly && !transaction.isRecurrent) return@filter false
         if (filter.creditOnly && !transaction.isCredit) return@filter false
+        if (filter.paymentMethod != null && transaction.paymentMethod != filter.paymentMethod) {
+            return@filter false
+        }
 
         val absAmount = transaction.amount.abs()
         if (filter.minAmount != null && absAmount < filter.minAmount) return@filter false

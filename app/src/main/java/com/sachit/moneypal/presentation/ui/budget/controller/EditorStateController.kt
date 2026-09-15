@@ -1,5 +1,6 @@
 package com.sachit.moneypal.presentation.ui.budget.controller
 
+import com.sachit.moneypal.domain.model.PaymentMethod
 import com.sachit.moneypal.presentation.ui.editor.AnimState
 import com.sachit.moneypal.presentation.ui.editor.EditMode
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +22,7 @@ class EditorStateController {
         data class LockDraggableChanged(val locked: Boolean) : EditorChange
         data class RecurrentEnabledChanged(val enabled: Boolean) : EditorChange
         data class CreditEnabledChanged(val enabled: Boolean) : EditorChange
+        data class PaymentMethodChanged(val method: PaymentMethod) : EditorChange
         data class RecurrentDialogVisibilityChanged(val visible: Boolean) : EditorChange
         data class CreditCutoffDialogVisibilityChanged(val visible: Boolean) : EditorChange
         data class DuplicateDialogVisibilityChanged(val visible: Boolean) : EditorChange
@@ -40,6 +42,7 @@ class EditorStateController {
         is EditorIntent.SetLockDraggable -> setLockDraggable(intent.locked)
         is EditorIntent.SetRecurrentEnabled -> setRecurrentEnabled(intent.enabled)
         is EditorIntent.SetCreditEnabled -> setCreditEnabled(intent.enabled, hasCreditCardCutoffDay)
+        is EditorIntent.SetPaymentMethod -> setPaymentMethod(intent.method)
         is EditorIntent.DismissRecurrentDialog -> dismissRecurrentDialog()
         is EditorIntent.DismissCreditCutoffDialog -> dismissCreditCutoffDialog()
         is EditorIntent.DismissDuplicateConfirmDialog -> dismissDuplicateConfirmDialog()
@@ -74,6 +77,11 @@ class EditorStateController {
     private fun setRecurrentEnabled(enabled: Boolean): List<EditorChange> {
         _state.value = _state.value.copy(isRecurrentEnabled = enabled)
         return listOf(EditorChange.RecurrentEnabledChanged(enabled))
+    }
+
+    private fun setPaymentMethod(method: PaymentMethod): List<EditorChange> {
+        _state.value = _state.value.copy(selectedPaymentMethod = method)
+        return listOf(EditorChange.PaymentMethodChanged(method))
     }
 
     private fun setCreditEnabled(enabled: Boolean, hasCutoff: Boolean): List<EditorChange> {
@@ -217,6 +225,7 @@ data class EditorLocalState(
     val lockDraggable: Boolean = false,
     val isRecurrentEnabled: Boolean = false,
     val isCreditEnabled: Boolean = false,
+    val selectedPaymentMethod: PaymentMethod = PaymentMethod.OTHER,
     val showRecurrentDialog: Boolean = false,
     val showCreditCutoffDialog: Boolean = false,
     val showDuplicateConfirmDialog: Boolean = false,
@@ -235,6 +244,7 @@ sealed interface EditorIntent {
     data class SetLockDraggable(val locked: Boolean) : EditorIntent
     data class SetRecurrentEnabled(val enabled: Boolean) : EditorIntent
     data class SetCreditEnabled(val enabled: Boolean) : EditorIntent
+    data class SetPaymentMethod(val method: PaymentMethod) : EditorIntent
     data object DismissRecurrentDialog : EditorIntent
     data object DismissCreditCutoffDialog : EditorIntent
     data object DismissDuplicateConfirmDialog : EditorIntent

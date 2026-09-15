@@ -62,11 +62,14 @@ internal val CATEGORY_COLOR_CHOICES = listOf(
 fun CategoryStyleSheet(
     category: Category,
     onDismiss: () -> Unit,
-    onApply: (emoji: String?, colorArgb: String?) -> Unit,
+    onApply: (emoji: String?, colorArgb: String?, monthlyLimit: java.math.BigDecimal?) -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var selectedEmoji by remember { mutableStateOf(category.emoji) }
     var selectedColor by remember { mutableStateOf(category.colorArgb) }
+    var limitText by remember {
+        mutableStateOf(category.monthlyLimit?.toPlainString().orEmpty())
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -162,6 +165,22 @@ fun CategoryStyleSheet(
                 }
             }
 
+            Spacer(Modifier.height(16.dp))
+
+            Text(
+                text = stringResource(R.string.category_style_monthly_limit),
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(8.dp))
+            androidx.compose.material3.OutlinedTextField(
+                value = limitText,
+                onValueChange = { value -> limitText = value.filter { it.isDigit() || it == '.' || it == ',' } },
+                singleLine = true,
+                placeholder = { Text(stringResource(R.string.category_style_monthly_limit_hint)) },
+                modifier = Modifier.fillMaxWidth(),
+            )
+
             Spacer(Modifier.height(24.dp))
 
             Row(
@@ -172,14 +191,21 @@ fun CategoryStyleSheet(
                     onClick = {
                         selectedEmoji = null
                         selectedColor = null
-                        onApply(null, null)
+                        limitText = ""
+                        onApply(null, null, null)
                     },
                     modifier = Modifier.weight(1f),
                 ) {
                     Text(stringResource(R.string.category_style_clear))
                 }
                 TextButton(
-                    onClick = { onApply(selectedEmoji, selectedColor) },
+                    onClick = {
+                        val parsedLimit = limitText.trim()
+                            .replace(',', '.')
+                            .takeIf { it.isNotEmpty() }
+                            ?.let { runCatching { java.math.BigDecimal(it) }.getOrNull() }
+                        onApply(selectedEmoji, selectedColor, parsedLimit)
+                    },
                     modifier = Modifier.weight(1f),
                 ) {
                     Text(stringResource(R.string.category_style_apply))

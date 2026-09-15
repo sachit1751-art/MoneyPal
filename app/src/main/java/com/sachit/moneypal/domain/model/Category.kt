@@ -1,5 +1,7 @@
 package com.sachit.moneypal.domain.model
 
+import java.math.BigDecimal
+
 data class Category(
     val id: Long = 0,
     val name: String,
@@ -10,7 +12,9 @@ data class Category(
     /** Optional emoji avatar; null = default styling. */
     val emoji: String? = null,
     /** ARGB hex color for the avatar/chip; null = theme default. */
-    val colorArgb: String? = null
+    val colorArgb: String? = null,
+    /** Optional monthly envelope limit; null = unbounded. */
+    val monthlyLimit: BigDecimal? = null
 ) {
     companion object {
         fun create(
@@ -20,7 +24,8 @@ data class Category(
             lastUsedAt: Long? = null,
             createdAt: Long = System.currentTimeMillis(),
             emoji: String? = null,
-            colorArgb: String? = null
+            colorArgb: String? = null,
+            monthlyLimit: BigDecimal? = null
         ): Category = Category(
             id = 0,
             name = name,
@@ -29,7 +34,8 @@ data class Category(
             lastUsedAt = lastUsedAt,
             createdAt = createdAt,
             emoji = emoji,
-            colorArgb = colorArgb
+            colorArgb = colorArgb,
+            monthlyLimit = monthlyLimit
         )
     }
 }

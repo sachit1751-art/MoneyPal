@@ -31,7 +31,9 @@ data class Transaction(
     /** True when the user expects this expense to be refunded. */
     val refundExpected: Boolean = false,
     /** Instant (epoch millis) the refund arrived; null until settled. */
-    val refundedAt: Long? = null
+    val refundedAt: Long? = null,
+    /** Payment method used for this expense. */
+    val paymentMethod: PaymentMethod = PaymentMethod.OTHER
 ) {
     companion object {
         fun create(
@@ -52,7 +54,8 @@ data class Transaction(
             originalAmount: BigDecimal? = null,
             originalCurrency: String? = null,
             refundExpected: Boolean = false,
-            refundedAt: Long? = null
+            refundedAt: Long? = null,
+            paymentMethod: PaymentMethod = PaymentMethod.OTHER
         ): Transaction = Transaction(
             id = 0,
             amount = amount,
@@ -73,7 +76,8 @@ data class Transaction(
             originalAmount = originalAmount,
             originalCurrency = originalCurrency,
             refundExpected = refundExpected,
-            refundedAt = refundedAt
+            refundedAt = refundedAt,
+            paymentMethod = paymentMethod
         )
     }
 }
@@ -83,6 +87,13 @@ enum class RecurrentFrequency {
     WEEKLY,
     BIWEEKLY,
     MONTHLY
+}
+
+/** How an expense was paid. Legacy entries default to [OTHER]. */
+enum class PaymentMethod {
+    CASH,
+    CARD,
+    OTHER
 }
 
 data class PaidRecurrentOccurrence(

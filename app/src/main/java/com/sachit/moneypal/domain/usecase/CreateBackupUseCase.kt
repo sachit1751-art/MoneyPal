@@ -85,6 +85,7 @@ internal fun Transaction.toBackup(): BackupTransaction = BackupTransaction(
     originalCurrency = originalCurrency,
     refundExpected = refundExpected,
     refundedAt = refundedAt,
+    paymentMethod = paymentMethod.name,
 )
 
 internal fun Category.toBackup(): BackupCategory = BackupCategory(
@@ -95,6 +96,7 @@ internal fun Category.toBackup(): BackupCategory = BackupCategory(
     createdAt = createdAt,
     emoji = emoji,
     colorArgb = colorArgb,
+    monthlyLimit = monthlyLimit?.toPlainString(),
 )
 
 internal fun ArchivedBudget.toBackup(): BackupArchivedBudget = BackupArchivedBudget(

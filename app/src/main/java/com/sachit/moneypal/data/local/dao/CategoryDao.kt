@@ -37,6 +37,9 @@ interface CategoryDao {
     @Query("UPDATE category SET emoji = :emoji, colorArgb = :colorArgb WHERE id = :id")
     suspend fun setCategoryStyle(id: Long, emoji: String?, colorArgb: String?)
 
+    @Query("UPDATE category SET monthlyLimit = :monthlyLimit WHERE id = :id")
+    suspend fun setMonthlyLimit(id: Long, monthlyLimit: String?)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAllCategories(categories: List<CategoryEntity>): List<Long>
 }

@@ -172,6 +172,13 @@ class HistoryViewModel @Inject constructor(
             is HistoryFilterIntent.SetAmountFilter -> _filter.update { it.copy(minAmount = intent.min, maxAmount = intent.max) }
             is HistoryFilterIntent.ToggleRecurrentOnly -> _filter.update { it.copy(recurrentOnly = intent.enabled) }
             is HistoryFilterIntent.ToggleCreditOnly -> _filter.update { it.copy(creditOnly = intent.enabled) }
+            is HistoryFilterIntent.SetPaymentMethodFilter -> _filter.update {
+                if (it.paymentMethod == intent.method) {
+                    it.copy(paymentMethod = null)
+                } else {
+                    it.copy(paymentMethod = intent.method)
+                }
+            }
             is HistoryFilterIntent.ClearFilters -> _filter.value = HistoryFilterState()
         }
     }

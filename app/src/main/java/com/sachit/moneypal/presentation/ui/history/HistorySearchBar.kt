@@ -121,6 +121,17 @@ fun HistorySearchBar(
                     label = { Text(text = stringResource(R.string.history_filter_credit)) },
                 )
             }
+            com.sachit.moneypal.domain.model.PaymentMethod.entries.forEach { method ->
+                item {
+                    FilterChip(
+                        selected = filter.paymentMethod == method,
+                        onClick = {
+                            onProcessIntent(HistoryFilterIntent.SetPaymentMethodFilter(method))
+                        },
+                        label = { Text(text = method.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                    )
+                }
+            }
         }
 
         if (isFilterActive) {

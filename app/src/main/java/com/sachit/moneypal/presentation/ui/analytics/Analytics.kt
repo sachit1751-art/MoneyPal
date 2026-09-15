@@ -155,6 +155,8 @@ data class AnalyticsState(
     val graphGranularity: GraphGranularity = GraphGranularity.TOTAL,
     /** No-spend streak snapshot for the current period window. */
     val noSpendStreak: com.sachit.moneypal.domain.calculator.NoSpendStreak? = null,
+    /** Envelope progress for categories with a monthly limit (plan 001). */
+    val envelopeProgress: List<com.sachit.moneypal.domain.calculator.EnvelopeProgress> = emptyList(),
 )
 
 data class AnalyticsActions(
@@ -818,6 +820,16 @@ private fun AnalyticsCompactLayout(
                     .fillMaxWidth(),
             )
         }
+        if (state.envelopeProgress.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(16.dp))
+            EnvelopeProgressCard(
+                progressList = state.envelopeProgress,
+                currency = state.currencyCode,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth(),
+            )
+        }
         if (state.incomes.isNotEmpty()) {
             Spacer(modifier = Modifier.height(16.dp))
             IncomeAddedCard(
@@ -1091,6 +1103,77 @@ fun NoSpendStreakCard(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f),
                 )
+            }
+        }
+    }
+}
+
+/**
+ * Per-category envelope budgets (plan 001): progress bars for every category
+ * that has a monthly limit, warning color at >=90% and error color on overspend.
+ */
+@Composable
+fun EnvelopeProgressCard(
+    progressList: List<com.sachit.moneypal.domain.calculator.EnvelopeProgress>,
+    currency: String,
+    modifier: Modifier = Modifier,
+) {
+    val currencyFormat = com.sachit.moneypal.presentation.util.font.format.symbolOnlyCurrencyFormat(currency)
+    Surface(
+        modifier = modifier,
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = stringResource(com.sachit.moneypal.R.string.envelope_title),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            progressList.forEach { progress ->
+                val fraction = progress.fraction
+                val barColor = when {
+                    progress.isOverBudget -> MaterialTheme.colorScheme.error
+                    fraction >= com.sachit.moneypal.domain.calculator.EnvelopeCalculator.WARN_FRACTION ->
+                        MaterialTheme.colorScheme.tertiary
+                    else -> MaterialTheme.colorScheme.primary
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = progress.category.emoji ?: "\uD83D\uDCE6",
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            Text(
+                                text = progress.category.name,
+                                style = MaterialTheme.typography.labelLarge,
+                                modifier = Modifier.weight(1f),
+                            )
+                            Text(
+                                text = "${currencyFormat.format(progress.spent)} / ${currencyFormat.format(progress.limit)}",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = if (progress.isOverBudget) {
+                                    MaterialTheme.colorScheme.error
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                },
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        androidx.compose.material3.LinearProgressIndicator(
+                            progress = { fraction },
+                            modifier = Modifier.fillMaxWidth(),
+                            color = barColor,
+                            trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(10.dp))
             }
         }
     }

@@ -1362,10 +1362,10 @@ private fun MainScreenEditorSection(
         CategoryStyleSheet(
             category = stylingCategory!!,
             onDismiss = { stylingCategory = null },
-            onApply = { emoji, color ->
+            onApply = { emoji, color, monthlyLimit ->
                 actions.onProcessIntent(
                     MainScreenUiIntent.ProcessBudgetEditorIntent(
-                        BudgetEditorIntent.StyleCategory(stylingCategory!!.id, emoji, color),
+                        BudgetEditorIntent.StyleCategory(stylingCategory!!.id, emoji, color, monthlyLimit),
                     ),
                 )
                 stylingCategory = null
@@ -1435,6 +1435,13 @@ private fun MainScreenEditorSection(
             actions.onProcessIntent(
                 MainScreenUiIntent.ProcessBudgetEditorIntent(
                     BudgetEditorIntent.SetCreditEnabled(enabled),
+                ),
+            )
+        },
+        onPaymentMethodSelected = { method ->
+            actions.onProcessIntent(
+                MainScreenUiIntent.ProcessBudgetEditorIntent(
+                    BudgetEditorIntent.SetPaymentMethod(method),
                 ),
             )
         },

@@ -27,6 +27,8 @@ data class BudgetUiState(
     val isFirstLaunch: Boolean = true,
     val isRecurrentEnabled: Boolean = false,
     val isCreditEnabled: Boolean = false,
+    /** Payment method for the entry being composed (see [PaymentMethod]). */
+    val selectedPaymentMethod: com.sachit.moneypal.domain.model.PaymentMethod = com.sachit.moneypal.domain.model.PaymentMethod.OTHER,
     val showRecurrentDialog: Boolean = false,
     val showCreditCutoffDialog: Boolean = false,
     val showDuplicateConfirmDialog: Boolean = false,

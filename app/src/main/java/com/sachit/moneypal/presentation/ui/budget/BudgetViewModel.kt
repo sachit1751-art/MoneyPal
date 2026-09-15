@@ -9,6 +9,7 @@ import com.sachit.moneypal.domain.model.BudgetSettings
 import com.sachit.moneypal.domain.model.Category
 import com.sachit.moneypal.domain.model.CreditCard
 import com.sachit.moneypal.domain.model.PaidRecurrentOccurrence
+import com.sachit.moneypal.domain.model.PaymentMethod
 import com.sachit.moneypal.domain.model.RecurrentFrequency
 import com.sachit.moneypal.domain.model.Transaction
 import com.sachit.moneypal.domain.model.calculatePaymentDueDate
@@ -193,6 +194,7 @@ class BudgetViewModel @Inject constructor(
             isFirstLaunch = settings == null,
             isRecurrentEnabled = editorState.isRecurrentEnabled,
             isCreditEnabled = editorState.isCreditEnabled,
+            selectedPaymentMethod = editorState.selectedPaymentMethod,
             showRecurrentDialog = editorState.showRecurrentDialog,
             showCreditCutoffDialog = editorState.showCreditCutoffDialog,
             showDuplicateConfirmDialog = editorState.showDuplicateConfirmDialog,
@@ -453,6 +455,11 @@ class BudgetViewModel @Inject constructor(
                 hasCreditCardCutoffDay = uiState.value.budgetSettings?.creditCardCutoffDay != null,
             )
 
+            is BudgetEditorIntent.SetPaymentMethod -> editorStateController.process(
+                EditorIntent.SetPaymentMethod(intent.method),
+                hasCreditCardCutoffDay = uiState.value.budgetSettings?.creditCardCutoffDay != null,
+            )
+
             is BudgetEditorIntent.DismissRecurrentDialog -> editorStateController.process(
                 EditorIntent.DismissRecurrentDialog,
                 hasCreditCardCutoffDay = uiState.value.budgetSettings?.creditCardCutoffDay != null,
@@ -514,6 +521,7 @@ class BudgetViewModel @Inject constructor(
                 budgetSettings = uiState.value.budgetSettings,
                 resolveActivePeriodId = ::resolveActivePeriodId,
                 forceSave = forceSave,
+                paymentMethod = uiState.value.selectedPaymentMethod,
             )
             applyTransactionActions(actions)
         }
@@ -588,7 +596,12 @@ class BudgetViewModel @Inject constructor(
 
     private fun handleStyleCategory(intent: BudgetEditorIntent.StyleCategory) {
         viewModelScope.launch {
-            budgetRepository.setCategoryStyle(intent.categoryId, intent.emoji, intent.colorArgb)
+            budgetRepository.setCategoryStyle(
+                intent.categoryId,
+                intent.emoji,
+                intent.colorArgb,
+                intent.monthlyLimit,
+            )
         }
     }
 
@@ -746,6 +759,7 @@ private class TransactionHandlerImpl(
         budgetSettings: BudgetSettings?,
         resolveActivePeriodId: suspend () -> Long,
         skipDuplicateCheck: Boolean,
+        paymentMethod: PaymentMethod,
     ): ApplyTransactionResult = delegate.applyTransaction(
         input = input,
         isCalculation = isCalculation,
@@ -755,6 +769,7 @@ private class TransactionHandlerImpl(
         budgetSettings = budgetSettings,
         resolveActivePeriodId = this.resolveActivePeriodId,
         skipDuplicateCheck = skipDuplicateCheck,
+        paymentMethod = paymentMethod,
     )
 
     override suspend fun applyRecurrent(

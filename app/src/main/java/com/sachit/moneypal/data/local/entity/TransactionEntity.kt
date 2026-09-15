@@ -45,7 +45,10 @@ data class TransactionEntity(
     val refundExpected: Boolean = false,
     /** Epoch millis when the refund arrived; null until settled. */
     @ColumnInfo(defaultValue = "NULL")
-    val refundedAt: Long? = null
+    val refundedAt: Long? = null,
+    /** Payment method used (see [com.sachit.moneypal.domain.model.PaymentMethod]); legacy rows default to OTHER. */
+    @ColumnInfo(defaultValue = "'OTHER'")
+    val paymentMethod: String = "OTHER"
 ) {
     companion object {
         fun fromDomain(
@@ -62,7 +65,8 @@ data class TransactionEntity(
             isAdjustment: Boolean = false,
             attachmentUri: String? = null,
             originalAmount: String? = null,
-            originalCurrency: String? = null
+            originalCurrency: String? = null,
+            paymentMethod: String = "OTHER"
         ): TransactionEntity = TransactionEntity(
             id = 0,
             amount = amount,
@@ -78,7 +82,8 @@ data class TransactionEntity(
             isAdjustment = isAdjustment,
             attachmentUri = attachmentUri,
             originalAmount = originalAmount,
-            originalCurrency = originalCurrency
+            originalCurrency = originalCurrency,
+            paymentMethod = paymentMethod
         )
     }
 }

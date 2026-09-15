@@ -61,8 +61,8 @@ interface BudgetRepository {
 
     suspend fun hideCategory(name: String)
 
-    /** Sets (or clears, with nulls) the emoji/color avatar of a category. */
-    suspend fun setCategoryStyle(categoryId: Long, emoji: String?, colorArgb: String?)
+    /** Sets (or clears, with nulls) the emoji/color avatar and monthly envelope limit of a category. */
+    suspend fun setCategoryStyle(categoryId: Long, emoji: String?, colorArgb: String?, monthlyLimit: java.math.BigDecimal? = null)
 
     /** Marks an expense as expecting a refund (clears any refund timestamp). */
     suspend fun setRefundExpected(transactionId: Long, expected: Boolean)

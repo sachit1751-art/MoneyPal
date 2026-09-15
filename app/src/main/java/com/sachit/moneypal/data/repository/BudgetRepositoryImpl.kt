@@ -22,6 +22,7 @@ import com.sachit.moneypal.domain.model.BudgetSplitMode
 import com.sachit.moneypal.domain.model.BudgetState
 import com.sachit.moneypal.domain.model.Category
 import com.sachit.moneypal.domain.model.PaidRecurrentOccurrence
+import com.sachit.moneypal.domain.model.PaymentMethod
 import com.sachit.moneypal.domain.model.RecurrentFrequency
 import com.sachit.moneypal.domain.model.RemainingBudgetStrategy
 import com.sachit.moneypal.domain.model.Transaction
@@ -75,7 +76,12 @@ class BudgetRepositoryImpl @Inject constructor(
         originalAmount = this.originalAmount?.let { BigDecimal(it) },
         originalCurrency = this.originalCurrency,
         refundExpected = this.refundExpected,
-        refundedAt = this.refundedAt
+        refundedAt = this.refundedAt,
+        paymentMethod = try {
+            PaymentMethod.valueOf(this.paymentMethod)
+        } catch (_: Exception) {
+        	PaymentMethod.OTHER
+        }
     )
 
     private fun Transaction.toEntity(): TransactionEntity = TransactionEntity(
@@ -100,7 +106,8 @@ class BudgetRepositoryImpl @Inject constructor(
         originalAmount = this.originalAmount?.toPlainString(),
         originalCurrency = this.originalCurrency,
         refundExpected = this.refundExpected,
-        refundedAt = this.refundedAt
+        refundedAt = this.refundedAt,
+        paymentMethod = this.paymentMethod.name
     )
 
     private fun QueuedTransactionEntity.toDomain(): Transaction = Transaction(
@@ -189,7 +196,8 @@ class BudgetRepositoryImpl @Inject constructor(
         lastUsedAt = this.lastUsedAt,
         createdAt = this.createdAt,
         emoji = this.emoji,
-        colorArgb = this.colorArgb
+        colorArgb = this.colorArgb,
+        monthlyLimit = this.monthlyLimit?.let { BigDecimal(it) }
     )
 
     private fun Category.toEntity(): CategoryEntity = CategoryEntity(
@@ -200,7 +208,8 @@ class BudgetRepositoryImpl @Inject constructor(
         lastUsedAt = this.lastUsedAt,
         createdAt = this.createdAt,
         emoji = this.emoji,
-        colorArgb = this.colorArgb
+        colorArgb = this.colorArgb,
+        monthlyLimit = this.monthlyLimit?.toPlainString()
     )
 
     private fun ArchivedBudgetEntity.toDomain(): ArchivedBudget = ArchivedBudget(
@@ -388,8 +397,14 @@ class BudgetRepositoryImpl @Inject constructor(
         categoryDao.incrementUsage(name)
     }
 
-    override suspend fun setCategoryStyle(categoryId: Long, emoji: String?, colorArgb: String?) {
+    override suspend fun setCategoryStyle(
+        categoryId: Long,
+        emoji: String?,
+        colorArgb: String?,
+        monthlyLimit: BigDecimal?,
+    ) {
         categoryDao.setCategoryStyle(categoryId, emoji, colorArgb)
+        categoryDao.setMonthlyLimit(categoryId, monthlyLimit?.toPlainString())
     }
 
     override suspend fun findDuplicateTransaction(
