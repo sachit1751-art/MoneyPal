@@ -1,0 +1,9 @@
+- Nuevo: bloqueo biométrico opcional con huella o credencial del dispositivo
+- Nuevo: búsqueda y filtros por categoría e importe en el historial
+- Nuevo: copia de seguridad y restauración completas
+- Nuevo: repite un gasto pasado con un toque
+- Nuevo: registra reembolsos esperados
+- Nuevo: personaliza tus categorías con emojis y colores
+- Nuevo: chips de importes rápidos
+- Nuevo: racha de días sin gastar
+- Nuevo: alertas de ritmo de gasto por umbral
