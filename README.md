@@ -65,13 +65,28 @@
 | **Recurring Expenses & Subscriptions** <br/> Track subscriptions and recurring bills with automatic notifications. Notifications fire at a configurable time before each occurrence.                                                                                                                              | <img src="assets/recurrent_payment.png" alt="Recurring expenses" width="560" style="border-radius:26px;"/> |
 | **See your expenses and analyze them** <br/> Every expense is stored and grouped by date. Browse history organized into: current period transactions, upcoming recurrent expenses, and past period data. Analyze them viewing graphs and see how can you save using the in app recommendation.                    | <img src="assets/screenshot_3.png" alt="Expense history" width="560" style="border-radius:26px;"/>         |
 | **CSV Export** writes your full expense history to the Downloads folder including amount, date, comment, category, and recurrence settings.                                                                                                                                                                       | <img src="assets/screenshot_4.png" alt="Settings" width="560" style="border-radius:26px;"/>                |
-| **Widgets** are available for the app to quickly see components like: Minimum and Maximum spent, average per day and a countdown for the period end.                                                                                                                                                              | <img src="assets/screenshot_5.png" alt="Widgets" width="560" style="border-radius:26px;"/>                 |
+| **SMS Expense Capture** <br/> Bank SMS messages are parsed automatically into transactions: the merchant name is extracted, a category is suggested from your history, and low-confidence captures land in a review inbox instead of being saved blind. Duplicates are rejected atomically.                          | <img src="assets/screenshot_5.png" alt="Widgets" width="560" style="border-radius:26px;"/>                 |
+| **Refund Tracker & Savings Goals** <br/> Mark expenses as refund-expected, settle them with one tap (crediting your budget), and get weekly nudges for pending refunds. Set a savings goal and watch progress + estimated completion date in Analytics and on your home screen.                                    | <img src="assets/screenshot_2.png" alt="Analytics" width="560" style="border-radius:26px;"/>               |
+| **Widgets** are available for the app to quickly see components like: Minimum and Maximum spent, average per day, a countdown for the period end, and a savings-goal progress tracker.                                                                                                                              | <img src="assets/screenshot_5.png" alt="Widgets" width="560" style="border-radius:26px;"/>                 |
 | **Wear OS Companion App** <br/> Track expenses directly from your wrist. A full numpad interface optimized for round and square watch faces, a glanceable recent history, and notification sync with the phone app. See the [Project Overview](PROJECT_OVERVIEW.md#wear-os-integration) for architecture details. | <img src="assets/wear_1.png" alt="Wear OS" width="560" style="border-radius:26px;"/>                       |
 
 ## Contributing
 
 Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTING.md) for more
 information.
+
+## Building from source
+
+One command builds every distributable APK (foss, phone-wear flavor, watch app)
+into `dist/<version>-<sha>/` with unambiguous names:
+
+```bash
+scripts/build-apks.sh              # all three APKs
+scripts/build-apks.sh --with-tests # run the unit suite first, abort on failure
+```
+
+Requires JDK 17–21 and the Android SDK (platform 36). Full prerequisites and
+manual steps: [BUILD_LOCALLY.md](BUILD_LOCALLY.md).
 
 ## Translations
 

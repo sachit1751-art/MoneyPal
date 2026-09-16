@@ -1,10 +1,10 @@
 # MoneyPal — Implementation Plans (round 3)
 
 > Written against commit `ff6f773` (2026-09-16) by an `/improve` audit.
-> Plans 001–005 and 006–011 from earlier rounds have landed; this round covers
-> the audit findings plus 10 new features. **Watch-related (`:wear` module,
-> Wear tile, watch sync) features are intentionally excluded** per maintainer
-> request — the only cross-module work is a one-line APK rename (plan 020).
+> **Round 3 is fully executed** — every plan below is DONE and merged to `main`
+> (final plan landed 2026-09-17). Watch-related (`:wear` module, Wear tile,
+> watch sync) features were intentionally excluded per maintainer request —
+> the only cross-module work was a one-line APK rename (plan 020).
 
 Build prerequisites (every plan): JDK 17/21, Android SDK 36, flavor-qualified
 Gradle tasks. Global verification gate (run at the end of every plan):

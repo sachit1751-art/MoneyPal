@@ -54,6 +54,10 @@ and fail.
 # Compile everything
 ./gradlew :app:compileFossDebugKotlin :app:compileWearDebugKotlin :wear:compileDebugKotlin :sync-contract:compileKotlin
 
+# One-click: build all distributable release APKs into dist/<version>-<sha>/
+scripts/build-apks.sh              # foss + phone-wear + watch app
+scripts/build-apks.sh --with-tests # gate on the unit suite first
+
 # Compile test sources
 ./gradlew :app:compileFossDebugUnitTestKotlin :sync-contract:compileTestKotlin
 
@@ -67,9 +71,15 @@ and fail.
 Notes:
 
 - **Room schema renames**: exported schemas live in `app/schemas/<package>.data.local.AppDatabase/`.
+  The database is at **version 23** (plan 014 added SMS capture metadata columns).
   If the database class package ever changes, move the `*.json` files to the new
   folder too, or Room auto-migration generation fails with
   `Schema 'N.json' required for migration was not found`.
+- **Improvement plans**: `plans/` holds self-contained implementation plans
+  (audit-driven feature/fix work) with a status index in `plans/README.md`.
+  New plan files must keep numbering monotonic and update the index status
+  column when executed. Watch-related (`:wear` module) features are excluded
+  from plan rounds per maintainer request.
 - `preBuild` runs `:app:generateChangelogKotlin`, which regenerates
   `app/build/generated/source/changelog/GeneratedChangelog.kt` from
   `fastlane/metadata/android/*/changelogs/*.txt`. Commit `.txt` changelogs for
@@ -86,6 +96,11 @@ Notes:
 - **Commits**: conventional commits style (see `CONTRIBUTING.md`).
 - Keep date/budget/recurrence logic out of UI when reusable — it's unit-tested
   in `domain/`.
+- **SMS capture**: bank SMS parsing is a single generic parser
+  (`domain/sms/BankSmsParser`, generic-patterns design decided 2026-09-08 —
+  do NOT switch to per-bank templates). Merchant extraction, confidence
+  scoring and dedupe live in `domain/sms/`; ingestion goes through
+  `ProcessIncomingSmsUseCase` → `SmsIngestWorker`.
 
 ## Releases (fastlane)
 
