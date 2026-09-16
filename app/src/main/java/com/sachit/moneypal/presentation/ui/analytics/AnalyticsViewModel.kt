@@ -73,7 +73,6 @@ class AnalyticsViewModel @Inject constructor(
 
     private val noSpendStreakCalculator = com.sachit.moneypal.domain.calculator.NoSpendStreakCalculator()
     private val envelopeCalculator = com.sachit.moneypal.domain.calculator.EnvelopeCalculator()
-    private val savingsGoalCalculator = com.sachit.moneypal.domain.calculator.SavingsGoalCalculator()
 
     val uiState: StateFlow<AnalyticsUiState> = combine(
         budgetRepository.getBudgetSettings().distinctUntilChanged(),
@@ -454,9 +453,8 @@ class AnalyticsViewModel @Inject constructor(
     }
 
     /**
-     * Tracked savings-goal progress (plan 002): aggregates saved amounts from
-     * archived periods (per calendar month, using each period's savings share)
-     * plus the current period's partial savings.
+     * Tracked savings-goal progress (plan 002): delegates to the shared
+     * [SavingsGoalAggregator] so the widget updater and Analytics agree.
      */
     private fun computeSavingsGoalProgress(
         archives: List<ArchivedBudget>,
@@ -464,38 +462,15 @@ class AnalyticsViewModel @Inject constructor(
         transactions: List<Transaction>,
         userSettings: UserSettings,
         today: LocalDate,
-    ): com.sachit.moneypal.domain.calculator.SavingsGoalProgress? {
-        val goal = userSettings.savingsPreferences.savingsGoalAmount ?: return null
-        val savingsPct = userSettings.savingsPreferences.savingsPct
-        val monthlyTotals = LinkedHashMap<java.time.YearMonth, BigDecimal>()
-
-        fun accumulate(month: java.time.YearMonth, periodBudget: BigDecimal, spent: BigDecimal) {
-            val saved = periodBudget.subtract(spent)
-                .multiply(BigDecimal(savingsPct))
-                .divide(BigDecimal(100), 2, java.math.RoundingMode.HALF_UP)
-            monthlyTotals.merge(month, saved, BigDecimal::add)
-        }
-
-        for (archive in archives) {
-            if (archive.currencyCode != (settings?.currencyCode ?: archive.currencyCode)) continue
-            accumulate(java.time.YearMonth.from(archive.startDate), archive.totalBudget, archive.spentAmount)
-        }
-
-        if (settings != null) {
-            val periodSpend = transactions.filter {
-                it.amount > BigDecimal.ZERO && !it.isAdjustment && !it.isDeleted
-            }.sumOf { it.amount }
-            accumulate(java.time.YearMonth.from(settings.startDate), settings.totalBudget, periodSpend)
-        }
-
-        return savingsGoalCalculator.compute(
-            monthlyTotals = monthlyTotals.map { (month, saved) ->
-                com.sachit.moneypal.domain.calculator.SavingsGoalCalculator.MonthlyTotal(month, saved)
-            },
-            target = goal,
+    ): com.sachit.moneypal.domain.calculator.SavingsGoalProgress? =
+        com.sachit.moneypal.domain.calculator.SavingsGoalAggregator.compute(
+            archives = archives,
+            settings = settings,
+            transactions = transactions,
+            savingsPct = userSettings.savingsPreferences.savingsPct,
+            target = userSettings.savingsPreferences.savingsGoalAmount,
             today = today,
         )
-    }
 
     private fun findPreviousPeriodTransactions(
         allTransactions: List<Transaction>,

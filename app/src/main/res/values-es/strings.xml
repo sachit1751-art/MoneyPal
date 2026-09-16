@@ -167,6 +167,14 @@
     <!-- Widget Descriptions -->
     <string name="widget_budget_overview_description">Vea el presupuesto gastado y restante de un vistazo</string>
     <string name="widget_days_countdown_description">Días de cuenta regresiva restantes en el período presupuestario</string>
+    <string name="widget_savings_goal_title">Meta de ahorro</string>
+    <string name="widget_savings_goal_description">Sigue tu progreso hacia tu meta de ahorro</string>
+    <string name="widget_savings_goal_empty">Configura una meta de ahorro en Analíticas</string>
+    <string name="widget_savings_goal_of">de %1$s</string>
+    <string name="widget_savings_goal_percent">%1$d%%</string>
+    <string name="widget_savings_goal_eta">En camino para %1$s</string>
+    <string name="widget_savings_goal_preview_saved">$1,200</string>
+    <string name="widget_savings_goal_preview_meta">24% · En camino para mar 2027</string>
     <string name="widget_budget_detail_description">Resumen completo del presupuesto con la categoría principal y los días restantes</string>
     <string name="widget_heatmap_description">Calendario de mapas de calor para ver la distribución del gasto</string>
     <string name="widget_month_heatmap_description">Calendario del mapa de calor del mes actual</string>

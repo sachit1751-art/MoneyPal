@@ -223,6 +223,14 @@
     <string name="widget_complete_budget_preview_end" translatable="false">21 Mar</string>
     <string name="widget_budget_overview_description">See spent and remaining budget at a glance</string>
     <string name="widget_days_countdown_description">Countdown days remaining in budget period</string>
+    <string name="widget_savings_goal_title">Savings goal</string>
+    <string name="widget_savings_goal_description">Track progress toward your savings goal</string>
+    <string name="widget_savings_goal_empty">Set a savings goal in Analytics</string>
+    <string name="widget_savings_goal_of">of %1$s</string>
+    <string name="widget_savings_goal_percent">%1$d%%</string>
+    <string name="widget_savings_goal_eta">On track for %1$s</string>
+    <string name="widget_savings_goal_preview_saved">$1,200</string>
+    <string name="widget_savings_goal_preview_meta">24% · On track for Mar 2027</string>
     <string name="widget_budget_detail_description">Full budget overview with top category and days left</string>
     <string name="widget_heatmap_description">Heatmap calendar to see spending distribution</string>
     <string name="widget_month_heatmap_description">Current month heatmap calendar</string>

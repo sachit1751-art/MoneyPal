@@ -168,6 +168,14 @@
     <!-- Widget Descriptions -->
     <string name="widget_budget_overview_description">Consultez le budget dépensé et restant en un coup d\'œil</string>
     <string name="widget_days_countdown_description">Compte à rebours des jours restants dans la période budgétaire</string>
+    <string name="widget_savings_goal_title">Objectif d\'épargne</string>
+    <string name="widget_savings_goal_description">Suivez votre progression vers votre objectif d\'épargne</string>
+    <string name="widget_savings_goal_empty">Définissez un objectif d\'épargne dans Analyses</string>
+    <string name="widget_savings_goal_of">sur %1$s</string>
+    <string name="widget_savings_goal_percent">%1$d%%</string>
+    <string name="widget_savings_goal_eta">En bonne voie pour %1$s</string>
+    <string name="widget_savings_goal_preview_saved">1 200 $</string>
+    <string name="widget_savings_goal_preview_meta">24 % · En bonne voie pour mars 2027</string>
     <string name="widget_budget_detail_description">Aperçu complet du budget avec la catégorie principale et les jours restants</string>
     <string name="widget_heatmap_description">Calendrier thermique pour voir la répartition des dépenses</string>
     <string name="widget_month_heatmap_description">Calendrier thermique du mois en cours</string>

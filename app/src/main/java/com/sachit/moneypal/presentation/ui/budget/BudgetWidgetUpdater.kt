@@ -1,6 +1,9 @@
 package com.sachit.moneypal.presentation.ui.budget
 
 import android.content.Context
+import com.sachit.moneypal.data.repository.BudgetRepository
+import com.sachit.moneypal.data.repository.SettingsRepository
+import com.sachit.moneypal.domain.calculator.SavingsGoalAggregator
 import com.sachit.moneypal.domain.model.Transaction
 import com.sachit.moneypal.presentation.widget.DailySpending
 import com.sachit.moneypal.presentation.widget.MonthHeatmapData
@@ -13,9 +16,11 @@ import com.sachit.moneypal.wearsync.WearBudgetStateHook
 import com.sachit.moneypal.presentation.widget.updateHeatmapWidget
 import com.sachit.moneypal.presentation.widget.updateMinMaxSpentWidget
 import com.sachit.moneypal.presentation.widget.updateMonthHeatmapWidget
+import com.sachit.moneypal.presentation.widget.updateSavingsGoalWidget
 import dagger.hilt.android.qualifiers.ApplicationContext
 import logcat.asLog
 import logcat.logcat
+import kotlinx.coroutines.flow.first
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.ZoneId
@@ -25,6 +30,8 @@ import javax.inject.Inject
 class BudgetWidgetUpdater @Inject constructor(
     @ApplicationContext private val context: Context,
     private val wearBudgetStateHooks: Set<@JvmSuppressWildcards WearBudgetStateHook>,
+    private val budgetRepository: BudgetRepository,
+    private val settingsRepository: SettingsRepository,
 ) {
 
     suspend fun update(baseState: BudgetUiState) {
@@ -46,12 +53,42 @@ class BudgetWidgetUpdater @Inject constructor(
         updateMonthHeatmapWidget(context, heatmapData.currentMonthHeatmap, heatmapData.currentMonthTotalSpent, currency)
         updateMinMaxSpentWidget(context, currentPeriodTransactions, currency)
         updateAverageSpendWidget(context, currentPeriodTransactions, currency, startDate, endDate)
+        updateSavingsGoalWidgetIfPresent(context, baseState, currency)
 
         // Plan 010: push the same state to Wear hooks (no-op on foss). Fire and
         // forget per hook — a slow/failing send must not block widget updates.
         wearBudgetStateHooks.forEach { hook ->
             runCatching { hook.onBudgetStateChanged(baseState) }
                 .onFailure { e -> logcat { "WearBudgetStateHook failed\n${e.asLog()}" } }
+        }
+    }
+
+    /**
+     * Plan 022: refresh the savings-goal widget from the same primitives the
+     * Analytics screen uses (shared [SavingsGoalAggregator]). Reads happen on
+     * first-access; a failure must never break the other widget updates.
+     */
+    private suspend fun updateSavingsGoalWidgetIfPresent(
+        context: Context,
+        baseState: BudgetUiState,
+        currency: String,
+    ) {
+        runCatching {
+            val settings = baseState.budgetSettings ?: return
+            val userSettings = settingsRepository.observeSettings().first()
+            val archives = budgetRepository.getArchivedBudgets().first()
+            val transactions = filterCurrentPeriodTransactions(baseState)
+            val progress = SavingsGoalAggregator.compute(
+                archives = archives,
+                settings = settings,
+                transactions = transactions,
+                savingsPct = userSettings.savingsPreferences.savingsPct,
+                target = userSettings.savingsPreferences.savingsGoalAmount,
+                today = LocalDate.now(),
+            )
+            updateSavingsGoalWidget(context, progress, currency)
+        }.onFailure { e ->
+            logcat { "SavingsGoalWidget update failed\n${e.asLog()}" }
         }
     }
 

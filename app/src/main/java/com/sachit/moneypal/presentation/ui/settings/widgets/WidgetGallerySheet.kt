@@ -45,6 +45,7 @@ import com.sachit.moneypal.presentation.widget.DaysCountdownWidgetReceiver
 import com.sachit.moneypal.presentation.widget.ExpenseWidgetReceiver
 import com.sachit.moneypal.presentation.widget.HeatmapWidgetReceiver
 import com.sachit.moneypal.presentation.widget.MinMaxSpentWidgetReceiver
+import com.sachit.moneypal.presentation.widget.SavingsGoalWidgetReceiver
 import com.sachit.moneypal.presentation.widget.MonthHeatmapWidgetReceiver
 
 private data class WidgetGalleryItem(
@@ -108,6 +109,12 @@ private val widgetGalleryItems = listOf(
         titleRes = R.string.widget_days_countdown_title,
         descriptionRes = R.string.widget_days_countdown_description,
         receiver = DaysCountdownWidgetReceiver::class.java,
+    ),
+    WidgetGalleryItem(
+        previewLayoutRes = R.layout.widget_savings_goal_preview,
+        titleRes = R.string.widget_savings_goal_title,
+        descriptionRes = R.string.widget_savings_goal_description,
+        receiver = SavingsGoalWidgetReceiver::class.java,
     ),
 )
 

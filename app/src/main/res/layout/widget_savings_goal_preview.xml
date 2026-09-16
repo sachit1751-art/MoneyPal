@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground"
+    android:padding="8dp">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#263F7DD5">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="14dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/widget_savings_goal_preview_saved"
+                android:textColor="#1B1B21"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/widget_savings_goal_title"
+                android:textColor="#5F6673"
+                android:textSize="13sp" />
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="6dp"
+                android:layout_marginTop="8dp"
+                android:background="#143F7DD5">
+
+                <FrameLayout
+                    android:layout_width="60dp"
+                    android:layout_height="match_parent"
+                    android:background="#3F7DD5" />
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/widget_savings_goal_preview_meta"
+                android:textColor="#5F6673"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </FrameLayout>
+</FrameLayout>

@@ -34,7 +34,7 @@ conventional commits, one commit per plan.
 | [019](019-monthly-report-export.md) | Monthly report share (text) | feature | 7 | — | DONE (pre-existing: toShareText + share intent) |
 | [020](020-apk-rename-and-build-script.md) | APK rename + one-click build script wiring | DX (audit #7/#8) | 8 | — | DONE 2026-09-16 |
 | [021](021-quick-expense-presets.md) | Quick-amount presets on the numpad | feature | 9 | — | DONE 2026-09-16 (learned presets; manual pinning deferred) |
-| [022](022-savings-goal-progress-widget.md) | Savings goal home-screen widget | feature | 10 | — | TODO (written 2026-09-16) |
+| [022](022-savings-goal-progress-widget.md) | Savings goal home-screen widget | feature | 10 | — | DONE (2026-09-17) |
 
 ## Recommended execution order
 
