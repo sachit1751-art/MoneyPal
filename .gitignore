@@ -45,3 +45,4 @@ specs/
 .artifacts/
 /fastlane/minus-app-504107-53ece865faf4.json
 /fastlane/moneypal-play-service-account.json
+dist/

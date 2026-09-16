@@ -2,6 +2,19 @@
 
 Clear, brief instructions to build the APK on your machine.
 
+## 0. One-click: all APKs
+
+```bash
+scripts/build-apks.sh              # foss + phone-wear + watch app
+scripts/build-apks.sh --with-tests # gate on the unit suite first
+```
+
+Detects JDK 17–21 and the SDK, builds everything, and copies the APKs to
+`dist/<version>-<sha>/` with unambiguous names
+(`MoneyPal-v…`, `MoneyPal-phone-wear-v…`, `MoneyPal-watchapp-v…`).
+This is for local builds and testing — releases still go through fastlane
+(changelog guard, signing).
+
 ## 1. Prerequisites
 
 | Tool        | Version       | Notes                                                          |

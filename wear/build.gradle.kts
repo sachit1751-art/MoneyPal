@@ -71,7 +71,7 @@ android {
 		outputs.all {
 			val output = this as? BaseVariantOutputImpl
 			if (output != null) {
-				output.outputFileName = "MoneyPal-WearOS-v$appVersionName.apk"
+				output.outputFileName = "MoneyPal-watchapp-v$appVersionName.apk"
 			}
 		}
 	}

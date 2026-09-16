@@ -171,7 +171,7 @@ android {
             if (output != null) {
                 val flavorName = name.replaceFirstChar { it.titlecase() }
                 output.outputFileName = if (flavorName.contains("wear", ignoreCase = true)) {
-                    "MoneyPal-WearOS-v$appVersionName.apk"
+                    "MoneyPal-phone-wear-v$appVersionName.apk"
                 } else {
                     "MoneyPal-v$appVersionName.apk"
                 }

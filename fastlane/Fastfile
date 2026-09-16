@@ -178,7 +178,8 @@ platform :android do
     gradle(task: ":app:assembleFossRelease")
 
     apk_paths = Dir[
-      File.expand_path("../app/build/outputs/apk/{wear,foss}/release/*.apk", __dir__)
+      File.expand_path("../app/build/outputs/apk/{wear,foss}/release/*.apk", __dir__),
+      File.expand_path("../wear/build/outputs/apk/release/*.apk", __dir__)
     ].select { |path| File.exist?(path) }
     UI.user_error!("No se encontraron APKs generados por Gradle") if apk_paths.empty?
 
