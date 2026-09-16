@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sachit.moneypal.R
 import com.sachit.moneypal.data.repository.SettingsRepository
+import com.sachit.moneypal.domain.calculator.RecurringExpenseCalculator
+import com.sachit.moneypal.domain.calculator.RecurringLinker
 import com.sachit.moneypal.domain.model.BudgetSettings
 import com.sachit.moneypal.domain.model.Category
 import com.sachit.moneypal.domain.model.PaidRecurrentOccurrence
@@ -16,6 +18,7 @@ import com.sachit.moneypal.domain.usecase.PersistBudgetSettingsUseCase
 import com.sachit.moneypal.domain.usecase.SkipNextOccurrenceUseCase
 import com.sachit.moneypal.presentation.ui.budget.BudgetStateCalculator
 import com.sachit.moneypal.presentation.ui.budget.BudgetTransactionHandler
+import com.sachit.moneypal.presentation.ui.theme.component.expense.UpcomingRecurrentItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
@@ -388,13 +391,29 @@ class HistoryViewModel @Inject constructor(
             budgetStateCalculator.calculateBudgetState(s, periodTransactions, today, paidOccurrences)
         }
 
+        // Plan 016: link ad-hoc spend to recurring templates (amount+date).
+        val recurringLinker = RecurringLinker(RecurringExpenseCalculator())
+        val links = recurringLinker.link(
+            adHoc = displayTx,
+            templates = displayTx,
+            today = today,
+        )
+        val linkedTemplateIds = links.values.toSet()
+        val adHocById = displayTx.associateBy { it.id }
+
+        fun withPaidCycles(items: List<UpcomingRecurrentItem>) = items.map { item ->
+            val paid = recurringLinker.paidCyclesThisYear(item.transaction, links, adHocById, today)
+            if (paid > 0) item.copy(paidCyclesThisYear = paid) else item
+        }
+
         val (upcomingInPeriod, futureOutOfPeriod) = buildUpcomingRecurrentItems(
             transactions = displayTx,
             budgetStartDate = startDate,
             budgetEndDate = endDate,
             today = today,
             paidOccurrences = paidOccurrences,
-        )
+            linkedTemplateIds = linkedTemplateIds,
+        ).let { (inPeriod, outOfPeriod) -> withPaidCycles(inPeriod) to withPaidCycles(outOfPeriod) }
 
         val categoryNames = categories.associate { it.id to it.name }
         val groupedCurrent: Map<LocalDate?, List<Transaction>>

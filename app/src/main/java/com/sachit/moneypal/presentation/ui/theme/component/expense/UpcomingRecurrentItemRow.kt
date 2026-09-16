@@ -49,6 +49,8 @@ data class UpcomingRecurrentItem(
     val transaction: Transaction,
     val nextChargeDate: LocalDate,
     val isInCurrentPeriod: Boolean,
+    /** Ad-hoc payments linked to this subscription this year (plan 016). */
+    val paidCyclesThisYear: Int? = null,
 )
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalSharedTransitionApi::class)
@@ -73,6 +75,7 @@ fun UpcomingRecurrentItemRow(
 ) {
     val transaction = item.transaction
     val nextChargeDate = item.nextChargeDate
+    val paidCyclesThisYear = item.paidCyclesThisYear
 
     val daysUntil = ChronoUnit.DAYS.between(LocalDate.now(), nextChargeDate)
     val relativeChargeDateText = when {
@@ -187,6 +190,13 @@ fun UpcomingRecurrentItemRow(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f * alpha)
                             )
+                            if (paidCyclesThisYear != null && paidCyclesThisYear > 0) {
+                                Text(
+                                    text = stringResource(R.string.recurrent_paid_cycles, paidCyclesThisYear),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f * alpha)
+                                )
+                            }
                         }
 
                         Text(

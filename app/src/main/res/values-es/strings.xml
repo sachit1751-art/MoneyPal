@@ -439,6 +439,7 @@
     <string name="recurrent_payments_divider_title_current_period">Pagos recurrentes en este periodo</string>
     <!-- Upcoming Recurrent Item -->
     <string name="upcoming_recurrent_today">Hoy</string>
+    <string name="recurrent_paid_cycles">Pagado %1$d veces este año</string>
     <string name="upcoming_recurrent_tomorrow">Mañana</string>
     <string name="upcoming_recurrent_in_days">En %1$d días</string>
     <string name="upcoming_recurrent_in_weeks">En %1$d semanas</string>

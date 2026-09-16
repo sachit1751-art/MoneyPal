@@ -153,6 +153,7 @@
     <string name="history_snackbar_mark_paid_failed">Could not mark transaction as paid</string>
     <string name="recurrent_skip_next">Skip next occurrence</string>
     <string name="recurrent_skipped_snackbar">Occurrence skipped — it will not be counted</string>
+    <string name="recurrent_paid_cycles">Paid %1$d ad-hoc this year</string>
     <string name="recurrent_paused_badge">Paused — reminders and due-today totals are off until you resume</string>
     <string name="category_suggestion_chip">Suggested: %1$s</string>
     <string name="history_search_hint">Search transactions…</string>

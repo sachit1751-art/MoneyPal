@@ -53,6 +53,8 @@ internal fun buildUpcomingRecurrentItems(
     budgetEndDate: LocalDate,
     today: LocalDate,
     paidOccurrences: Set<PaidRecurrentOccurrence> = emptySet(),
+    /** Template ids with ≥1 linked ad-hoc row inside that cycle's window (plan 016). */
+    linkedTemplateIds: Set<Long> = emptySet(),
 ): Pair<List<UpcomingRecurrentItem>, List<UpcomingRecurrentItem>> {
     val recurrentTransactions = transactions.filter { it.isRecurrent }
 
@@ -63,7 +65,8 @@ internal fun buildUpcomingRecurrentItems(
         }
         nextDate?.let { date ->
             if (!date.isBefore(budgetStartDate) && !date.isAfter(budgetEndDate) &&
-                !paidOccurrences.containsOccurrence(transaction.id, date)
+                !paidOccurrences.containsOccurrence(transaction.id, date) &&
+                transaction.id !in linkedTemplateIds
             ) {
                 UpcomingRecurrentItem(
                     transaction = transaction,

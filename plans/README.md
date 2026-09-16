@@ -28,7 +28,7 @@ conventional commits, one commit per plan.
 | [013](013-sms-parser-coverage.md) | SMS parser: real-world format coverage | feature (user priority) | 1 | — | DONE 2026-09-16 |
 | [014](014-sms-smart-capture.md) | SMS capture: merchant + auto-category + confidence | feature (user priority) | 2 | 012, 013 | DONE 2026-09-16 (room 22→23) |
 | [015](015-sms-review-inbox.md) | Low-confidence SMS review inbox | feature | 3 | 014 | DONE 2026-09-16 |
-| [016](016-recurring-merchant-aliases.md) | Recurring payment merchant aliases | feature | 4 | — | TODO |
+| [016](016-recurring-merchant-aliases.md) | Recurring payment merchant aliases | feature | 4 | — | DONE 2026-09-16 |
 | [017](017-refund-tracker.md) | Refund tracker completion flow | feature | 5 | — | TODO |
 | [018](018-burn-rate-forecast-card.md) | Analytics: burn-rate forecast card | feature | 6 | — | TODO |
 | [019](019-monthly-report-export.md) | Monthly report share (text) | feature | 7 | — | TODO |
