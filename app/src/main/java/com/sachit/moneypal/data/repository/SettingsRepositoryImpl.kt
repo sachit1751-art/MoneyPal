@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.sachit.moneypal.domain.model.BudgetPeriod
 import com.sachit.moneypal.domain.model.ContrastMode
 import com.sachit.moneypal.domain.usecase.BudgetThreshold
@@ -71,7 +72,7 @@ const val TUTORIAL_BOX_COMPLETED_KEY_NAME = "tutorial_box_completed"
 const val ANALYTICS_TUTORIAL_COMPLETED_KEY_NAME = "analytics_tutorial_completed"
 const val ANALYTICS_SPENDS_TUTORIAL_COMPLETED_KEY_NAME = "analytics_spends_tutorial_completed"
 const val SMS_CAPTURE_ENABLED_KEY_NAME = "sms_capture_enabled"
-const val SMS_SEEN_PREFIX_KEY_NAME = "sms_seen_"
+const val SMS_SEEN_SET_KEY_NAME = "sms_seen_set"
 const val THRESHOLD_ALERTS_ENABLED_KEY_NAME = "threshold_alerts_enabled"
 const val ENVELOPE_ALERTS_ENABLED_KEY_NAME = "envelope_alerts_enabled"
 const val DAILY_ALERTED_THRESHOLD_KEY_NAME = "daily_alerted_threshold"
@@ -144,6 +145,7 @@ private val ANALYTICS_TUTORIAL_COMPLETED = booleanPreferencesKey(ANALYTICS_TUTOR
 private val ANALYTICS_SPENDS_TUTORIAL_COMPLETED = booleanPreferencesKey(ANALYTICS_SPENDS_TUTORIAL_COMPLETED_KEY_NAME)
 private val BUDGET_SPLIT_VIEW_PERIOD = stringPreferencesKey(BUDGET_SPLIT_VIEW_PERIOD_KEY_NAME)
 private val SMS_CAPTURE_ENABLED = booleanPreferencesKey(SMS_CAPTURE_ENABLED_KEY_NAME)
+private val SMS_SEEN_SET = stringSetPreferencesKey(SMS_SEEN_SET_KEY_NAME)
 private val THRESHOLD_ALERTS_ENABLED =
     booleanPreferencesKey(THRESHOLD_ALERTS_ENABLED_KEY_NAME)
 private val ENVELOPE_ALERTS_ENABLED =
@@ -490,13 +492,36 @@ class SettingsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun isSmsSeen(key: String): Boolean {
-        return dataStore.data.first()[booleanPreferencesKey(SMS_SEEN_PREFIX_KEY_NAME + key)] ?: false
+        return loadSmsSeenSet().contains(key)
     }
 
     override suspend fun markSmsSeen(key: String) {
+        val next = loadSmsSeenSet() + key
+        val bounded = if (next.size > SMS_SEEN_MAX) next.drop(next.size - SMS_SEEN_MAX).toSet() else next
         dataStore.edit { preferences ->
-            preferences[booleanPreferencesKey(SMS_SEEN_PREFIX_KEY_NAME + key)] = true
+            preferences[SMS_SEEN_SET] = bounded
         }
+        smsSeenCache.clear()
+        smsSeenCache.addAll(bounded)
+    }
+
+    /**
+     * Bounded dedupe memory for SMS captures (plan 012): one string-set
+     * preference holding the last [SMS_SEEN_MAX] dedupe keys instead of one
+     * boolean preference per key (which grew forever). Old per-key entries are
+     * abandoned, not migrated — keys are minute-bucketed and transient.
+     */
+    private val smsSeenCache = mutableSetOf<String>()
+
+    private suspend fun loadSmsSeenSet(): Set<String> {
+        if (smsSeenCache.isEmpty()) {
+            smsSeenCache.addAll(dataStore.data.first()[SMS_SEEN_SET] ?: emptySet())
+        }
+        return smsSeenCache
+    }
+
+    private companion object {
+        const val SMS_SEEN_MAX = 500
     }
 
     override fun observeBudgetEndDate(): Flow<Long?> {

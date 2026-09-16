@@ -21,14 +21,16 @@ import javax.inject.Inject
  *   `isAdjustment = true`) — the same semantics as a manual `+100` entry.
  *
  * Dedupe: `sender + minute-bucket + amount + direction` hash stored via
- * [SettingsRepository.markSmsSeen] (capped? no — but keys are tiny and per-minute
- * buckets; DataStore handles the size). The dedupe write happens AFTER the insert
- * succeeds so a crash between insert and dedupe-mark re-inserts rather than loses.
+ * [SettingsRepository.markSmsSeen] (bounded 500-key set — see plan 012). The
+ * dedupe write happens AFTER the insert succeeds so a crash between insert and
+ * dedupe-mark re-inserts rather than loses, but a dedupe-mark failure is
+ * swallowed: `Result.Error` is reserved for insert failures (which are safe to
+ * retry because nothing was inserted).
  *
- * Period handling mirrors [com.sachit.moneypal.presentation.ui.budget.BudgetTransactionHandler]:
- * when **today** is past the period end, the transaction is queued for the next
- * period instead (the SMS timestamp may lag; the period assignment follows the
- * day of capture, same as manual entry).
+ * Period handling: the SMS carries its own timestamp, so period assignment
+ * follows the SMS capture date (not `LocalDate.now()`) — a message delivered
+ * after midnight lands in the period its transaction belongs to, and one
+ * captured for a closed period is queued for the next period instead.
  */
 class ProcessIncomingSmsUseCase @Inject constructor(
     private val budgetRepository: BudgetRepository,
@@ -78,8 +80,10 @@ class ProcessIncomingSmsUseCase @Inject constructor(
 
         return try {
             val budgetSettings = budgetRepository.getBudgetSettingsSync()
+            val captureDate = Instant.ofEpochMilli(match.timestampMillis)
+                .atZone(ZoneId.systemDefault()).toLocalDate()
             val isPastPeriodEnd =
-                budgetSettings != null && LocalDate.now().isAfter(budgetSettings.getPeriodEndDate())
+                budgetSettings != null && captureDate.isAfter(budgetSettings.getPeriodEndDate())
 
             val transaction = Transaction.create(
                 amount = amount,
@@ -97,8 +101,16 @@ class ProcessIncomingSmsUseCase @Inject constructor(
                 logcat(TAG) { "Captured SMS ${match.sender} ${match.amount}" }
             }
 
-            // Mark seen only after a successful insert (re-delivery re-inserts rather than loses).
-            settingsRepository.markSmsSeen(dedupeKey)
+            // Mark seen only after a successful insert (re-delivery re-inserts rather
+            // than loses). But a dedupe-mark failure must NOT fail the result: the
+            // expense IS recorded, and the worker maps Result.Error to retry, which
+            // would insert it a second time (plan 012).
+            try {
+                settingsRepository.markSmsSeen(dedupeKey)
+            } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
+                logcat(TAG) { "markSmsSeen failed after insert (not retrying): ${e.message}" }
+            }
 
             Result.Captured(
                 transactionId = transaction.id,
@@ -109,7 +121,7 @@ class ProcessIncomingSmsUseCase @Inject constructor(
         } catch (e: Exception) {
             if (e is kotlinx.coroutines.CancellationException) throw e
             logcat(TAG) { "SMS capture failed: ${e.message}" }
-            Result.Error(e.message ?: "Capture failed")
+            Result.Error("insert:${e.message ?: "Capture failed"}")
         }
     }
 

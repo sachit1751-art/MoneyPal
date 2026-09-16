@@ -151,6 +151,90 @@ class BankSmsParserTest {
         assertThat(parse("")).isNull()
     }
 
+    // ---------- plan 013: real-world format coverage ----------
+
+    @Test
+    fun `parses charged verb`() {
+        val match = parse("Your card XX1234 was charged for Rs 899 on 12-03")
+        assertThat(match).isNotNull()
+        assertThat(match!!.amount).isEqualTo(BigDecimal("899"))
+        assertThat(match.isCredit).isFalse()
+    }
+
+    @Test
+    fun `parses autopay mandate debit`() {
+        val match = parse("AutoPay of Rs 299 executed for Netflix")
+        assertThat(match).isNotNull()
+        assertThat(match!!.amount).isEqualTo(BigDecimal("299"))
+        assertThat(match.isCredit).isFalse()
+    }
+
+    @Test
+    fun `parses emi debit`() {
+        val match = parse("EMI of Rs 4,500 deducted from a/c XX")
+        assertThat(match).isNotNull()
+        assertThat(match!!.amount).isEqualTo(BigDecimal("4500"))
+    }
+
+    @Test
+    fun `parses txn-of connector without keyword`() {
+        val match = parse("Txn of Rs 1,234.00 on ICICI card")
+        assertThat(match).isNotNull()
+        assertThat(match!!.amount).isEqualTo(BigDecimal("1234.00"))
+        assertThat(match.isCredit).isFalse()
+    }
+
+    @Test
+    fun `balance amounts are skipped`() {
+        val match = parse("Bal: Rs 5,000. Rs 300 debited at Amazon")
+        assertThat(match).isNotNull()
+        assertThat(match!!.amount).isEqualTo(BigDecimal("300"))
+    }
+
+    @Test
+    fun `available limit noise skipped`() {
+        val match = parse("Avl lmt Rs 1,00,000. Spent Rs 250 at Zomato")
+        assertThat(match).isNotNull()
+        assertThat(match!!.amount).isEqualTo(BigDecimal("250"))
+    }
+
+    @Test
+    fun `trailing slash-dash parses`() {
+        val match = parse("Rs 500.00/- debited from a/c XX99")
+        assertThat(match).isNotNull()
+        assertThat(match!!.amount).isEqualTo(BigDecimal("500.00"))
+    }
+
+    @Test
+    fun `upi paid-to parses`() {
+        val match = parse("Paid Rs 150 to UPI ID rahul@ybl")
+        assertThat(match).isNotNull()
+        assertThat(match!!.isCredit).isFalse()
+        assertThat(match.amount).isEqualTo(BigDecimal("150"))
+    }
+
+    @Test
+    fun `payment-received credit still works`() {
+        val match = parse("Payment of Rs 999 received on card XX")
+        assertThat(match).isNotNull()
+        assertThat(match!!.isCredit).isTrue()
+        assertThat(match.amount).isEqualTo(BigDecimal("999"))
+    }
+
+    @Test
+    fun `isLikelyBankSender heuristics`() {
+        assertThat(BankSmsParser.isLikelyBankSender("JD-HDFC")).isTrue()
+        assertThat(BankSmsParser.isLikelyBankSender("+919595000000")).isTrue()
+        assertThat(BankSmsParser.isLikelyBankSender("404040")).isTrue()
+        assertThat(BankSmsParser.isLikelyBankSender("Google")).isFalse()
+        assertThat(BankSmsParser.isLikelyBankSender("")).isFalse()
+    }
+
+    @Test
+    fun `otp message still rejected after coverage expansion`() {
+        assertThat(parse("Your OTP is 123456")).isNull()
+    }
+
     // ---------- amount + dedupe helpers ----------
 
     @Test

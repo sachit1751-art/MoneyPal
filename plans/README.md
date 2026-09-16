@@ -24,8 +24,8 @@ conventional commits, one commit per plan.
 
 | # | Plan | Type | Priority | Depends on | Status |
 |:--|:-----|:-----|:---------|:-----------|:-------|
-| [012](012-sms-dedupe-atomic.md) | SMS dedupe: atomic + bounded store | fix (audit #1/#2) | 0 — correctness first | — | TODO |
-| [013](013-sms-parser-coverage.md) | SMS parser: real-world format coverage | feature (user priority) | 1 | — | TODO |
+| [012](012-sms-dedupe-atomic.md) | SMS dedupe: atomic + bounded store | fix (audit #1/#2) | 0 — correctness first | — | DONE 2026-09-16 |
+| [013](013-sms-parser-coverage.md) | SMS parser: real-world format coverage | feature (user priority) | 1 | — | DONE 2026-09-16 |
 | [014](014-sms-smart-capture.md) | SMS capture: merchant + auto-category + confidence | feature (user priority) | 2 | 012, 013 | TODO |
 | [015](015-sms-review-inbox.md) | Low-confidence SMS review inbox | feature | 3 | 014 | TODO |
 | [016](016-recurring-merchant-aliases.md) | Recurring payment merchant aliases | feature | 4 | — | TODO |
@@ -34,7 +34,7 @@ conventional commits, one commit per plan.
 | [019](019-monthly-report-export.md) | Monthly report share (text) | feature | 7 | — | TODO |
 | [020](020-apk-rename-and-build-script.md) | APK rename + one-click build script wiring | DX (audit #7/#8) | 8 | — | TODO |
 | [021](021-quick-expense-presets.md) | Quick-amount presets on the numpad | feature | 9 | — | TODO |
-| [022](022-savings-goal-progress-widget.md) | Savings goal home-screen widget | feature | 10 | — | TODO |
+| [022](022-savings-goal-progress-widget.md) | Savings goal home-screen widget | feature | 10 | — | TODO (written 2026-09-16) |
 
 ## Recommended execution order
 

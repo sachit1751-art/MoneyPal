@@ -49,7 +49,9 @@ class SmsIngestWorker @AssistedInject constructor(
                 ProcessIncomingSmsUseCase.Result.Ignored -> Result.success()
                 is ProcessIncomingSmsUseCase.Result.Error -> {
                     logcat(TAG) { "Ingest error: ${result.reason}" }
-                    Result.retry()
+                    // Only insert failures are safe to retry (nothing was inserted).
+                    // Any other error would duplicate the capture on retry (plan 012).
+                    if (result.reason.startsWith("insert:")) Result.retry() else Result.success()
                 }
             }
         } catch (e: Exception) {

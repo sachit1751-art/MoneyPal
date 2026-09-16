@@ -127,6 +127,19 @@ class ProcessIncomingSmsUseCaseTest {
 
         assertThat(result).isInstanceOf(ProcessIncomingSmsUseCase.Result.Error::class.java)
         coVerify(exactly = 0) { settingsRepository.markSmsSeen(any()) }
+        assertThat((result as ProcessIncomingSmsUseCase.Result.Error).reason).startsWith("insert:")
+    }
+
+    @Test
+    fun `insert success then markSmsSeen failure still returns Captured`() = runTest {
+        // Plan 012: the expense IS recorded; failing the result would make the
+        // worker retry and duplicate it.
+        coEvery { settingsRepository.markSmsSeen(any()) } throws RuntimeException("datastore down")
+
+        val result = useCase("HDFC-BANK", "Debited Rs 500 from account", ts)
+
+        assertThat(result).isInstanceOf(ProcessIncomingSmsUseCase.Result.Captured::class.java)
+        coVerify(exactly = 1) { budgetRepository.addTransaction(any()) }
     }
 
     @Test
