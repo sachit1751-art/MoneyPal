@@ -27,7 +27,7 @@ conventional commits, one commit per plan.
 | [012](012-sms-dedupe-atomic.md) | SMS dedupe: atomic + bounded store | fix (audit #1/#2) | 0 — correctness first | — | DONE 2026-09-16 |
 | [013](013-sms-parser-coverage.md) | SMS parser: real-world format coverage | feature (user priority) | 1 | — | DONE 2026-09-16 |
 | [014](014-sms-smart-capture.md) | SMS capture: merchant + auto-category + confidence | feature (user priority) | 2 | 012, 013 | DONE 2026-09-16 (room 22→23) |
-| [015](015-sms-review-inbox.md) | Low-confidence SMS review inbox | feature | 3 | 014 | TODO |
+| [015](015-sms-review-inbox.md) | Low-confidence SMS review inbox | feature | 3 | 014 | DONE 2026-09-16 |
 | [016](016-recurring-merchant-aliases.md) | Recurring payment merchant aliases | feature | 4 | — | TODO |
 | [017](017-refund-tracker.md) | Refund tracker completion flow | feature | 5 | — | TODO |
 | [018](018-burn-rate-forecast-card.md) | Analytics: burn-rate forecast card | feature | 6 | — | TODO |

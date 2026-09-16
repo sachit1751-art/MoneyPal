@@ -62,6 +62,12 @@ class HistoryViewModel @Inject constructor(
     private val _pendingRemovedTransactions = MutableStateFlow(emptyMap<Long, Transaction>())
     private val _filter = MutableStateFlow(HistoryFilterState())
 
+    /** Plan 015: low-confidence SMS captures + dialog visibility. */
+    val smsReviewCandidates: StateFlow<List<Transaction>> = budgetTransactionHandler.budgetRepository
+        .observeSmsReviewCandidates()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000L), emptyList())
+    private val _showSmsReviewDialog = MutableStateFlow(false)
+
     private val _effects = MutableSharedFlow<HistoryUiEffect>()
     val effects: SharedFlow<HistoryUiEffect> = _effects.asSharedFlow()
 
@@ -80,7 +86,9 @@ class HistoryViewModel @Inject constructor(
             _lockSwipeable,
             _expandedTransactionId,
             _pendingRemovedTransactions,
-            _filter
+            _filter,
+            _showSmsReviewDialog,
+            smsReviewCandidates
         )
     ) { array ->
         UIInputs(
@@ -95,7 +103,9 @@ class HistoryViewModel @Inject constructor(
             lockSwipeable = array[8] as Boolean,
             expandedTransactionId = array[9] as Long?,
             pendingRemovedTransactions = array[10] as Map<Long, Transaction>,
-            filter = array[11] as HistoryFilterState
+            filter = array[11] as HistoryFilterState,
+            showSmsReviewDialog = array[12] as Boolean,
+            smsReviewCandidates = array[13] as List<Transaction>,
         )
     }
 
@@ -164,6 +174,9 @@ class HistoryViewModel @Inject constructor(
             is HistoryUiIntent.SetLockSwipeable -> _lockSwipeable.value = intent.locked
             is HistoryUiIntent.ToggleExpandedTransaction -> toggleExpandedTransaction(intent.transactionId)
             is HistoryUiIntent.UpdateCreditCutoffDay -> updateCreditCutoffDay(intent.day)
+            is HistoryUiIntent.SetSmsReviewDialogVisible -> _showSmsReviewDialog.value = true
+            is HistoryUiIntent.DismissSmsReviewDialog -> _showSmsReviewDialog.value = false
+            is HistoryUiIntent.ConfirmSmsCapture -> confirmSmsCapture(intent.transaction)
             is HistoryFilterIntent.SetSearchQuery -> _filter.update { it.copy(query = intent.query) }
             is HistoryFilterIntent.ToggleCategoryName -> _filter.update {
                 if (it.categoryName == intent.name) {
@@ -183,6 +196,21 @@ class HistoryViewModel @Inject constructor(
                 }
             }
             is HistoryFilterIntent.ClearFilters -> _filter.value = HistoryFilterState()
+        }
+    }
+
+    /** Plan 015: user confirmed a low-confidence SMS capture — trust it. */
+    private fun confirmSmsCapture(transaction: Transaction) {
+        viewModelScope.launch {
+            runCatching { budgetTransactionHandler.budgetRepository.confirmSmsCapture(transaction.id) }
+                .onFailure { e ->
+                    logcat(TAG) { "confirmSmsCapture failed for id=${transaction.id}: $e" }
+                    _effects.emit(
+                        HistoryUiEffect.ShowSnackbar(
+                            context.getString(R.string.sms_review_confirm_failed)
+                        )
+                    )
+                }
         }
     }
 
@@ -474,6 +502,8 @@ class HistoryViewModel @Inject constructor(
         val expandedTransactionId: Long?,
         val pendingRemovedTransactions: Map<Long, Transaction>,
         val filter: HistoryFilterState = HistoryFilterState(),
+        val showSmsReviewDialog: Boolean = false,
+        val smsReviewCandidates: List<Transaction> = emptyList(),
     )
 
     companion object {

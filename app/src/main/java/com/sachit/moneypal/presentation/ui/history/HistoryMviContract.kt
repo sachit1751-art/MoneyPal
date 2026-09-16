@@ -45,6 +45,11 @@ sealed interface HistoryUiIntent {
     data class SetLockSwipeable(val locked: Boolean) : HistoryUiIntent
 
     data class UpdateCreditCutoffDay(val day: Int) : HistoryUiIntent
+
+    /** Plan 015: review-inbox controls for low-confidence SMS captures. */
+    data object SetSmsReviewDialogVisible : HistoryUiIntent
+    data object DismissSmsReviewDialog : HistoryUiIntent
+    data class ConfirmSmsCapture(val transaction: Transaction) : HistoryUiIntent
 }
 
 sealed interface HistoryUiEffect {
@@ -81,6 +86,10 @@ data class HistoryUiState(
     val filter: HistoryFilterState = HistoryFilterState(),
     val isFilterActive: Boolean = false,
     val matchCount: Int = 0,
+
+    /** Plan 015: low-confidence SMS review inbox. */
+    val showSmsReviewDialog: Boolean = false,
+    val smsReviewCandidates: List<Transaction> = emptyList(),
 
     val displayTransactions: List<Transaction> = emptyList(),
     val groupedCurrentTransactions: Map<LocalDate?, List<Transaction>> = emptyMap(),

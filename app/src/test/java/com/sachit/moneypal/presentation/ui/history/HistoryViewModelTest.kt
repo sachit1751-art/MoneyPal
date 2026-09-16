@@ -307,4 +307,38 @@ class HistoryViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
     }
+
+    @Test
+    fun `reviewCount exposes size of low-confidence rows`() = runTest {
+        every { budgetRepository.getBudgetSettings() } returns flowOf(budgetSettings())
+        every { budgetStateCalculator.filterPeriodTransactions(any(), any(), any(), any()) } returns emptyList()
+        every { budgetStateCalculator.calculateBudgetState(any(), any(), any(), any()) } returns BudgetState.EMPTY
+        every { budgetRepository.observeSmsReviewCandidates() } returns flowOf(listOf(txn(1L), txn(2L)))
+        val vm = newViewModel()
+
+        // Subscribing starts the WhileSubscribed sharing; UnconfinedTestDispatcher
+        // lets flowOf emit synchronously.
+        vm.smsReviewCandidates.test {
+            assertThat(awaitItem()).hasSize(2)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `confirm routes through repository confidence update`() = runTest {
+        every { budgetRepository.getBudgetSettings() } returns flowOf(budgetSettings())
+        every { budgetStateCalculator.filterPeriodTransactions(any(), any(), any(), any()) } returns emptyList()
+        every { budgetStateCalculator.calculateBudgetState(any(), any(), any(), any()) } returns BudgetState.EMPTY
+        // Room's invalidation tracker would re-emit the query without the
+        // confirmed row; the VM contract under test is the routing below.
+        every { budgetRepository.observeSmsReviewCandidates() } returns flowOf(listOf(txn(1L), txn(2L)))
+        coEvery { budgetRepository.confirmSmsCapture(any()) } returns Unit
+        val vm = newViewModel()
+
+        advanceUntilIdle()
+        vm.processIntent(HistoryUiIntent.ConfirmSmsCapture(txn(1L)))
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { budgetRepository.confirmSmsCapture(1L) }
+    }
 }

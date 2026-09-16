@@ -34,6 +34,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sachit.moneypal.R
 import com.sachit.moneypal.domain.model.Transaction
 import com.sachit.moneypal.presentation.ui.history.dialogs.DeleteRecurrentExpenseDialog
+import com.sachit.moneypal.presentation.ui.history.dialogs.SmsReviewDialog
 import com.sachit.moneypal.presentation.ui.history.dialogs.TransactionEditDialog
 import com.sachit.moneypal.presentation.ui.history.sections.budgetDisplaySection
 import com.sachit.moneypal.presentation.ui.history.sections.currentPeriodRecurrentSection
@@ -182,6 +183,15 @@ fun History(
                     tags = uiState.tags,
                     onProcessIntent = onProcessIntent,
                 )
+            }
+
+            if (uiState.smsReviewCandidates.isNotEmpty()) {
+                item(key = "sms_review_chip") {
+                    ReviewSmsChip(
+                        count = uiState.smsReviewCandidates.size,
+                        onClick = { onProcessIntent(HistoryUiIntent.SetSmsReviewDialogVisible) },
+                    )
+                }
             }
 
             currentPeriodRecurrentSection(
@@ -413,6 +423,19 @@ fun History(
             onProcessIntent(HistoryUiIntent.ConfirmDeleteRecurrent(expense))
         },
     )
+
+    if (uiState.showSmsReviewDialog) {
+        SmsReviewDialog(
+            candidates = uiState.smsReviewCandidates,
+            currencyCode = currencyCode,
+            onConfirm = { expense -> onProcessIntent(HistoryUiIntent.ConfirmSmsCapture(expense)) },
+            onEdit = { expense ->
+                onProcessIntent(HistoryUiIntent.SetEditingTransaction(expense))
+            },
+            onDelete = { expense -> onProcessIntent(HistoryUiIntent.DeleteTransaction(expense)) },
+            onDismiss = { onProcessIntent(HistoryUiIntent.DismissSmsReviewDialog) },
+        )
+    }
 
     TransactionEditDialog(
         transaction = uiState.recurrentToEdit,

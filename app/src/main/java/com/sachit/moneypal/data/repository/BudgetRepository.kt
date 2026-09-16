@@ -70,6 +70,12 @@ interface BudgetRepository {
     /** Marks a refund as received; clears the pending flag and stamps the time. */
     suspend fun markRefunded(transactionId: Long)
 
+    /** Low-confidence SMS captures awaiting user review (plan 015). */
+    fun observeSmsReviewCandidates(): Flow<List<Transaction>>
+
+    /** User confirmed a low-confidence SMS capture: trust it from now on (plan 015). */
+    suspend fun confirmSmsCapture(transactionId: Long)
+
     suspend fun incrementCategoryUsage(name: String)
 
     suspend fun getPeriodCount(): Int

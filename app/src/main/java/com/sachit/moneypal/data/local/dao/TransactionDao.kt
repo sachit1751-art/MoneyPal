@@ -92,6 +92,17 @@ interface TransactionDao {
     @Query("SELECT * FROM transactions ORDER BY date DESC LIMIT :limit")
     suspend fun getRecentTransactions(limit: Int): List<TransactionEntity>
 
+    /** Low-confidence SMS captures awaiting review (plan 015). LIMIT keeps the dialog light. */
+    @Query(
+        "SELECT * FROM transactions WHERE source = 'sms' AND captureConfidence IS NOT NULL " +
+            "AND captureConfidence < :threshold ORDER BY createdAt DESC LIMIT 50"
+    )
+    fun observeSmsReviews(threshold: Int): Flow<List<TransactionEntity>>
+
+    /** User confirmed a low-confidence SMS capture (plan 015). */
+    @Query("UPDATE transactions SET captureConfidence = 100 WHERE id = :transactionId")
+    suspend fun confirmSmsCapture(transactionId: Long)
+
     @Query("""
         UPDATE transactions 
         SET isCreditPaid = 1 

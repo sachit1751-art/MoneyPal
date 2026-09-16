@@ -131,6 +131,17 @@
     <string name="history_snackbar_delete_transaction_failed">Impossible de supprimer la transaction</string>
     <string name="history_snackbar_save_transaction_failed">Impossible d\'enregistrer la transaction</string>
     <string name="history_snackbar_delete_recurrent_failed">Impossible de supprimer le paiement récurrent</string>
+
+    <!-- Plan 015: low-confidence SMS review inbox -->
+    <string name="sms_review_title">Vérifier les captures</string>
+    <string name="sms_review_empty">Rien à vérifier. Les captures douteuses apparaîtront ici.</string>
+    <string name="sms_review_confirm">Confirmer</string>
+    <string name="sms_review_edit">Modifier</string>
+    <string name="sms_review_delete">Supprimer</string>
+    <string name="sms_review_close">Fermer</string>
+    <string name="sms_review_confidence">Confiance %1$d%%</string>
+    <string name="sms_review_chip">Vérifier %1$d captures</string>
+    <string name="sms_review_confirm_failed">Impossible de confirmer la capture</string>
     <string name="history_snackbar_mark_paid_failed">Impossible de marquer la transaction comme payée</string>
     <string name="add_new_category">Catégorie</string>
     <string name="add_new_category_action">Ajouter une nouvelle catégorie</string>

@@ -15,6 +15,7 @@ import com.sachit.moneypal.data.local.entity.PaidRecurrentOccurrenceEntity
 import com.sachit.moneypal.data.local.entity.QueuedTransactionEntity
 import com.sachit.moneypal.data.local.entity.TransactionEntity
 import com.sachit.moneypal.domain.calculator.BudgetCalculator
+import com.sachit.moneypal.domain.sms.SmsCaptureConfidence
 import com.sachit.moneypal.domain.model.ArchivedBudget
 import com.sachit.moneypal.domain.model.BudgetPeriod
 import com.sachit.moneypal.domain.model.BudgetSettings
@@ -437,6 +438,15 @@ class BudgetRepositoryImpl @Inject constructor(
 
     override suspend fun markRefunded(transactionId: Long) {
         transactionDao.markRefunded(transactionId)
+    }
+
+    override fun observeSmsReviewCandidates(): Flow<List<Transaction>> {
+        return transactionDao.observeSmsReviews(SmsCaptureConfidence.REVIEW_THRESHOLD)
+            .map { entities -> entities.map { it.toDomain() } }
+    }
+
+    override suspend fun confirmSmsCapture(transactionId: Long) {
+        transactionDao.confirmSmsCapture(transactionId)
     }
 
     override suspend fun getPeriodCount(): Int {

@@ -139,6 +139,17 @@
     <string name="history_snackbar_delete_transaction_failed">Could not delete transaction</string>
     <string name="history_snackbar_save_transaction_failed">Could not save transaction</string>
     <string name="history_snackbar_delete_recurrent_failed">Could not delete recurring payment</string>
+
+    <!-- Plan 015: low-confidence SMS review inbox -->
+    <string name="sms_review_title">Review captures</string>
+    <string name="sms_review_empty">Nothing to review. Captures the app is unsure about will appear here.</string>
+    <string name="sms_review_confirm">Confirm</string>
+    <string name="sms_review_edit">Edit</string>
+    <string name="sms_review_delete">Delete</string>
+    <string name="sms_review_close">Close</string>
+    <string name="sms_review_confidence">Confidence %1$d%%</string>
+    <string name="sms_review_chip">Review %1$d captures</string>
+    <string name="sms_review_confirm_failed">Could not confirm capture</string>
     <string name="history_snackbar_mark_paid_failed">Could not mark transaction as paid</string>
     <string name="recurrent_skip_next">Skip next occurrence</string>
     <string name="recurrent_skipped_snackbar">Occurrence skipped — it will not be counted</string>
