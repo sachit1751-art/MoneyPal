@@ -448,6 +448,11 @@
     <string name="refund_nudge_body">Vous avez %1$d dépenses en attente de remboursement</string>
     <string name="settings_refund_nudge">Rappels de remboursement</string>
     <string name="settings_refund_nudge_summary">Rappel hebdomadaire quand vos dépenses marquées attendent toujours leur remboursement</string>
+    <string name="forecast_title">Prévision de dépenses</string>
+    <string name="forecast_on_pace_line">Dans le rythme — dépenses à %1$d%% de votre budget quotidien</string>
+    <string name="forecast_over_pace_line">Dépassement de %1$s d\'ici le %2$s</string>
+    <string name="forecast_at_this_pace">Touchez pour ajuster votre budget</string>
+    <string name="forecast_period_end">fin de période</string>
     <string name="upcoming_recurrent_tomorrow">Demain</string>
     <string name="upcoming_recurrent_in_days">Dans %1$d jours</string>
     <string name="upcoming_recurrent_in_weeks">Dans %1$d semaines</string>

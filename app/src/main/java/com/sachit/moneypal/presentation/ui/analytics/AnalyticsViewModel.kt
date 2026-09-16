@@ -422,6 +422,11 @@ class AnalyticsViewModel @Inject constructor(
             budgetStateForDisplay = displayBudgetState,
             showRolloverStyleInBudgetDisplay = displayBudgetState.totalBudget > settings.totalBudget,
             isLoading = false,
+            burnRateForecast = com.sachit.moneypal.presentation.ui.analytics.util.BurnRateForecastUiModel.from(
+                state = displayBudgetState,
+                isHistoricalView = false,
+                today = today,
+            ),
             savingsPreferences = userSettings.savingsPreferences,
             creditOwed = creditInfo.owed,
             debtAdjustedBalance = creditInfo.debtAdjustedBalance,

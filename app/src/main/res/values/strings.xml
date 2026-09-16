@@ -699,6 +699,13 @@
     <string name="refund_nudge_body">You have %1$d expenses waiting for their refund</string>
     <string name="settings_refund_nudge">Refund reminders</string>
     <string name="settings_refund_nudge_summary">Weekly nudge when expenses you flagged are still awaiting their refund</string>
+
+    <!-- Plan 018: burn-rate forecast card -->
+    <string name="forecast_title">Spending forecast</string>
+    <string name="forecast_on_pace_line">On pace — spending at %1$d%% of your daily budget</string>
+    <string name="forecast_over_pace_line">Overshooting by %1$s by %2$s</string>
+    <string name="forecast_at_this_pace">Tap to adjust your budget</string>
+    <string name="forecast_period_end">period end</string>
     <string name="quick_amounts_add">Add quick amount</string>
 
     <!-- Category personalization -->

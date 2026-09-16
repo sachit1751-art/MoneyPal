@@ -448,6 +448,11 @@
     <string name="refund_nudge_body">Tienes %1$d gastos esperando su reembolso</string>
     <string name="settings_refund_nudge">Recordatorios de reembolso</string>
     <string name="settings_refund_nudge_summary">Aviso semanal cuando tus gastos marcados siguen esperando su reembolso</string>
+    <string name="forecast_title">Previsión de gasto</string>
+    <string name="forecast_on_pace_line">En ritmo — gastando al %1$d%% de tu presupuesto diario</string>
+    <string name="forecast_over_pace_line">Excederás %1$s para el %2$s</string>
+    <string name="forecast_at_this_pace">Toca para ajustar tu presupuesto</string>
+    <string name="forecast_period_end">fin de periodo</string>
     <string name="upcoming_recurrent_tomorrow">Mañana</string>
     <string name="upcoming_recurrent_in_days">En %1$d días</string>
     <string name="upcoming_recurrent_in_weeks">En %1$d semanas</string>

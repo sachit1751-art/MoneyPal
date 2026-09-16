@@ -159,6 +159,8 @@ data class AnalyticsState(
     val envelopeProgress: List<com.sachit.moneypal.domain.calculator.EnvelopeProgress> = emptyList(),
     /** Tracked savings-goal progress (plan 002); null when no goal is set. */
     val savingsGoalProgress: com.sachit.moneypal.domain.calculator.SavingsGoalProgress? = null,
+    /** Burn-rate forecast card input (plan 018); null = hide the card. */
+    val burnRateForecast: com.sachit.moneypal.presentation.ui.analytics.util.BurnRateForecastUiModel? = null,
 )
 
 data class AnalyticsActions(
@@ -436,6 +438,7 @@ fun Analytics(
                             useTabletLayout = useWideAnalyticsLayout,
                             state = state,
                             categories = categories,
+                            onOpenMainScreen = { actions.onClose() },
                             onShowHistory = {
                                 showHistorySheet = true
                                 view.weakHapticFeedback()
@@ -675,6 +678,7 @@ private fun AnalyticsResponsiveLayout(
     onShowCreditDetails: () -> Unit,
     onCategoryClick: (String, List<Transaction>) -> Unit,
     onDayClick: (LocalDate) -> Unit,
+    onOpenMainScreen: () -> Unit = {},
     bringIntoViewRequesters: Map<Int, BringIntoViewRequester>,
     markIfInOrder: Modifier.(Int) -> Modifier,
 ) {
@@ -686,6 +690,7 @@ private fun AnalyticsResponsiveLayout(
             onShowCreditDetails = onShowCreditDetails,
             onCategoryClick = onCategoryClick,
             onDayClick = onDayClick,
+            onOpenMainScreen = onOpenMainScreen,
             bringIntoViewRequesters = bringIntoViewRequesters,
             markIfInOrder = markIfInOrder,
         )
@@ -697,6 +702,7 @@ private fun AnalyticsResponsiveLayout(
             onShowCreditDetails = onShowCreditDetails,
             onCategoryClick = onCategoryClick,
             onDayClick = onDayClick,
+            onOpenMainScreen = onOpenMainScreen,
             bringIntoViewRequesters = bringIntoViewRequesters,
             markIfInOrder = markIfInOrder,
         )
@@ -711,6 +717,7 @@ private fun AnalyticsCompactLayout(
     onShowCreditDetails: () -> Unit,
     onCategoryClick: (String, List<Transaction>) -> Unit,
     onDayClick: (LocalDate) -> Unit,
+    onOpenMainScreen: () -> Unit = {},
     bringIntoViewRequesters: Map<Int, BringIntoViewRequester>,
     markIfInOrder: Modifier.(Int) -> Modifier,
 ) {
@@ -831,6 +838,18 @@ private fun AnalyticsCompactLayout(
                     .fillMaxWidth(),
             )
         }
+        if (state.burnRateForecast != null) {
+            Spacer(modifier = Modifier.height(16.dp))
+            com.sachit.moneypal.presentation.ui.analytics.sections.BurnRateForecastCard(
+                forecast = state.burnRateForecast,
+                currency = state.currencyCode,
+                exhaustionDate = state.budgetStateForDisplay?.projectedExhaustionDate,
+                onClick = onOpenMainScreen,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth(),
+            )
+        }
         if (state.envelopeProgress.isNotEmpty()) {
             Spacer(modifier = Modifier.height(16.dp))
             EnvelopeProgressCard(
@@ -884,6 +903,7 @@ private fun AnalyticsTabletLayout(
     onShowCreditDetails: () -> Unit,
     onCategoryClick: (String, List<Transaction>) -> Unit,
     onDayClick: (LocalDate) -> Unit,
+    onOpenMainScreen: () -> Unit = {},
     bringIntoViewRequesters: Map<Int, BringIntoViewRequester>,
     markIfInOrder: Modifier.(Int) -> Modifier,
 ) {

@@ -30,7 +30,7 @@ conventional commits, one commit per plan.
 | [015](015-sms-review-inbox.md) | Low-confidence SMS review inbox | feature | 3 | 014 | DONE 2026-09-16 |
 | [016](016-recurring-merchant-aliases.md) | Recurring payment merchant aliases | feature | 4 | — | DONE 2026-09-16 |
 | [017](017-refund-tracker.md) | Refund tracker completion flow | feature | 5 | — | DONE 2026-09-16 |
-| [018](018-burn-rate-forecast-card.md) | Analytics: burn-rate forecast card | feature | 6 | — | TODO |
+| [018](018-burn-rate-forecast-card.md) | Analytics: burn-rate forecast card | feature | 6 | — | DONE 2026-09-16 |
 | [019](019-monthly-report-export.md) | Monthly report share (text) | feature | 7 | — | TODO |
 | [020](020-apk-rename-and-build-script.md) | APK rename + one-click build script wiring | DX (audit #7/#8) | 8 | — | TODO |
 | [021](021-quick-expense-presets.md) | Quick-amount presets on the numpad | feature | 9 | — | TODO |
