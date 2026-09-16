@@ -55,6 +55,7 @@ internal fun LazyListScope.futureRecurrentSection(
     onDelete: (Transaction) -> Unit,
     onEdit: (Transaction) -> Unit,
     onMarkAsPaid: (Transaction) -> Unit = {},
+    onSkipNext: (Transaction) -> Unit = {},
     onClick: (Transaction) -> Unit,
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
@@ -125,6 +126,7 @@ internal fun LazyListScope.futureRecurrentSection(
                                     )
                                 )
                             },
+                            onSkipNext = { onSkipNext(item.transaction) },
                             onClick = { onClick(item.transaction) },
                             creditCardCutoffDay = creditCardCutoffDay,
                         )

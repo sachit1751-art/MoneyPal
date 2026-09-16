@@ -41,7 +41,7 @@ class EnvelopeCalculator @Inject constructor() {
             if (!limitById.containsKey(categoryId)) continue
             val amount = transaction.amount
             if (amount.signum() <= 0) continue
-            if (transaction.isDeleted || transaction.isAdjustment) continue
+            if (transaction.isDeleted || transaction.isAdjustment || transaction.isIncome) continue
             spentById.merge(categoryId, amount, BigDecimal::add)
         }
 

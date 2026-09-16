@@ -50,6 +50,7 @@ internal fun LazyListScope.currentPeriodRecurrentSection(
     onDelete: (Transaction) -> Unit,
     onEdit: (Transaction) -> Unit,
     onMarkAsPaid: (Transaction) -> Unit = {},
+    onSkipNext: (Transaction) -> Unit = {},
     onClick: (Transaction) -> Unit,
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
@@ -109,6 +110,7 @@ internal fun LazyListScope.currentPeriodRecurrentSection(
                                     )
                                 )
                             },
+                            onSkipNext = { onSkipNext(item.transaction) },
                             onClick = { onClick(item.transaction) },
                             creditCardCutoffDay = creditCardCutoffDay,
                         )

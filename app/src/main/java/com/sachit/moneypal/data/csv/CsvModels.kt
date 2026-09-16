@@ -19,7 +19,9 @@ data class CsvTransactionRow(
     val subscriptionDay: Int?,
     val isCredit: Boolean,
     val isCreditPaid: Boolean,
-    val periodId: Long
+    val periodId: Long,
+    /** Plan 006: income entry; older files without the column import as false. */
+    val isIncome: Boolean = false
 )
 
 data class CsvBackupMetadata(
@@ -55,7 +57,8 @@ fun CsvTransactionRow.toDomainTransaction(categoryId: Long? = null): Transaction
         subscriptionDay = subscriptionDay,
         categoryId = categoryId,
         isCredit = isCredit,
-        isCreditPaid = isCreditPaid
+        isCreditPaid = isCreditPaid,
+        isIncome = isIncome
     )
 }
 

@@ -103,6 +103,8 @@ class MinusCsvParser {
 
         val isCredit = raw.valueOf(MinusCsvContract.COL_IS_CREDIT).trim() == "1"
         val isCreditPaid = raw.valueOf(MinusCsvContract.COL_IS_CREDIT_PAID).trim() == "1"
+        // Optional column (plan 006): absent in older exports → false.
+        val isIncome = raw.valueOf(MinusCsvContract.COL_IS_INCOME).trim() == "1"
 
         val periodId = raw.valueOf(MinusCsvContract.COL_PERIOD_ID)
             .toLongOrNull()
@@ -121,6 +123,7 @@ class MinusCsvParser {
             isCredit = isCredit,
             isCreditPaid = isCreditPaid,
             periodId = periodId,
+            isIncome = isIncome,
         )
     }
 

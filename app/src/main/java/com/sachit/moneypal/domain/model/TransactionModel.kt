@@ -33,8 +33,18 @@ data class Transaction(
     /** Instant (epoch millis) the refund arrived; null until settled. */
     val refundedAt: Long? = null,
     /** Payment method used for this expense. */
-    val paymentMethod: PaymentMethod = PaymentMethod.OTHER
+    val paymentMethod: PaymentMethod = PaymentMethod.OTHER,
+    /** True when this entry is income (money in); excluded from all spend math. */
+    val isIncome: Boolean = false,
+    /**
+     * Instant (epoch millis) a recurring expense was paused; null when active.
+     * Meaningful only when [isRecurrent] (plan 008).
+     */
+    val pausedAtEpochMs: Long? = null,
 ) {
+    /** True when this recurring expense is paused (reminders and due-today sums off). */
+    val isRecurrentPaused: Boolean get() = isRecurrent && pausedAtEpochMs != null
+
     companion object {
         fun create(
             amount: BigDecimal,
@@ -55,10 +65,14 @@ data class Transaction(
             originalCurrency: String? = null,
             refundExpected: Boolean = false,
             refundedAt: Long? = null,
-            paymentMethod: PaymentMethod = PaymentMethod.OTHER
-        ): Transaction = Transaction(
-            id = 0,
-            amount = amount,
+            paymentMethod: PaymentMethod = PaymentMethod.OTHER,
+            isIncome: Boolean = false,
+            pausedAtEpochMs: Long? = null
+        ): Transaction {
+            require(!(isAdjustment && isIncome)) { "An adjustment cannot be income" }
+            return Transaction(
+                id = 0,
+                amount = amount,
             comment = comment,
             date = date,
             periodId = periodId,
@@ -77,8 +91,11 @@ data class Transaction(
             originalCurrency = originalCurrency,
             refundExpected = refundExpected,
             refundedAt = refundedAt,
-            paymentMethod = paymentMethod
+            paymentMethod = paymentMethod,
+            isIncome = isIncome,
+            pausedAtEpochMs = pausedAtEpochMs,
         )
+        }
     }
 }
 
@@ -99,4 +116,25 @@ enum class PaymentMethod {
 data class PaidRecurrentOccurrence(
     val transactionId: Long,
     val occurrenceDate: LocalDate,
-)
+    /** Epoch millis the occurrence was marked, or [SKIPPED_OCCURRENCE_MARKER] when skipped. */
+    val paidAt: Long = 0,
+) {
+    /** True when this occurrence was skipped (not paid) — plan 008. */
+    val isSkipped: Boolean get() = paidAt == SKIPPED_OCCURRENCE_MARKER
+}
+
+/** [PaidRecurrentOccurrence.paidAt] sentinel marking a skipped (not paid) occurrence. */
+const val SKIPPED_OCCURRENCE_MARKER = -1L
+
+/**
+ * True when the set records the occurrence as settled — paid *or* skipped.
+ *
+ * Matches on (transactionId, occurrenceDate) only, mirroring the Room table's
+ * primary key. [PaidRecurrentOccurrence.paidAt] must NOT matter here, otherwise
+ * skipped occurrences (paidAt = [SKIPPED_OCCURRENCE_MARKER]) would never match a
+ * default-constructed lookup and skip suppression would silently never work.
+ */
+fun Set<PaidRecurrentOccurrence>.containsOccurrence(
+    transactionId: Long,
+    occurrenceDate: LocalDate,
+): Boolean = any { it.transactionId == transactionId && it.occurrenceDate == occurrenceDate }

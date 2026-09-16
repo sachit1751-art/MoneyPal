@@ -113,6 +113,7 @@ import com.sachit.moneypal.presentation.ui.theme.component.numpad.EditorState
 import com.sachit.moneypal.presentation.ui.theme.component.numpad.Numpad
 import com.sachit.moneypal.presentation.ui.editor.category.CategoryStyleSheet
 import com.sachit.moneypal.presentation.ui.theme.component.numpad.SavedCategoriesGrid
+import com.sachit.moneypal.presentation.ui.theme.component.numpad.SuggestedCategoryChip
 import com.sachit.moneypal.presentation.ui.theme.isNightMode
 import com.sachit.moneypal.presentation.ui.tutorial.TutorialBoxState
 import com.sachit.moneypal.presentation.ui.tutorial.markForTutorial
@@ -1235,6 +1236,35 @@ private fun MainScreenNumpadSection(
             null
         }
 
+    // Plan 009: non-intrusive suggestion chip while typing a comment — tap to
+    // apply, ignore to dismiss for this entry.
+    var suggestionDismissed by remember { mutableStateOf(false) }
+    val showSuggestionChip = budgetUiState.suggestedCategory != null &&
+        budgetUiState.currentComment != budgetUiState.suggestedCategory.name &&
+        !suggestionDismissed
+    val suggestionChip: (@Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit)? =
+        if (showSuggestionChip) {
+            {
+                val suggested = budgetUiState.suggestedCategory!!
+                SuggestedCategoryChip(
+                    label = stringResource(
+                        R.string.category_suggestion_chip,
+                        listOf(suggested.emoji, suggested.name).filterNotNull().joinToString(" "),
+                    ),
+                    onApply = {
+                        actions.onProcessIntent(
+                            MainScreenUiIntent.ProcessBudgetEditorIntent(
+                                BudgetEditorIntent.CommentUpdated(suggested.name),
+                            ),
+                        )
+                    },
+                    onDismiss = { suggestionDismissed = true },
+                )
+            }
+        } else {
+            null
+        }
+
     Numpad(
         modifier =
             modifier.then(
@@ -1319,6 +1349,7 @@ private fun MainScreenNumpadSection(
         enableCalculationMode = true,
         enableCalcModeSwipe = !showCategoryGrid,
         leftContent = categoryGridContent,
+        topContent = suggestionChip,
         tutorialBoxState = tutorialBoxState,
         quickAmounts = remember { listOf(
             java.math.BigDecimal(10),
@@ -1435,6 +1466,15 @@ private fun MainScreenEditorSection(
             actions.onProcessIntent(
                 MainScreenUiIntent.ProcessBudgetEditorIntent(
                     BudgetEditorIntent.SetCreditEnabled(enabled),
+                ),
+            )
+        },
+        showIncomeToggle = true,
+        isIncomeModeEnabled = budgetUiState.isIncomeModeEnabled,
+        onIncomeToggle = { enabled ->
+            actions.onProcessIntent(
+                MainScreenUiIntent.ProcessBudgetEditorIntent(
+                    BudgetEditorIntent.SetIncomeMode(enabled),
                 ),
             )
         },

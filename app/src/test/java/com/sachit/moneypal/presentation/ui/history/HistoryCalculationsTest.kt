@@ -2,6 +2,7 @@ package com.sachit.moneypal.presentation.ui.history
 
 import com.sachit.moneypal.domain.model.PaidRecurrentOccurrence
 import com.sachit.moneypal.domain.model.RecurrentFrequency
+import com.sachit.moneypal.domain.model.SKIPPED_OCCURRENCE_MARKER
 import com.sachit.moneypal.domain.model.Transaction
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -145,6 +146,32 @@ class HistoryCalculationsTest {
         assertTrue(chargeDates.contains(LocalDate.of(2026, 3, 2)))
         assertTrue(!chargeDates.contains(paidDate))
         assertTrue(chargeDates.contains(LocalDate.of(2026, 3, 16)))
+    }
+
+    @Test
+    fun when_occurrence_is_skipped_then_charges_are_suppressed_like_a_paid_occurrence() {
+        val today = LocalDate.of(2026, 3, 1)
+        val periodStart = LocalDate.of(2026, 3, 1)
+        val periodEnd = LocalDate.of(2026, 3, 31)
+        val tx = recurrentTransaction(id = 1L, startDate = LocalDate.of(2026, 1, 15), subscriptionDay = 15)
+        val nextChargeDate = LocalDate.of(2026, 3, 15)
+
+        val (upcoming, future) = buildUpcomingRecurrentItems(
+            transactions = listOf(tx),
+            budgetStartDate = periodStart,
+            budgetEndDate = periodEnd,
+            today = today,
+            paidOccurrences = setOf(
+                PaidRecurrentOccurrence(
+                    transactionId = tx.id,
+                    occurrenceDate = nextChargeDate,
+                    paidAt = SKIPPED_OCCURRENCE_MARKER,
+                )
+            ),
+        )
+
+        assertTrue(upcoming.isEmpty())
+        assertTrue(future.isEmpty())
     }
 
     @Test

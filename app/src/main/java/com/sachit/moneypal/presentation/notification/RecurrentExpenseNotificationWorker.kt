@@ -168,7 +168,14 @@ class RecurrentExpenseNotificationWorker(
         val stableId = transaction.sourceTransactionId ?: transaction.id
         val paidDates = budgetRepository.getPaidOccurrenceDatesFor(stableId)
         if (paidDates.contains(today)) {
-            logcat { "Recurrent notification worker fired but today's occurrence is already marked paid: transactionId=${transaction.id} today=$today" }
+            val skipped = budgetRepository.getPaidRecurrentOccurrences().first().any {
+                it.transactionId == stableId && it.occurrenceDate == today && it.isSkipped
+            }
+            logcat {
+                "Recurrent notification worker fired but today's occurrence is already marked " +
+                    (if (skipped) "skipped" else "paid") +
+                    ": transactionId=${transaction.id} today=$today"
+            }
             return
         }
 

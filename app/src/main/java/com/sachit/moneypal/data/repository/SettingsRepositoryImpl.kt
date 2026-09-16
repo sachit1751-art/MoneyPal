@@ -73,6 +73,7 @@ const val ANALYTICS_SPENDS_TUTORIAL_COMPLETED_KEY_NAME = "analytics_spends_tutor
 const val SMS_CAPTURE_ENABLED_KEY_NAME = "sms_capture_enabled"
 const val SMS_SEEN_PREFIX_KEY_NAME = "sms_seen_"
 const val THRESHOLD_ALERTS_ENABLED_KEY_NAME = "threshold_alerts_enabled"
+const val ENVELOPE_ALERTS_ENABLED_KEY_NAME = "envelope_alerts_enabled"
 const val DAILY_ALERTED_THRESHOLD_KEY_NAME = "daily_alerted_threshold"
 const val PERIOD_ALERTED_THRESHOLD_KEY_NAME = "period_alerted_threshold"
 const val DAILY_ALERTED_THRESHOLD_DATE_KEY_NAME = "daily_alerted_threshold_date"
@@ -145,6 +146,8 @@ private val BUDGET_SPLIT_VIEW_PERIOD = stringPreferencesKey(BUDGET_SPLIT_VIEW_PE
 private val SMS_CAPTURE_ENABLED = booleanPreferencesKey(SMS_CAPTURE_ENABLED_KEY_NAME)
 private val THRESHOLD_ALERTS_ENABLED =
     booleanPreferencesKey(THRESHOLD_ALERTS_ENABLED_KEY_NAME)
+private val ENVELOPE_ALERTS_ENABLED =
+    booleanPreferencesKey(ENVELOPE_ALERTS_ENABLED_KEY_NAME)
 private val DAILY_ALERTED_THRESHOLD = stringPreferencesKey(DAILY_ALERTED_THRESHOLD_KEY_NAME)
 private val PERIOD_ALERTED_THRESHOLD = stringPreferencesKey(PERIOD_ALERTED_THRESHOLD_KEY_NAME)
 private val DAILY_ALERTED_THRESHOLD_DATE =
@@ -198,6 +201,7 @@ class SettingsRepositoryImpl @Inject constructor(
                 showPastTransactions = preferences[SHOW_PAST_TRANSACTIONS] ?: true,
                 smsCaptureEnabled = preferences[SMS_CAPTURE_ENABLED] ?: false,
                 thresholdAlertsEnabled = preferences[THRESHOLD_ALERTS_ENABLED] ?: false,
+                envelopeAlertsEnabled = preferences[ENVELOPE_ALERTS_ENABLED] ?: false,
                 isCreditQuickToggleEnabled = preferences[CREDIT_QUICK_TOGGLE_FEATURE_ENABLED] ?: false,
                 categoryPickerDirectPopupEnabled = preferences[CATEGORY_PICKER_DIRECT_POPUP_ENABLED] ?: false,
                 categoryGridModeEnabled = preferences[CATEGORY_GRID_MODE_ENABLED] ?: false,
@@ -618,6 +622,14 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun setThresholdAlertsEnabled(enabled: Boolean) {
         dataStore.edit { it[THRESHOLD_ALERTS_ENABLED] = enabled }
+    }
+
+    override fun observeEnvelopeAlertsEnabled(): Flow<Boolean> {
+        return dataStore.data.map { it[ENVELOPE_ALERTS_ENABLED] ?: false }
+    }
+
+    override suspend fun setEnvelopeAlertsEnabled(enabled: Boolean) {
+        dataStore.edit { it[ENVELOPE_ALERTS_ENABLED] = enabled }
     }
 
     override suspend fun getDailyAlertedThreshold(todayEpochDay: Long): BudgetThreshold? {

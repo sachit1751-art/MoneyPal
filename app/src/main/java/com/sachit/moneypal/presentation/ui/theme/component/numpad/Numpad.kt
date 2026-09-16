@@ -26,14 +26,21 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Backspace
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.graphicsLayer
@@ -41,6 +48,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sachit.moneypal.presentation.ui.theme.MinusTheme
@@ -102,6 +110,8 @@ fun Numpad(
     enableCalculationMode: Boolean = true,
     enableCalcModeSwipe: Boolean = enableCalculationMode,
     leftContent: (@Composable ColumnScope.() -> Unit)? = null,
+    /** Plan 009: optional slot above the grid (category suggestion chip). */
+    topContent: (@Composable ColumnScope.() -> Unit)? = null,
     tutorialBoxState: TutorialBoxState? = null,
     /** Optional quick-amount chips shown above the number grid (e.g. +10/+50/+100). */
     quickAmounts: List<java.math.BigDecimal> = emptyList(),
@@ -199,6 +209,7 @@ fun Numpad(
                 onApply = onApply
             )
         } else {
+            topContent?.invoke(this)
             if (quickAmounts.isNotEmpty() && onQuickAmount != null && !isCalculation) {
                 QuickAmountChipsRow(
                     amounts = quickAmounts,
@@ -564,6 +575,48 @@ fun QuickAmountChipsRow(
                 type = NumpadButtonType.TERTIARY,
                 text = "+$label",
                 onClick = { onQuickAmount(amount) },
+            )
+        }
+    }
+}
+
+/**
+ * Plan 009: non-intrusive "Suggested: 🍜 Food" chip shown while the user types
+ * a comment. Tap applies the suggestion; the ✕ dismisses it for this entry.
+ */
+@Composable
+fun SuggestedCategoryChip(
+    label: String,
+    onApply: () -> Unit,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,
+    ) {
+        Surface(
+            shape = RoundedCornerShape(20.dp),
+            color = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            onClick = onApply,
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        IconButton(onClick = onDismiss) {
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

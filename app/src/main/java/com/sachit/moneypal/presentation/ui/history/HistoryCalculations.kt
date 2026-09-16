@@ -3,6 +3,7 @@ package com.sachit.moneypal.presentation.ui.history
 import com.sachit.moneypal.domain.model.PaidRecurrentOccurrence
 import com.sachit.moneypal.domain.model.RecurrentFrequency
 import com.sachit.moneypal.domain.model.Transaction
+import com.sachit.moneypal.domain.model.containsOccurrence
 import com.sachit.moneypal.presentation.ui.theme.component.expense.UpcomingRecurrentItem
 import java.time.LocalDate
 import java.time.LocalTime
@@ -62,7 +63,7 @@ internal fun buildUpcomingRecurrentItems(
         }
         nextDate?.let { date ->
             if (!date.isBefore(budgetStartDate) && !date.isAfter(budgetEndDate) &&
-                !paidOccurrences.contains(PaidRecurrentOccurrence(transaction.id, date))
+                !paidOccurrences.containsOccurrence(transaction.id, date)
             ) {
                 UpcomingRecurrentItem(
                     transaction = transaction,
@@ -78,7 +79,7 @@ internal fun buildUpcomingRecurrentItems(
     val futureOutOfPeriod = recurrentTransactions.mapNotNull { transaction ->
         calculateNextChargeDate(transaction, today)?.let { nextDate ->
             if (nextDate.isAfter(budgetEndDate) &&
-                !paidOccurrences.contains(PaidRecurrentOccurrence(transaction.id, nextDate))
+                !paidOccurrences.containsOccurrence(transaction.id, nextDate)
             ) {
                 UpcomingRecurrentItem(
                     transaction = transaction,
@@ -183,7 +184,7 @@ internal fun getRecurringChargesInPeriod(
     while (!chargeDate.isAfter(subscriptionEnd)) {
         if (!chargeDate.isBefore(periodStart) && !chargeDate.isAfter(periodEnd) &&
             !chargeDate.isAfter(today) &&
-            !paidOccurrences.contains(PaidRecurrentOccurrence(transaction.id, chargeDate))
+            !paidOccurrences.containsOccurrence(transaction.id, chargeDate)
         ) {
             virtualTransactions.add(
                 transaction.copy(

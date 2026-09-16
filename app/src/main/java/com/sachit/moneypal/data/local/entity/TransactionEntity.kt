@@ -48,7 +48,13 @@ data class TransactionEntity(
     val refundedAt: Long? = null,
     /** Payment method used (see [com.sachit.moneypal.domain.model.PaymentMethod]); legacy rows default to OTHER. */
     @ColumnInfo(defaultValue = "'OTHER'")
-    val paymentMethod: String = "OTHER"
+    val paymentMethod: String = "OTHER",
+    /** True when this entry is income (money in); excluded from spend math (plan 006). */
+    @ColumnInfo(defaultValue = "0")
+    val isIncome: Boolean = false,
+    /** Epoch millis when this recurring expense was paused; NULL while active (plan 008). */
+    @ColumnInfo(defaultValue = "NULL")
+    val pausedAtEpochMs: Long? = null
 ) {
     companion object {
         fun fromDomain(
@@ -66,7 +72,9 @@ data class TransactionEntity(
             attachmentUri: String? = null,
             originalAmount: String? = null,
             originalCurrency: String? = null,
-            paymentMethod: String = "OTHER"
+            paymentMethod: String = "OTHER",
+            isIncome: Boolean = false,
+            pausedAtEpochMs: Long? = null
         ): TransactionEntity = TransactionEntity(
             id = 0,
             amount = amount,
@@ -83,7 +91,9 @@ data class TransactionEntity(
             attachmentUri = attachmentUri,
             originalAmount = originalAmount,
             originalCurrency = originalCurrency,
-            paymentMethod = paymentMethod
+            paymentMethod = paymentMethod,
+            isIncome = isIncome,
+            pausedAtEpochMs = pausedAtEpochMs
         )
     }
 }

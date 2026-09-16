@@ -14,6 +14,7 @@ import com.sachit.moneypal.domain.model.UserSettings
 import com.sachit.moneypal.domain.usecase.GetCurrentPeriodIdUseCase
 import com.sachit.moneypal.domain.usecase.ObserveCurrentPeriodBoundaryUseCase
 import com.sachit.moneypal.domain.usecase.PersistBudgetSettingsUseCase
+import com.sachit.moneypal.domain.usecase.SkipNextOccurrenceUseCase
 import com.sachit.moneypal.presentation.ui.budget.BudgetStateCalculator
 import com.sachit.moneypal.presentation.ui.budget.BudgetTransactionHandler
 import io.mockk.coEvery
@@ -47,6 +48,7 @@ class HistoryViewModelTest {
     private val observeCurrentPeriodBoundaryUseCase: ObserveCurrentPeriodBoundaryUseCase = mockk()
     private val persistBudgetSettingsUseCase: PersistBudgetSettingsUseCase = mockk(relaxed = true)
     private val getCurrentPeriodIdUseCase: GetCurrentPeriodIdUseCase = mockk()
+    private val skipNextOccurrenceUseCase: SkipNextOccurrenceUseCase = mockk(relaxed = true)
     private val context: Context = mockk(relaxed = true)
 
     @Before
@@ -75,6 +77,7 @@ class HistoryViewModelTest {
         observeCurrentPeriodBoundaryUseCase = observeCurrentPeriodBoundaryUseCase,
         persistBudgetSettingsUseCase = persistBudgetSettingsUseCase,
         getCurrentPeriodIdUseCase = getCurrentPeriodIdUseCase,
+        skipNextOccurrenceUseCase = skipNextOccurrenceUseCase,
         context = context,
     )
 

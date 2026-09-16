@@ -56,10 +56,10 @@ class BudgetStateCalculator @Inject constructor(
 
         val activeTransactions = transactions.filter { !it.isDeleted && !it.isRecurrent }
         val totalExpensesInPeriod = activeTransactions
-            .filter { it.amount > BigDecimal.ZERO && !it.isAdjustment }
+            .filter { it.amount > BigDecimal.ZERO && !it.isAdjustment && !it.isIncome }
             .sumOf { it.amount }
         val totalIncomeInPeriod = activeTransactions
-            .filter { it.amount < BigDecimal.ZERO }
+            .filter { it.amount < BigDecimal.ZERO || it.isIncome }
             .sumOf { it.amount }
             .abs()
         val totalDecreasesInPeriod = activeTransactions
@@ -113,8 +113,13 @@ class BudgetStateCalculator @Inject constructor(
         }
 
         val todayTransactions = activeTransactions.filter { it.date?.toLocalDate() == currentDate }
-        val regularSpentToday = todayTransactions.filter { it.amount > BigDecimal.ZERO }.sumOf { it.amount }
-        val incomeToday = todayTransactions.filter { it.amount < BigDecimal.ZERO }.sumOf { it.amount }.abs()
+        val regularSpentToday = todayTransactions
+            .filter { it.amount > BigDecimal.ZERO && !it.isIncome }
+            .sumOf { it.amount }
+        val incomeToday = todayTransactions
+            .filter { it.amount < BigDecimal.ZERO || it.isIncome }
+            .sumOf { it.amount }
+            .abs()
 
         val recurringDueToday = recurringExpenseCalculator.calculateRecurringDueToday(
             transactions, currentDate, paidOccurrences
@@ -242,6 +247,7 @@ class BudgetStateCalculator @Inject constructor(
         val blockEnd = blockStart.plusDays(blockDays.toLong() - 1)
 
         return transactions.filter { !it.isDeleted && !it.isRecurrent }
+            .filter { !it.isIncome }
             .filter {
                 val txDate = it.date?.toLocalDate()
                 txDate != null && !txDate.isBefore(blockStart) && !txDate.isAfter(blockEnd)

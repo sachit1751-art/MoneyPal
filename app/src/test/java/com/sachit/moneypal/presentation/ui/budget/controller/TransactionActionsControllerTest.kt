@@ -32,6 +32,7 @@ class TransactionActionsControllerTest {
             resolveActivePeriodId: suspend () -> Long,
             skipDuplicateCheck: Boolean,
             paymentMethod: PaymentMethod,
+            isIncome: Boolean,
         ): ApplyTransactionResult = applyResult
 
         override suspend fun applyRecurrent(

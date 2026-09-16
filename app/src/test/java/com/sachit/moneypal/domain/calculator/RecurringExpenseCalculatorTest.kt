@@ -2,6 +2,7 @@ package com.sachit.moneypal.domain.calculator
 
 import com.sachit.moneypal.domain.model.PaidRecurrentOccurrence
 import com.sachit.moneypal.domain.model.RecurrentFrequency
+import com.sachit.moneypal.domain.model.SKIPPED_OCCURRENCE_MARKER
 import com.sachit.moneypal.domain.model.Transaction
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -154,6 +155,140 @@ class RecurringExpenseCalculatorTest {
         )
 
         assertEquals(BigDecimal("15.00"), result)
+    }
+
+    // ---- Plan 008: pause / skip ----
+
+    @Test
+    fun pausedMonthlyRecurring_isNeverDue() {
+        val start = LocalDate.of(2026, 3, 1)
+        val tx = recurrentTransaction(start, RecurrentFrequency.MONTHLY, subscriptionDay = 15)
+            .copy(pausedAtEpochMs = 1_000L)
+
+        assertFalse(calculator.isRecurringDueToday(tx, LocalDate.of(2026, 3, 15)))
+        assertFalse(calculator.isRecurringDueToday(tx, LocalDate.of(2027, 3, 15)))
+    }
+
+    @Test
+    fun unpausingResumesTheSchedule() {
+        val start = LocalDate.of(2026, 3, 1)
+        val paused = recurrentTransaction(start, RecurrentFrequency.MONTHLY, subscriptionDay = 15)
+            .copy(pausedAtEpochMs = 1_000L)
+        val resumed = paused.copy(pausedAtEpochMs = null)
+
+        assertFalse(calculator.isRecurringDueToday(paused, LocalDate.of(2026, 3, 15)))
+        assertTrue(calculator.isRecurringDueToday(resumed, LocalDate.of(2026, 3, 15)))
+    }
+
+    @Test
+    fun calculateRecurringDueToday_excludesPausedRows() {
+        val today = LocalDate.of(2026, 3, 15)
+        val paused = recurrentTransaction(
+            LocalDate.of(2026, 3, 1), RecurrentFrequency.MONTHLY, subscriptionDay = 15, amount = BigDecimal("15.00")
+        ).copy(id = 7L, pausedAtEpochMs = 1_000L)
+
+        val result = calculator.calculateRecurringDueToday(listOf(paused), today)
+
+        assertEquals(BigDecimal.ZERO, result)
+    }
+
+    @Test
+    fun calculateRecurringDueToday_suppressesSkippedOccurrences() {
+        val today = LocalDate.of(2026, 3, 15)
+        val dueToday = recurrentTransaction(
+            LocalDate.of(2026, 3, 1), RecurrentFrequency.MONTHLY, subscriptionDay = 15, amount = BigDecimal("15.00")
+        ).copy(id = 7L)
+
+        val result = calculator.calculateRecurringDueToday(
+            transactions = listOf(dueToday),
+            today = today,
+            paidOccurrences = setOf(
+                PaidRecurrentOccurrence(
+                    transactionId = 7L,
+                    occurrenceDate = today,
+                    paidAt = SKIPPED_OCCURRENCE_MARKER,
+                )
+            ),
+        )
+
+        assertEquals(BigDecimal.ZERO, result)
+    }
+
+    @Test
+    fun isSkipped_trueOnlyForTheMarkerValue() {
+        assertTrue(
+            PaidRecurrentOccurrence(1L, LocalDate.of(2026, 3, 15), SKIPPED_OCCURRENCE_MARKER).isSkipped
+        )
+        assertFalse(PaidRecurrentOccurrence(1L, LocalDate.of(2026, 3, 15), 0L).isSkipped)
+        assertFalse(PaidRecurrentOccurrence(1L, LocalDate.of(2026, 3, 15), 5L).isSkipped)
+    }
+
+    @Test
+    fun nextOccurrenceDate_weeklyAdvancesFromToday() {
+        val start = LocalDate.of(2026, 3, 1)
+        val tx = recurrentTransaction(start, RecurrentFrequency.WEEKLY)
+
+        assertEquals(
+            LocalDate.of(2026, 3, 8),
+            calculator.nextOccurrenceDate(tx, LocalDate.of(2026, 3, 3)),
+        )
+    }
+
+    @Test
+    fun nextOccurrenceDate_biweeklyAdvancesFromToday() {
+        val start = LocalDate.of(2026, 3, 1)
+        val tx = recurrentTransaction(start, RecurrentFrequency.BIWEEKLY)
+
+        assertEquals(
+            LocalDate.of(2026, 3, 15),
+            calculator.nextOccurrenceDate(tx, LocalDate.of(2026, 3, 3)),
+        )
+    }
+
+    @Test
+    fun nextOccurrenceDate_monthlyClampsShortMonths() {
+        val start = LocalDate.of(2026, 1, 31)
+        val tx = recurrentTransaction(start, RecurrentFrequency.MONTHLY, subscriptionDay = 31)
+
+        assertEquals(
+            LocalDate.of(2026, 2, 28),
+            calculator.nextOccurrenceDate(tx, LocalDate.of(2026, 2, 2)),
+        )
+    }
+
+    @Test
+    fun nextOccurrenceDate_monthlyWithoutSubscriptionDayUsesStartDay() {
+        val start = LocalDate.of(2026, 1, 15)
+        val tx = recurrentTransaction(start, RecurrentFrequency.MONTHLY, subscriptionDay = null)
+
+        assertEquals(
+            LocalDate.of(2026, 2, 15),
+            calculator.nextOccurrenceDate(tx, LocalDate.of(2026, 2, 1)),
+        )
+    }
+
+    @Test
+    fun nextOccurrenceDate_returnsNullAfterTheRecurrenceEnd() {
+        val start = LocalDate.of(2026, 3, 1)
+        val tx = recurrentTransaction(
+            start,
+            RecurrentFrequency.WEEKLY,
+            recurrentEndDate = LocalDateTime.of(2026, 3, 10, 0, 0),
+        )
+
+        assertEquals(LocalDate.of(2026, 3, 8), calculator.nextOccurrenceDate(tx, LocalDate.of(2026, 3, 3)))
+        assertEquals(null, calculator.nextOccurrenceDate(tx, LocalDate.of(2026, 3, 9)))
+    }
+
+    @Test
+    fun nextOccurrenceDate_returnsNullForNonRecurring() {
+        val tx = Transaction.create(
+            amount = BigDecimal("10.00"),
+            comment = "",
+            date = LocalDate.of(2026, 3, 1).atStartOfDay(),
+        )
+
+        assertEquals(null, calculator.nextOccurrenceDate(tx, LocalDate.of(2026, 3, 3)))
     }
 
     private fun recurrentTransaction(

@@ -27,6 +27,7 @@ import com.sachit.moneypal.presentation.ui.budget.controller.EditorIntent
 import com.sachit.moneypal.presentation.ui.budget.controller.EditorLocalState
 import com.sachit.moneypal.presentation.ui.budget.controller.EditorStateController
 import com.sachit.moneypal.presentation.ui.budget.controller.NumpadController
+import com.sachit.moneypal.presentation.ui.editor.EditMode
 import com.sachit.moneypal.presentation.ui.budget.controller.NumpadIntent
 import com.sachit.moneypal.presentation.ui.budget.controller.PeriodActions
 import com.sachit.moneypal.presentation.ui.budget.controller.PeriodActionsController
@@ -90,6 +91,12 @@ class BudgetViewModel @Inject constructor(
 
     private val noSpendStreakCalculator =
         com.sachit.moneypal.domain.calculator.NoSpendStreakCalculator()
+
+    private val categorySuggester =
+        com.sachit.moneypal.domain.calculator.CategorySuggester()
+
+    /** Hoisted per transaction-list emission so suggesting is O(tokens) per keystroke (plan 009). */
+    private var categoryIndex: com.sachit.moneypal.domain.calculator.CategoryIndex? = null
 
     private val editorStateController = EditorStateController()
 
@@ -176,6 +183,16 @@ class BudgetViewModel @Inject constructor(
             today = LocalDate.now(),
         )
 
+        // Plan 009: rebuild the suggestion index once per emission (not per
+        // keystroke), then suggest for the comment currently being typed.
+        val newCategoryIndex = categorySuggester.buildIndex(transactions)
+        categoryIndex = newCategoryIndex
+        val suggestedCategory = if (editorState.editMode == EditMode.ADD && editorState.isIncomeModeEnabled.not()) {
+            categorySuggester.suggest(editorState.currentComment, categories, newCategoryIndex)?.category
+        } else {
+            null
+        }
+
         BudgetUiState(
             isLoading = false,
             budgetSettings = settingsWithRollover,
@@ -191,10 +208,12 @@ class BudgetViewModel @Inject constructor(
             currentComment = editorState.currentComment,
             tags = categories.map { it.name },
             categories = categories,
+            suggestedCategory = suggestedCategory,
             isFirstLaunch = settings == null,
             isRecurrentEnabled = editorState.isRecurrentEnabled,
             isCreditEnabled = editorState.isCreditEnabled,
             selectedPaymentMethod = editorState.selectedPaymentMethod,
+            isIncomeModeEnabled = editorState.isIncomeModeEnabled,
             showRecurrentDialog = editorState.showRecurrentDialog,
             showCreditCutoffDialog = editorState.showCreditCutoffDialog,
             showDuplicateConfirmDialog = editorState.showDuplicateConfirmDialog,
@@ -460,6 +479,11 @@ class BudgetViewModel @Inject constructor(
                 hasCreditCardCutoffDay = uiState.value.budgetSettings?.creditCardCutoffDay != null,
             )
 
+            is BudgetEditorIntent.SetIncomeMode -> editorStateController.process(
+                EditorIntent.SetIncomeMode(intent.enabled),
+                hasCreditCardCutoffDay = uiState.value.budgetSettings?.creditCardCutoffDay != null,
+            )
+
             is BudgetEditorIntent.DismissRecurrentDialog -> editorStateController.process(
                 EditorIntent.DismissRecurrentDialog,
                 hasCreditCardCutoffDay = uiState.value.budgetSettings?.creditCardCutoffDay != null,
@@ -522,6 +546,7 @@ class BudgetViewModel @Inject constructor(
                 resolveActivePeriodId = ::resolveActivePeriodId,
                 forceSave = forceSave,
                 paymentMethod = uiState.value.selectedPaymentMethod,
+                isIncome = uiState.value.isIncomeModeEnabled,
             )
             applyTransactionActions(actions)
         }
@@ -670,6 +695,10 @@ class BudgetViewModel @Inject constructor(
                 EditorIntent.SetCreditEnabled(false),
                 hasCreditCardCutoffDay = uiState.value.budgetSettings?.creditCardCutoffDay != null
             )
+            editorStateController.process(
+                EditorIntent.SetIncomeMode(false),
+                hasCreditCardCutoffDay = uiState.value.budgetSettings?.creditCardCutoffDay != null
+            )
         }
     }
 
@@ -760,6 +789,7 @@ private class TransactionHandlerImpl(
         resolveActivePeriodId: suspend () -> Long,
         skipDuplicateCheck: Boolean,
         paymentMethod: PaymentMethod,
+        isIncome: Boolean,
     ): ApplyTransactionResult = delegate.applyTransaction(
         input = input,
         isCalculation = isCalculation,
@@ -770,6 +800,7 @@ private class TransactionHandlerImpl(
         resolveActivePeriodId = this.resolveActivePeriodId,
         skipDuplicateCheck = skipDuplicateCheck,
         paymentMethod = paymentMethod,
+        isIncome = isIncome,
     )
 
     override suspend fun applyRecurrent(

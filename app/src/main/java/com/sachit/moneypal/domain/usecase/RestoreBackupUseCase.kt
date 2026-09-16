@@ -11,6 +11,7 @@ import com.sachit.moneypal.domain.model.BudgetSplitMode
 import com.sachit.moneypal.domain.model.Category
 import com.sachit.moneypal.domain.model.PaidRecurrentOccurrence
 import com.sachit.moneypal.domain.model.RemainingBudgetStrategy
+import com.sachit.moneypal.domain.model.SKIPPED_OCCURRENCE_MARKER
 import com.sachit.moneypal.domain.model.SavingsPreferences
 import com.sachit.moneypal.domain.model.SavingsSplitPreset
 import com.sachit.moneypal.domain.model.Transaction
@@ -132,6 +133,8 @@ class RestoreBackupUseCase @Inject constructor(
                 } catch (_: Exception) {
                     com.sachit.moneypal.domain.model.PaymentMethod.OTHER
                 },
+                isIncome = backupTransaction.isIncome,
+                pausedAtEpochMs = backupTransaction.pausedAtEpochMs,
             )
         }
         if (transactionsToUpsert.isNotEmpty()) {
@@ -161,10 +164,17 @@ class RestoreBackupUseCase @Inject constructor(
         }
 
         for (occurrence in backup.paidOccurrences) {
-            budgetRepository.markRecurrentOccurrencePaid(
-                occurrence.transactionId,
-                LocalDate.ofEpochDay(occurrence.occurrenceDateEpochDay),
-            )
+            if (occurrence.paidAt == SKIPPED_OCCURRENCE_MARKER) {
+                budgetRepository.markOccurrenceSkipped(
+                    occurrence.transactionId,
+                    LocalDate.ofEpochDay(occurrence.occurrenceDateEpochDay),
+                )
+            } else {
+                budgetRepository.markRecurrentOccurrencePaid(
+                    occurrence.transactionId,
+                    LocalDate.ofEpochDay(occurrence.occurrenceDateEpochDay),
+                )
+            }
             paidOccurrencesRestored++
         }
 

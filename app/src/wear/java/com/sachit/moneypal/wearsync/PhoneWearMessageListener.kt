@@ -29,7 +29,8 @@ import javax.inject.Singleton
 class PhoneWearMessageListener @Inject constructor(
     @ApplicationContext private val context: Context,
     private val repository: BudgetRepository,
-    private val ingestor: WearExpenseIngestor
+    private val ingestor: WearExpenseIngestor,
+    private val budgetStatePublisher: BudgetStatePublisher,
 ) : MessageClient.OnMessageReceivedListener {
 
     companion object {
@@ -45,11 +46,12 @@ class PhoneWearMessageListener @Inject constructor(
     override fun onMessageReceived(messageEvent: MessageEvent) {
         logcat { "onMessageReceived: path=${messageEvent.path}, sourceNode=${messageEvent.sourceNodeId}" }
         when (messageEvent.path) {
-            WearPaths.EXPENSE_ADD, WearPaths.EXPENSE_SNAPSHOT -> {
+            WearPaths.EXPENSE_ADD, WearPaths.EXPENSE_SNAPSHOT, WearPaths.BUDGET_STATE_REQUEST -> {
                 scope.launch {
                     if (isTrustedWearSource(context, messageEvent.sourceNodeId)) {
                         when (messageEvent.path) {
                             WearPaths.EXPENSE_ADD -> handleExpenseAdd(messageEvent)
+                            WearPaths.BUDGET_STATE_REQUEST -> budgetStatePublisher.publishNow()
                             else -> handleSnapshotRequest(messageEvent)
                         }
                     } else {

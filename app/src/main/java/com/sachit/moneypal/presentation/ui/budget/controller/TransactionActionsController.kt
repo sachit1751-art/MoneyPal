@@ -52,6 +52,7 @@ class TransactionActionsController(
         resolveActivePeriodId: suspend () -> Long,
         forceSave: Boolean = false,
         paymentMethod: PaymentMethod = PaymentMethod.OTHER,
+        isIncome: Boolean = false,
     ): List<TransactionAction> {
         val result = handler.apply(
             input = input,
@@ -63,6 +64,7 @@ class TransactionActionsController(
             resolveActivePeriodId = resolveActivePeriodId,
             skipDuplicateCheck = forceSave,
             paymentMethod = paymentMethod,
+            isIncome = isIncome,
         )
         return when (result) {
             is ApplyTransactionResult.InvalidInput -> emptyList()
@@ -163,6 +165,7 @@ interface TransactionHandler {
         resolveActivePeriodId: suspend () -> Long,
         skipDuplicateCheck: Boolean = false,
         paymentMethod: PaymentMethod = PaymentMethod.OTHER,
+        isIncome: Boolean = false,
     ): ApplyTransactionResult
 
     suspend fun applyRecurrent(

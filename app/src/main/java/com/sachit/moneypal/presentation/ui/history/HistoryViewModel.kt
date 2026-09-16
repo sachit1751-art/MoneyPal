@@ -13,6 +13,7 @@ import com.sachit.moneypal.domain.model.UserSettings
 import com.sachit.moneypal.domain.usecase.GetCurrentPeriodIdUseCase
 import com.sachit.moneypal.domain.usecase.ObserveCurrentPeriodBoundaryUseCase
 import com.sachit.moneypal.domain.usecase.PersistBudgetSettingsUseCase
+import com.sachit.moneypal.domain.usecase.SkipNextOccurrenceUseCase
 import com.sachit.moneypal.presentation.ui.budget.BudgetStateCalculator
 import com.sachit.moneypal.presentation.ui.budget.BudgetTransactionHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -44,6 +45,7 @@ class HistoryViewModel @Inject constructor(
     private val observeCurrentPeriodBoundaryUseCase: ObserveCurrentPeriodBoundaryUseCase,
     private val persistBudgetSettingsUseCase: PersistBudgetSettingsUseCase,
     private val getCurrentPeriodIdUseCase: GetCurrentPeriodIdUseCase,
+    private val skipNextOccurrenceUseCase: SkipNextOccurrenceUseCase,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
@@ -155,6 +157,7 @@ class HistoryViewModel @Inject constructor(
             is HistoryUiIntent.SaveEditedTransaction -> saveEditedTransaction(intent.transaction)
             is HistoryUiIntent.ConfirmDeleteRecurrent -> confirmDeleteRecurrent(intent.transaction)
             is HistoryUiIntent.MarkTransactionAsPaid -> markTransactionAsPaid(intent.transaction)
+            is HistoryUiIntent.SkipNextOccurrence -> skipNextOccurrence(intent.transaction)
             is HistoryUiIntent.CloneTransaction -> cloneTransaction(intent.transaction)
             is HistoryUiIntent.ToggleRefundExpected -> toggleRefundExpected(intent.transaction)
             is HistoryUiIntent.MarkRefunded -> markRefunded(intent.transaction)
@@ -262,6 +265,21 @@ class HistoryViewModel @Inject constructor(
                     )
                 )
             }
+        }
+    }
+
+    /** Skips the next occurrence of a recurring expense (plan 008). */
+    private fun skipNextOccurrence(transaction: Transaction) {
+        viewModelScope.launch {
+            val skipped = skipNextOccurrenceUseCase(transaction, LocalDate.now())
+            _effects.emit(
+                HistoryUiEffect.ShowSnackbar(
+                    context.getString(
+                        if (skipped) R.string.recurrent_skipped_snackbar
+                        else R.string.history_snackbar_mark_paid_failed
+                    )
+                )
+            )
         }
     }
 

@@ -32,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.sachit.moneypal.presentation.ui.theme.MinusTheme
 import com.sachit.moneypal.presentation.ui.theme.bodySmallCondensed
 import com.sachit.moneypal.presentation.ui.theme.labelLargeCondensed
+import com.sachit.moneypal.presentation.ui.theme.labelSmallCondensed
 import com.sachit.moneypal.presentation.util.censor
 import com.sachit.moneypal.presentation.util.font.format.calculateDaysToCutoff
 import com.sachit.moneypal.presentation.ui.theme.colorGood
@@ -54,6 +55,7 @@ fun ExpenseItemExpandedContent(
     onClick: () -> Unit = {},
     onClone: () -> Unit = {},
     onToggleRefund: () -> Unit = {},
+    onSkipNext: (() -> Unit)? = null,
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
     creditCardCutoffDay: Int? = null,
@@ -225,6 +227,28 @@ fun ExpenseItemExpandedContent(
                 Text(
                     text = stringResource(R.string.mark_as_paid),
                     style = MaterialTheme.typography.labelSmallEmphasized,
+                )
+            }
+            if (onSkipNext != null && transaction.pausedAtEpochMs == null) {
+                Button(
+                    onClick = onSkipNext,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        contentColor = MaterialTheme.colorScheme.primary,
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        text = stringResource(R.string.recurrent_skip_next),
+                        style = MaterialTheme.typography.labelSmallEmphasized,
+                    )
+                }
+            }
+            if (transaction.pausedAtEpochMs != null) {
+                Text(
+                    text = stringResource(R.string.recurrent_paused_badge),
+                    style = MaterialTheme.typography.labelSmallCondensed,
+                    color = MaterialTheme.colorScheme.tertiary,
                 )
             }
         }

@@ -19,11 +19,13 @@ sealed interface BudgetEditorIntent : BudgetUiIntent {
         val categoryId: Long,
         val emoji: String?,
         val colorArgb: String?,
-        val monthlyLimit: java.math.BigDecimal? = null,
-    ) : BudgetEditorIntent
+    val monthlyLimit: java.math.BigDecimal? = null,
+) : BudgetEditorIntent
     data class SetRecurrentEnabled(val enabled: Boolean) : BudgetEditorIntent
     data class SetCreditEnabled(val enabled: Boolean) : BudgetEditorIntent
     data class SetPaymentMethod(val method: com.sachit.moneypal.domain.model.PaymentMethod) : BudgetEditorIntent
+    /** Plan 006: toggle income-entry mode (session-only). */
+    data class SetIncomeMode(val enabled: Boolean) : BudgetEditorIntent
     data object DismissRecurrentDialog : BudgetEditorIntent
     data object DismissCreditCutoffDialog : BudgetEditorIntent
     data object DismissDuplicateConfirmDialog : BudgetEditorIntent

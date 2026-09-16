@@ -33,7 +33,7 @@ class BudgetCalculator @Inject constructor() {
         logcat { "daysRemaining: $daysRemaining (from $currentDate to $periodEnd)" }
 
         val totalSpentInPeriod = transactions
-            .filter { !it.isDeleted }
+            .filter { !it.isDeleted && !it.isIncome }
             .sumOf { it.amount }
         logcat { "totalSpentInPeriod: $totalSpentInPeriod" }
 
@@ -70,7 +70,7 @@ class BudgetCalculator @Inject constructor() {
 
         val spentToday = transactions
             .filter {
-                !it.isDeleted && it.date?.toLocalDate() == currentDate
+                !it.isDeleted && !it.isIncome && it.date?.toLocalDate() == currentDate
             }
             .sumOf { it.amount }
         logcat { "spentToday: $spentToday" }

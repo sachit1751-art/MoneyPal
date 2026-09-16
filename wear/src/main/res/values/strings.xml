@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">MoneyPal Wear</string>
+
+    <!-- Budget tile (plan 010) -->
+    <string name="tile_budget_label">Budget</string>
+    <string name="tile_budget_setup">Set up MoneyPal on your phone</string>
+    <string name="tile_budget_days_left">Days left: %1$d</string>
+    <string name="tile_budget_sync_pending">Sync pending</string>
 </resources>

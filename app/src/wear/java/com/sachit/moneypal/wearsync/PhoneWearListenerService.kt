@@ -9,6 +9,7 @@ import logcat.logcat
 import com.sachit.moneypal.sync.contract.AckPayload
 import com.sachit.moneypal.sync.contract.AckStatus
 import com.sachit.moneypal.sync.contract.ExpensePayload
+import com.sachit.moneypal.sync.contract.WearPaths.BUDGET_STATE_REQUEST
 import com.sachit.moneypal.sync.contract.SnapshotExpenseItem
 import com.sachit.moneypal.sync.contract.SnapshotRequestPayload
 import com.sachit.moneypal.sync.contract.SnapshotResponsePayload
@@ -62,11 +63,12 @@ class PhoneWearListenerService : WearableListenerService() {
     override fun onMessageReceived(messageEvent: MessageEvent) {
         logcat { "onMessageReceived: path=${messageEvent.path}, sourceNode=${messageEvent.sourceNodeId}" }
         when (messageEvent.path) {
-            WearPaths.EXPENSE_ADD, WearPaths.EXPENSE_SNAPSHOT -> {
+            WearPaths.EXPENSE_ADD, WearPaths.EXPENSE_SNAPSHOT, BUDGET_STATE_REQUEST -> {
                 scope.launch {
                     if (isTrustedWearSource(applicationContext, messageEvent.sourceNodeId)) {
                         when (messageEvent.path) {
                             WearPaths.EXPENSE_ADD -> handleExpenseAdd(messageEvent)
+                            BUDGET_STATE_REQUEST -> scope.launch { publishBudgetState() }
                             else -> handleSnapshotRequest(messageEvent)
                         }
                     } else {
@@ -153,5 +155,14 @@ class PhoneWearListenerService : WearableListenerService() {
                 .sendMessage(nodeId, WearPaths.EXPENSE_ACK, bytes)
                 .await()
         }
+    }
+
+    /** Responds to the watch tile's /budget/state/request with fresh state (plan 010). */
+    private suspend fun publishBudgetState() {
+        val publisher = EntryPointAccessors.fromApplication(
+            applicationContext,
+            WearSyncEntryPoint::class.java
+        ).budgetStatePublisher()
+        publisher.publishNow()
     }
 }

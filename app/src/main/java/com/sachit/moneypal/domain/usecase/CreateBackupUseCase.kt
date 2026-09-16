@@ -55,6 +55,7 @@ class CreateBackupUseCase @Inject constructor(
                 BackupPaidOccurrence(
                     transactionId = it.transactionId,
                     occurrenceDateEpochDay = it.occurrenceDate.toEpochDay(),
+                    paidAt = it.paidAt,
                 )
             },
             budgetSettings = budgetSettings?.toBackup(),
@@ -86,6 +87,8 @@ internal fun Transaction.toBackup(): BackupTransaction = BackupTransaction(
     refundExpected = refundExpected,
     refundedAt = refundedAt,
     paymentMethod = paymentMethod.name,
+    isIncome = isIncome,
+    pausedAtEpochMs = pausedAtEpochMs,
 )
 
 internal fun Category.toBackup(): BackupCategory = BackupCategory(

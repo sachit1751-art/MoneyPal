@@ -8,6 +8,8 @@ object WearPaths {
     const val EXPENSE_ACK = "/expense/ack"
     const val EXPENSE_SNAPSHOT = "/expense/snapshot"
     const val EXPENSE_SNAPSHOT_RESPONSE = "/expense/snapshot/response"
+    const val BUDGET_STATE = "/budget/state"
+    const val BUDGET_STATE_REQUEST = "/budget/state/request"
 }
 
 object WearJson {
@@ -55,4 +57,23 @@ data class SnapshotExpenseItem(
 @Serializable
 data class SnapshotResponsePayload(
     val items: List<SnapshotExpenseItem>
+)
+
+/**
+ * Phone → watch budget state for the watch tile (plan 010). Money amounts are
+ * plain strings (money never floats — see the backup codec convention).
+ */
+@Serializable
+data class BudgetStatePayload(
+    /** Remaining spendable today, formatted for display. */
+    val remainingToday: String,
+    /** Daily budget, formatted for display. */
+    val dailyBudget: String,
+    val currencyCode: String,
+    /** 0..100+ percent of the period budget consumed. */
+    val progressPercent: Int,
+    val daysRemaining: Int,
+    val isOverBudget: Boolean,
+    /** Epoch millis the phone computed this state — powers the freshness rule. */
+    val updatedAtEpochMs: Long,
 )

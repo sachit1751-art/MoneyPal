@@ -140,6 +140,10 @@
     <string name="history_snackbar_save_transaction_failed">Could not save transaction</string>
     <string name="history_snackbar_delete_recurrent_failed">Could not delete recurring payment</string>
     <string name="history_snackbar_mark_paid_failed">Could not mark transaction as paid</string>
+    <string name="recurrent_skip_next">Skip next occurrence</string>
+    <string name="recurrent_skipped_snackbar">Occurrence skipped — it will not be counted</string>
+    <string name="recurrent_paused_badge">Paused — reminders and due-today totals are off until you resume</string>
+    <string name="category_suggestion_chip">Suggested: %1$s</string>
     <string name="history_search_hint">Search transactions…</string>
     <string name="history_filter_results">%1$d results</string>
     <string name="history_filter_recurrent">Recurring</string>
@@ -850,6 +854,19 @@
     <string name="threshold_scope_daily">daily</string>
     <string name="threshold_scope_period">period</string>
 
+    <!-- Category-envelope alerts (plan 007) -->
+    <string name="settings_envelope_alerts_title">Envelope alerts</string>
+    <string name="settings_envelope_alerts_subtitle">Warn me when a category hits 80% or 100% of its monthly limit</string>
+    <string name="notification_channel_envelope_name">Envelope alerts</string>
+    <string name="notification_channel_envelope_description">Alerts when a category envelope reaches 80% or 100% of its monthly limit</string>
+    <string name="notification_envelope_title">Envelope alert</string>
+    <string name="notification_envelope_message">%1$s: %2$d%% of the monthly limit — %3$s of %4$s spent.</string>
+
+    <!-- Income tracking (plan 006) -->
+    <string name="income_mode_toggle">Income</string>
+    <string name="income_entry_hint">Money in — not counted against your budget</string>
+    <string name="analytics_net_saved">Net saved this period: %1$s</string>
+
     <!-- Receipt attachments -->
     <string name="attachment_add">Attach receipt photo</string>
     <string name="attachment_added">Receipt attached</string>
@@ -867,6 +884,20 @@
 
     <!-- Full backup / restore -->
     <string name="settings_backup_create_title">Create full backup</string>
+
+    <!-- Backup encryption (plan 011) -->
+    <string name="backup_encrypt_title">Encrypt backup</string>
+    <string name="backup_encrypt_subtitle">Protect the backup file with a password (min 8 characters)</string>
+    <string name="backup_password_hint">Password (min 8 characters)</string>
+    <string name="backup_password_confirm">Confirm password</string>
+    <string name="backup_password_mismatch">Passwords don\'t match</string>
+    <string name="backup_password_too_short">Password must be at least 8 characters</string>
+    <string name="backup_password_required">This backup is password-protected</string>
+    <string name="backup_password_wrong">Wrong password or corrupted file</string>
+    <string name="backup_password_enter_title">Enter backup password</string>
+    <string name="backup_password_ok">OK</string>
+    <string name="backup_password_cancel">Cancel</string>
+    <string name="backup_export_plain">Export without password</string>
     <string name="settings_backup_create_subtitle">Transactions, categories, history and settings as JSON in Downloads</string>
     <string name="settings_backup_folder_title">Back up to folder</string>
     <string name="settings_backup_folder_subtitle">Save a backup copy into any folder — great for sync apps</string>

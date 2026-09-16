@@ -111,6 +111,15 @@ dependencies {
 
 	// Logcat
 	implementation("com.squareup.logcat:logcat:0.4")
+
+	// Wear Tiles (plan 010 budget tile)
+	implementation("androidx.wear.tiles:tiles:1.5.0")
+	implementation("androidx.wear.protolayout:protolayout:1.2.0")
+	implementation("androidx.wear.tiles:tiles-material:1.5.0")
+	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-guava:1.10.2")
+
+	testImplementation(libs.junit)
+	testImplementation(libs.google.truth)
 }
 
 detekt {

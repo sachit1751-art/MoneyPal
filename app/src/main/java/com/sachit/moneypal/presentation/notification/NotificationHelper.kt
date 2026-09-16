@@ -44,6 +44,7 @@ class NotificationHelper @Inject constructor(
         private const val NOTIFICATION_ID_THRESHOLD_PERIOD_100 = 1008
         const val CHANNEL_DIGEST = "weekly_digest"
         private const val NOTIFICATION_ID_DIGEST = 1009
+        const val CHANNEL_ENVELOPE = "envelope_alerts"
     }
 
     init {
@@ -107,12 +108,22 @@ class NotificationHelper @Inject constructor(
             description = context.getString(R.string.notification_channel_digest_description)
         }
 
+        val envelopeChannel = NotificationChannel(
+            CHANNEL_ENVELOPE,
+            context.getString(R.string.notification_channel_envelope_name),
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            description = context.getString(R.string.notification_channel_envelope_description)
+            enableVibration(true)
+        }
+
         notificationManager.createNotificationChannel(periodEndChannel)
         notificationManager.createNotificationChannel(recurrentChannel)
         notificationManager.createNotificationChannel(creditChannel)
         notificationManager.createNotificationChannel(smsCaptureChannel)
         notificationManager.createNotificationChannel(thresholdChannel)
         notificationManager.createNotificationChannel(digestChannel)
+        notificationManager.createNotificationChannel(envelopeChannel)
         logcat { "Notification channels created" }
     }
 
@@ -546,6 +557,63 @@ class NotificationHelper @Inject constructor(
 
         NotificationManagerCompat.from(context).notify(notificationId, notification)
         logcat { "Threshold alert shown: scope=$scope percent=$thresholdPercent" }
+    }
+
+    /**
+     * Shows a category-envelope alert (80% / 100% of the monthly limit, plan
+     * 007). Each category+threshold pair has a stable notification id so a
+     * FULL alert replaces the EIGHTY alert for the same category instead of
+     * stacking.
+     */
+    fun showEnvelopeAlertNotification(
+        categoryName: String,
+        thresholdPercent: Int,
+        spentFormatted: String,
+        limitFormatted: String,
+    ) {
+        val hasPermission = checkNotificationPermission()
+        if (!hasPermission) {
+            logcat { "Cannot show envelope alert - permission not granted" }
+            return
+        }
+
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            6,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val title = context.getString(R.string.notification_envelope_title)
+        val message = context.getString(
+            R.string.notification_envelope_message,
+            categoryName,
+            thresholdPercent,
+            spentFormatted,
+            limitFormatted,
+        )
+
+        // Stable id per category+percent so upgrades replace, never stack.
+        val notificationId = 2000 + (categoryName.hashCode() % 400) * 2 +
+            if (thresholdPercent >= 100) 1 else 0
+
+        val notification = NotificationCompat.Builder(context, CHANNEL_ENVELOPE)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .build()
+
+        NotificationManagerCompat.from(context).notify(notificationId, notification)
+        logcat { "Envelope alert shown: category=$categoryName percent=$thresholdPercent" }
     }
 
     fun cancelAllNotifications() {

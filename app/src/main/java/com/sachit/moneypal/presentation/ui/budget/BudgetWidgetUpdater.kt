@@ -9,10 +9,13 @@ import com.sachit.moneypal.presentation.widget.updateBudgetOverviewWidget
 import com.sachit.moneypal.presentation.widget.updateCompleteBudgetWidget
 import com.sachit.moneypal.presentation.widget.updateDaysCountdownWidget
 import com.sachit.moneypal.presentation.widget.updateExpenseWidget
+import com.sachit.moneypal.wearsync.WearBudgetStateHook
 import com.sachit.moneypal.presentation.widget.updateHeatmapWidget
 import com.sachit.moneypal.presentation.widget.updateMinMaxSpentWidget
 import com.sachit.moneypal.presentation.widget.updateMonthHeatmapWidget
 import dagger.hilt.android.qualifiers.ApplicationContext
+import logcat.asLog
+import logcat.logcat
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.ZoneId
@@ -21,6 +24,7 @@ import javax.inject.Inject
 
 class BudgetWidgetUpdater @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val wearBudgetStateHooks: Set<@JvmSuppressWildcards WearBudgetStateHook>,
 ) {
 
     suspend fun update(baseState: BudgetUiState) {
@@ -42,6 +46,13 @@ class BudgetWidgetUpdater @Inject constructor(
         updateMonthHeatmapWidget(context, heatmapData.currentMonthHeatmap, heatmapData.currentMonthTotalSpent, currency)
         updateMinMaxSpentWidget(context, currentPeriodTransactions, currency)
         updateAverageSpendWidget(context, currentPeriodTransactions, currency, startDate, endDate)
+
+        // Plan 010: push the same state to Wear hooks (no-op on foss). Fire and
+        // forget per hook — a slow/failing send must not block widget updates.
+        wearBudgetStateHooks.forEach { hook ->
+            runCatching { hook.onBudgetStateChanged(baseState) }
+                .onFailure { e -> logcat { "WearBudgetStateHook failed\n${e.asLog()}" } }
+        }
     }
 
     private fun filterCurrentPeriodTransactions(baseState: BudgetUiState): List<Transaction> {

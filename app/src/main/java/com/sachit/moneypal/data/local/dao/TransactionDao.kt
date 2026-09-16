@@ -132,4 +132,8 @@ interface TransactionDao {
 
     @Query("UPDATE transactions SET refundExpected = 0, refundedAt = :refundedAt WHERE id = :transactionId")
     suspend fun markRefunded(transactionId: Long, refundedAt: Long = System.currentTimeMillis())
+
+    /** Pauses (stamps the time) or resumes (clears) a recurring expense — plan 008. */
+    @Query("UPDATE transactions SET pausedAtEpochMs = :pausedAt WHERE id = :transactionId")
+    suspend fun setPaused(transactionId: Long, pausedAt: Long?)
 }

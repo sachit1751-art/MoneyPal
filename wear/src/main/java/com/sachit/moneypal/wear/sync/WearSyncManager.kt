@@ -74,6 +74,31 @@ class WearSyncManager(private val context: Context) {
         return sentAny
     }
 
+    /**
+     * Asks the phone for a fresh budget state (plan 010). The phone responds
+     * on /budget/state; the tile renders whatever lands in BudgetStateStore.
+     */
+    suspend fun requestBudgetState(): Boolean {
+        val nodes = getPhoneReceiverNodes()
+        logcat { "requestBudgetState: receiverNodes=${nodes.size}" }
+        if (nodes.isEmpty()) {
+            return false
+        }
+
+        var sentAny = false
+        for (node in nodes) {
+            runCatching {
+                messageClient.sendMessage(node.id, WearPaths.BUDGET_STATE_REQUEST, ByteArray(0)).await()
+            }.onSuccess {
+                sentAny = true
+                logcat { "requestBudgetState: sent to node=${node.id}" }
+            }.onFailure { e ->
+                logcat { "requestBudgetState: failed for node=${node.id}\n${e.asLog()}" }
+            }
+        }
+        return sentAny
+    }
+
     private suspend fun getPhoneReceiverNodes(): List<com.google.android.gms.wearable.Node> {
         val capabilityInfo = capabilityClient
             .getCapability("minus_phone_receiver", CapabilityClient.FILTER_REACHABLE)

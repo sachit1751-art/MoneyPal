@@ -64,6 +64,7 @@ class BudgetTransactionHandler @Inject constructor(
         resolveActivePeriodId: suspend () -> Long,
         skipDuplicateCheck: Boolean = false,
         paymentMethod: PaymentMethod = PaymentMethod.OTHER,
+        isIncome: Boolean = false,
     ): ApplyTransactionResult {
         var normalizedInput = input
 
@@ -97,6 +98,8 @@ class BudgetTransactionHandler @Inject constructor(
         }
 
         val isAdjustment = input.startsWith("+") || input.startsWith("-")
+        // Plan 006: income mode is mutually exclusive with adjustment entries.
+        val effectiveIsIncome = isIncome && !isAdjustment
         val today = LocalDate.now()
 
         // Duplicate guard: warn when an entry with the same amount+comment was
@@ -130,7 +133,8 @@ class BudgetTransactionHandler @Inject constructor(
                     categoryId = categoryId,
                     isCredit = isCreditEnabled,
                     isAdjustment = isAdjustment,
-                    paymentMethod = paymentMethod
+                    paymentMethod = paymentMethod,
+                    isIncome = effectiveIsIncome
                 )
                 budgetRepository.addQueuedTransaction(pendingTransaction)
                 return ApplyTransactionResult.QueuedForNextPeriod(normalizedInput = normalizedInput)
@@ -144,9 +148,9 @@ class BudgetTransactionHandler @Inject constructor(
                 periodId = activePeriodId,
                 categoryId = categoryId,
                 isCredit = isCreditEnabled,
-                isAdjustment = isAdjustment,
-                paymentMethod = paymentMethod
-            )
+                isAdjustment = isAdjustment,                    paymentMethod = paymentMethod,
+                    isIncome = effectiveIsIncome
+                )
             addTransactionUseCase(transaction)
             ApplyTransactionResult.Added(normalizedInput = normalizedInput)
         } catch (e: CancellationException) {

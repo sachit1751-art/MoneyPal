@@ -24,11 +24,15 @@ data class BudgetUiState(
     val tags: List<String> = emptyList(),
     /** Full category objects (incl. emoji/color styling) backing [tags]. */
     val categories: List<Category> = emptyList(),
+    /** Plan 009: learned category suggestion for the comment being typed; null when none. */
+    val suggestedCategory: Category? = null,
     val isFirstLaunch: Boolean = true,
     val isRecurrentEnabled: Boolean = false,
     val isCreditEnabled: Boolean = false,
     /** Payment method for the entry being composed (see [PaymentMethod]). */
     val selectedPaymentMethod: com.sachit.moneypal.domain.model.PaymentMethod = com.sachit.moneypal.domain.model.PaymentMethod.OTHER,
+    /** Plan 006: session-only income-entry mode; not persisted across launches. */
+    val isIncomeModeEnabled: Boolean = false,
     val showRecurrentDialog: Boolean = false,
     val showCreditCutoffDialog: Boolean = false,
     val showDuplicateConfirmDialog: Boolean = false,

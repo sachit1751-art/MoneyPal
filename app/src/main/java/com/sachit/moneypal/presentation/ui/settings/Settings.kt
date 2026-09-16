@@ -69,6 +69,7 @@ import androidx.compose.material.icons.rounded.Sms
 import androidx.compose.material.icons.rounded.Sell
 import androidx.compose.material.icons.rounded.TipsAndUpdates
 import androidx.compose.material.icons.rounded.YoutubeSearchedFor
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -78,6 +79,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
@@ -108,6 +110,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -173,7 +177,10 @@ fun Settings(
     onSavingsPreferencesChange: (SavingsPreferences) -> Unit = {},
     onExportCsv: () -> Unit = {},
     onImportCsv: () -> Unit = {},
-    onCreateBackup: () -> Unit = {},
+    onCreateBackup: (CharArray?) -> Unit = {},
+    onRestorePasswordEntered: (CharArray) -> Unit = {},
+    showRestorePasswordDialog: Boolean = false,
+    onRestorePasswordDialogDismissed: () -> Unit = {},
     onExportBackupToFolder: () -> Unit = {},
     onRestoreBackup: () -> Unit = {},
     onResetTutorial: () -> Unit = {},
@@ -186,6 +193,8 @@ fun Settings(
     onAppLockToggle: () -> Unit = {},
     thresholdAlertsEnabled: Boolean = false,
     onThresholdAlertsToggle: () -> Unit = {},
+    envelopeAlertsEnabled: Boolean = false,
+    onEnvelopeAlertsToggle: () -> Unit = {},
     weeklyDigestEnabled: Boolean = false,
     onWeeklyDigestToggle: () -> Unit = {},
     autoBackupEnabled: Boolean = false,
@@ -200,6 +209,7 @@ fun Settings(
     var showNotificationTimePicker by remember { mutableStateOf(false) }
     var showRecurrentNotificationTimePicker by remember { mutableStateOf(false) }
     var showWidgetsSheet by remember { mutableStateOf(false) }
+    var showEncryptBackupDialog by remember { mutableStateOf(false) }
     val widgetsSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var isCreditFeatureExpanded by remember { mutableStateOf(false) }
     var isCategoryFeatureExpanded by remember { mutableStateOf(false) }
@@ -505,6 +515,28 @@ fun Settings(
                                 checked = thresholdAlertsEnabled,
                                 onCheckedChange = { onThresholdAlertsToggle() },
                                 modifier = Modifier.testTag("SettingsThresholdAlertsSwitch")
+                            )
+                        }
+                    )
+
+                    SelectablePaddedItem(
+                        label = stringResource(R.string.settings_envelope_alerts_title),
+                        subtitle = stringResource(R.string.settings_envelope_alerts_subtitle),
+                        isActive = envelopeAlertsEnabled,
+                        onClick = onEnvelopeAlertsToggle,
+                        position = PaddedListItemPosition.Middle,
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Rounded.NotificationsActive,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        },
+                        trailingContent = {
+                            Switch(
+                                checked = envelopeAlertsEnabled,
+                                onCheckedChange = { onEnvelopeAlertsToggle() },
+                                modifier = Modifier.testTag("SettingsEnvelopeAlertsSwitch")
                             )
                         }
                     )
@@ -1017,7 +1049,7 @@ fun Settings(
 
                     CustomPaddedListItem(
                         onClick = {
-                            onCreateBackup()
+                            showEncryptBackupDialog = true
                             view.toggleFeedback()
                         }, position = PaddedListItemPosition.Middle
                     ) {
@@ -1290,6 +1322,28 @@ fun Settings(
             }
         }
 
+        if (showEncryptBackupDialog) {
+            EncryptBackupDialog(
+                onDismiss = { showEncryptBackupDialog = false },
+                onExportPlain = {
+                    showEncryptBackupDialog = false
+                    onCreateBackup(null)
+                },
+                onExportEncrypted = { password ->
+                    showEncryptBackupDialog = false
+                    onCreateBackup(password)
+                },
+            )
+        }
+
+        if (showRestorePasswordDialog) {
+            RestorePasswordDialog(
+                onDismiss = onRestorePasswordDialogDismissed,
+                onPasswordEntered = { password ->
+                    onRestorePasswordEntered(password)
+                },
+            )
+        }
     }
 }
 
@@ -1517,6 +1571,155 @@ private fun formatNotificationTime(
     val pattern = if (android.text.format.DateFormat.is24HourFormat(context)) "HH:mm" else "h:mm a"
     return LocalTime.of(hour, minute)
         .format(DateTimeFormatter.ofPattern(pattern, Locale.getDefault()))
+}
+
+/**
+ * Export dialog (plan 011): choose a plain or password-encrypted backup.
+ * Validation: ≥ 8 chars, confirmation must match.
+ */
+@Composable
+fun EncryptBackupDialog(
+    onDismiss: () -> Unit,
+    onExportPlain: () -> Unit,
+    onExportEncrypted: (CharArray) -> Unit,
+) {
+    var password by remember { mutableStateOf("") }
+    var confirm by remember { mutableStateOf("") }
+    var showPassword by remember { mutableStateOf(false) }
+    var showMismatch by remember { mutableStateOf(false) }
+
+    val passwordsMatch = password == confirm
+    val tooShort = password.length < MIN_BACKUP_PASSWORD_LENGTH
+    val canEncrypt = password.isNotEmpty() && !tooShort && passwordsMatch
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.backup_encrypt_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(R.string.backup_encrypt_subtitle))
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = {
+                        password = it
+                        showMismatch = false
+                    },
+                    label = { Text(stringResource(R.string.backup_password_hint)) },
+                    singleLine = true,
+                    isError = tooShort && password.isNotEmpty(),
+                    visualTransformation = if (showPassword) {
+                        VisualTransformation.None
+                    } else {
+                        PasswordVisualTransformation()
+                    },
+                    trailingIcon = {
+                        IconButton(onClick = { showPassword = !showPassword }) {
+                            Icon(
+                                imageVector = Icons.Outlined.RemoveRedEye,
+                                contentDescription = null,
+                            )
+                        }
+                    },
+                )
+                if (tooShort && password.isNotEmpty()) {
+                    Text(
+                        text = stringResource(R.string.backup_password_too_short),
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+                OutlinedTextField(
+                    value = confirm,
+                    onValueChange = {
+                        confirm = it
+                        showMismatch = false
+                    },
+                    label = { Text(stringResource(R.string.backup_password_confirm)) },
+                    singleLine = true,
+                    isError = showMismatch || (confirm.isNotEmpty() && !passwordsMatch),
+                    visualTransformation = if (showPassword) {
+                        VisualTransformation.None
+                    } else {
+                        PasswordVisualTransformation()
+                    },
+                )
+                if (showMismatch || (confirm.isNotEmpty() && !passwordsMatch)) {
+                    Text(
+                        text = stringResource(R.string.backup_password_mismatch),
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                enabled = canEncrypt,
+                onClick = { onExportEncrypted(password.toCharArray()) },
+            ) { Text(stringResource(R.string.backup_encrypt_title)) }
+        },
+        dismissButton = {
+            Row {
+                TextButton(onClick = onExportPlain) {
+                    Text(stringResource(R.string.backup_export_plain))
+                }
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.backup_password_cancel))
+                }
+            }
+        },
+    )
+}
+
+private const val MIN_BACKUP_PASSWORD_LENGTH = 8
+
+/**
+ * Password prompt shown when the picked restore file is encrypted (plan 011).
+ */
+@Composable
+fun RestorePasswordDialog(
+    onDismiss: () -> Unit,
+    onPasswordEntered: (CharArray) -> Unit,
+) {
+    var password by remember { mutableStateOf("") }
+    var showPassword by remember { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.backup_password_enter_title)) },
+        text = {
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text(stringResource(R.string.backup_password_hint)) },
+                singleLine = true,
+                visualTransformation = if (showPassword) {
+                    VisualTransformation.None
+                } else {
+                    PasswordVisualTransformation()
+                },
+                trailingIcon = {
+                    IconButton(onClick = { showPassword = !showPassword }) {
+                        Icon(
+                            imageVector = Icons.Outlined.RemoveRedEye,
+                            contentDescription = null,
+                        )
+                    }
+                },
+            )
+        },
+        confirmButton = {
+            TextButton(
+                enabled = password.isNotEmpty(),
+                onClick = { onPasswordEntered(password.toCharArray()) },
+            ) { Text(stringResource(R.string.backup_password_ok)) }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.backup_password_cancel))
+            }
+        },
+    )
 }
 
 @Preview

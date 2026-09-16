@@ -15,6 +15,8 @@ object MinusCsvContract {
     const val COL_IS_CREDIT_PAID = "is_credit_paid"
     const val COL_PERIOD_ID = "period_id"
     const val COL_CREATED_AT = "created_at"
+    /** Plan 006: appended at the END of the header; old files import as false. */
+    const val COL_IS_INCOME = "is_income"
 
     const val MARKER_META = "__META__"
     const val MARKER_ARCHIVED = "__ARCHIVED__"
@@ -46,6 +48,7 @@ object MinusCsvContract {
         COL_IS_CREDIT_PAID,
         COL_PERIOD_ID,
         COL_CREATED_AT,
+        COL_IS_INCOME,
         COL_BUDGET_TOTAL,
         COL_BUDGET_PERIOD,
         COL_BUDGET_START_DATE,

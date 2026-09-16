@@ -25,6 +25,7 @@ import com.sachit.moneypal.domain.model.PaidRecurrentOccurrence
 import com.sachit.moneypal.domain.model.PaymentMethod
 import com.sachit.moneypal.domain.model.RecurrentFrequency
 import com.sachit.moneypal.domain.model.RemainingBudgetStrategy
+import com.sachit.moneypal.domain.model.SKIPPED_OCCURRENCE_MARKER
 import com.sachit.moneypal.domain.model.Transaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -81,7 +82,9 @@ class BudgetRepositoryImpl @Inject constructor(
             PaymentMethod.valueOf(this.paymentMethod)
         } catch (_: Exception) {
         	PaymentMethod.OTHER
-        }
+        },
+        isIncome = this.isIncome,
+        pausedAtEpochMs = this.pausedAtEpochMs
     )
 
     private fun Transaction.toEntity(): TransactionEntity = TransactionEntity(
@@ -107,7 +110,9 @@ class BudgetRepositoryImpl @Inject constructor(
         originalCurrency = this.originalCurrency,
         refundExpected = this.refundExpected,
         refundedAt = this.refundedAt,
-        paymentMethod = this.paymentMethod.name
+        paymentMethod = this.paymentMethod.name,
+        isIncome = this.isIncome,
+        pausedAtEpochMs = this.pausedAtEpochMs
     )
 
     private fun QueuedTransactionEntity.toDomain(): Transaction = Transaction(
@@ -454,6 +459,7 @@ class BudgetRepositoryImpl @Inject constructor(
                 PaidRecurrentOccurrence(
                     transactionId = it.transactionId,
                     occurrenceDate = LocalDate.ofEpochDay(it.occurrenceDateEpochDay),
+                    paidAt = it.paidAt,
                 )
             }.toSet()
         }
@@ -466,6 +472,20 @@ class BudgetRepositoryImpl @Inject constructor(
                 occurrenceDateEpochDay = occurrenceDate.toEpochDay(),
             )
         )
+    }
+
+    override suspend fun markOccurrenceSkipped(transactionId: Long, occurrenceDate: LocalDate) {
+        paidRecurrentOccurrenceDao.markPaid(
+            PaidRecurrentOccurrenceEntity(
+                transactionId = transactionId,
+                occurrenceDateEpochDay = occurrenceDate.toEpochDay(),
+                paidAt = SKIPPED_OCCURRENCE_MARKER,
+            )
+        )
+    }
+
+    override suspend fun setRecurringPaused(transactionId: Long, paused: Boolean) {
+        transactionDao.setPaused(transactionId, if (paused) System.currentTimeMillis() else null)
     }
 
     override suspend fun getPaidOccurrenceDatesFor(transactionId: Long): Set<LocalDate> {

@@ -86,6 +86,12 @@ interface BudgetRepository {
 
     suspend fun getPaidOccurrenceDatesFor(transactionId: Long): Set<LocalDate>
 
+    /** Marks the occurrence on [occurrenceDate] as skipped (not billed) — plan 008. */
+    suspend fun markOccurrenceSkipped(transactionId: Long, occurrenceDate: LocalDate)
+
+    /** Pauses or resumes a recurring expense (plan 008); paused rows are never due. */
+    suspend fun setRecurringPaused(transactionId: Long, paused: Boolean)
+
     fun getArchivedBudgets(): Flow<List<ArchivedBudget>>
 
     suspend fun upsertArchivedBudgets(archivedBudgets: List<ArchivedBudget>)

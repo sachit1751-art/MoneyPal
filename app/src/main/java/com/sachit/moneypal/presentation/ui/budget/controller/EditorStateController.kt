@@ -23,6 +23,8 @@ class EditorStateController {
         data class RecurrentEnabledChanged(val enabled: Boolean) : EditorChange
         data class CreditEnabledChanged(val enabled: Boolean) : EditorChange
         data class PaymentMethodChanged(val method: PaymentMethod) : EditorChange
+        /** Plan 006: income-mode toggle for the entry being composed. */
+        data class IncomeModeChanged(val enabled: Boolean) : EditorChange
         data class RecurrentDialogVisibilityChanged(val visible: Boolean) : EditorChange
         data class CreditCutoffDialogVisibilityChanged(val visible: Boolean) : EditorChange
         data class DuplicateDialogVisibilityChanged(val visible: Boolean) : EditorChange
@@ -43,6 +45,7 @@ class EditorStateController {
         is EditorIntent.SetRecurrentEnabled -> setRecurrentEnabled(intent.enabled)
         is EditorIntent.SetCreditEnabled -> setCreditEnabled(intent.enabled, hasCreditCardCutoffDay)
         is EditorIntent.SetPaymentMethod -> setPaymentMethod(intent.method)
+        is EditorIntent.SetIncomeMode -> setIncomeMode(intent.enabled)
         is EditorIntent.DismissRecurrentDialog -> dismissRecurrentDialog()
         is EditorIntent.DismissCreditCutoffDialog -> dismissCreditCutoffDialog()
         is EditorIntent.DismissDuplicateConfirmDialog -> dismissDuplicateConfirmDialog()
@@ -82,6 +85,18 @@ class EditorStateController {
     private fun setPaymentMethod(method: PaymentMethod): List<EditorChange> {
         _state.value = _state.value.copy(selectedPaymentMethod = method)
         return listOf(EditorChange.PaymentMethodChanged(method))
+    }
+
+    /** Plan 006: income entries skip adjustments (mutually exclusive). */
+    private fun setIncomeMode(enabled: Boolean): List<EditorChange> {
+        _state.value = _state.value.copy(
+            isIncomeModeEnabled = enabled,
+            isCreditEnabled = if (enabled) false else _state.value.isCreditEnabled,
+        )
+        return buildList {
+            add(EditorChange.IncomeModeChanged(enabled))
+            if (enabled) add(EditorChange.CreditEnabledChanged(false))
+        }
     }
 
     private fun setCreditEnabled(enabled: Boolean, hasCutoff: Boolean): List<EditorChange> {
@@ -226,6 +241,8 @@ data class EditorLocalState(
     val isRecurrentEnabled: Boolean = false,
     val isCreditEnabled: Boolean = false,
     val selectedPaymentMethod: PaymentMethod = PaymentMethod.OTHER,
+    /** Plan 006: session-only income-entry mode; not persisted. */
+    val isIncomeModeEnabled: Boolean = false,
     val showRecurrentDialog: Boolean = false,
     val showCreditCutoffDialog: Boolean = false,
     val showDuplicateConfirmDialog: Boolean = false,
@@ -245,6 +262,8 @@ sealed interface EditorIntent {
     data class SetRecurrentEnabled(val enabled: Boolean) : EditorIntent
     data class SetCreditEnabled(val enabled: Boolean) : EditorIntent
     data class SetPaymentMethod(val method: PaymentMethod) : EditorIntent
+    /** Plan 006: toggle income entry mode. */
+    data class SetIncomeMode(val enabled: Boolean) : EditorIntent
     data object DismissRecurrentDialog : EditorIntent
     data object DismissCreditCutoffDialog : EditorIntent
     data object DismissDuplicateConfirmDialog : EditorIntent

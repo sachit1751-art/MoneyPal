@@ -57,6 +57,10 @@ data class BackupTransaction(
     val refundExpected: Boolean = false,
     val refundedAt: Long? = null,
     val paymentMethod: String = "OTHER",
+    /** Plan 006: income entries; old v1 files decode as false. */
+    val isIncome: Boolean = false,
+    /** Plan 008: epoch millis the recurring expense was paused; null when active. */
+    val pausedAtEpochMs: Long? = null,
 )
 
 @Serializable
@@ -88,6 +92,11 @@ data class BackupPaidOccurrence(
     val transactionId: Long,
     /** Epoch day of the occurrence date. */
     val occurrenceDateEpochDay: Long,
+    /**
+     * Epoch millis of the mark, or `-1` when the occurrence was skipped
+     * (plan 008). Old v1 files decode as 0 = paid — correct default.
+     */
+    val paidAt: Long = 0,
 )
 
 @Serializable

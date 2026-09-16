@@ -24,6 +24,7 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val restoreNeedsPassword by viewModel.restoreNeedsPassword.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -142,6 +143,9 @@ fun SettingsScreen(
         onExportCsv = viewModel::onExportCsv,
         onImportCsv = viewModel::onImportCsv,
         onCreateBackup = viewModel::onCreateBackup,
+        onRestorePasswordEntered = viewModel::onRestorePasswordEntered,
+        showRestorePasswordDialog = restoreNeedsPassword,
+        onRestorePasswordDialogDismissed = viewModel::onRestorePasswordDialogDismissed,
         onExportBackupToFolder = viewModel::onExportBackupToFolder,
         onRestoreBackup = viewModel::onRestoreBackup,
         onResetTutorial = viewModel::onResetTutorial,
@@ -164,6 +168,8 @@ fun SettingsScreen(
         onAppLockToggle = viewModel::onAppLockToggle,
         thresholdAlertsEnabled = uiState.thresholdAlertsEnabled,
         onThresholdAlertsToggle = viewModel::onThresholdAlertsToggle,
+        envelopeAlertsEnabled = uiState.envelopeAlertsEnabled,
+        onEnvelopeAlertsToggle = viewModel::onEnvelopeAlertsToggle,
         weeklyDigestEnabled = uiState.weeklyDigestEnabled,
         onWeeklyDigestToggle = viewModel::onWeeklyDigestToggle,
         autoBackupEnabled = uiState.autoBackupEnabled,

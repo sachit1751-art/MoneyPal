@@ -36,6 +36,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.CreditCard
 import androidx.compose.material.icons.rounded.EventRepeat
+import androidx.compose.material.icons.rounded.SouthWest
 import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Wallet
@@ -162,6 +163,10 @@ fun Editor(
     onRecurrentToggle: (Boolean) -> Unit = {},
     onCreditToggle: (Boolean) -> Unit = {},
     onPaymentMethodSelected: (com.sachit.moneypal.domain.model.PaymentMethod) -> Unit = {},
+    /** Plan 006: income-entry mode toggle (shown when the flag is enabled). */
+    showIncomeToggle: Boolean = false,
+    isIncomeModeEnabled: Boolean = false,
+    onIncomeToggle: (Boolean) -> Unit = {},
     showCreditQuickToggleFeature: Boolean = false,
     directCategoryPopupEnabled: Boolean = false,
     categoryGridModeEnabled: Boolean = false,
@@ -314,6 +319,44 @@ fun Editor(
                                 ),
                                 verticalArrangement = Arrangement.spacedBy(2.dp)
                             ) {
+                                if (showIncomeToggle) {
+                                    val incomeDescription = "Income entry (not counted against budget)"
+                                    TooltipBox(
+                                        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
+                                            TooltipAnchorPosition.Above
+                                        ),
+                                        tooltip = {
+                                            PlainTooltip(
+                                                modifier = Modifier.semantics {
+                                                    liveRegion = LiveRegionMode.Assertive
+                                                    paneTitle = incomeDescription
+                                                }
+                                            ) { Text(incomeDescription) }
+                                        },
+                                        state = rememberTooltipState(),
+                                    ) {
+                                        ToggleButton(
+                                            checked = isIncomeModeEnabled,
+                                            onCheckedChange = onIncomeToggle,
+                                            shapes = ButtonGroupDefaults.connectedLeadingButtonShapes(),
+                                            modifier = Modifier
+                                                .fillMaxHeight()
+                                                .semantics { role = Role.RadioButton },
+                                            colors = ToggleButtonDefaults.toggleButtonColors(
+                                                containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.65f),
+                                                checkedContainerColor = MaterialTheme.colorScheme.primary,
+                                                contentColor = MaterialTheme.colorScheme.primary,
+                                                checkedContentColor = MaterialTheme.colorScheme.onPrimary
+                                            )
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Rounded.SouthWest,
+                                                contentDescription = incomeDescription
+                                            )
+                                        }
+                                    }
+                                }
+
                                 val creditDescription = "Credit card payment"
                                 TooltipBox(
                                     positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
@@ -399,6 +442,44 @@ fun Editor(
                                 }
                             }
                         } else {
+                            if (showIncomeToggle) {
+                                val incomeDescription = "Income entry (not counted against budget)"
+                                TooltipBox(
+                                    positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
+                                        TooltipAnchorPosition.Below
+                                    ),
+                                    tooltip = {
+                                        PlainTooltip(
+                                            modifier = Modifier.semantics {
+                                                liveRegion = LiveRegionMode.Assertive
+                                                paneTitle = incomeDescription
+                                            }
+                                        ) { Text(incomeDescription) }
+                                    },
+                                    state = rememberTooltipState(),
+                                ) {
+                                    ToggleButton(
+                                        checked = isIncomeModeEnabled,
+                                        onCheckedChange = onIncomeToggle,
+                                        shapes = ToggleButtonDefaults.shapes(),
+                                        modifier = Modifier
+                                            .fillMaxHeight()
+                                            .semantics { role = Role.RadioButton },
+                                        colors = ToggleButtonDefaults.toggleButtonColors(
+                                            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.65f),
+                                            checkedContainerColor = MaterialTheme.colorScheme.primary,
+                                            contentColor = MaterialTheme.colorScheme.primary,
+                                            checkedContentColor = MaterialTheme.colorScheme.onPrimary
+                                        )
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.SouthWest,
+                                            contentDescription = incomeDescription
+                                        )
+                                    }
+                                }
+                            }
+
                             val recurrentDescription = "Recurrent payment"
                             TooltipBox(
                                 positionProvider = TooltipDefaults.rememberTooltipPositionProvider(

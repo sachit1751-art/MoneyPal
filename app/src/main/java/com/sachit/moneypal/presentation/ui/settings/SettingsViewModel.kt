@@ -74,6 +74,7 @@ data class SettingsUiState(
     val smsPermissionGranted: Boolean = false,
     val appLockEnabled: Boolean = false,
     val thresholdAlertsEnabled: Boolean = false,
+    val envelopeAlertsEnabled: Boolean = false,
     val weeklyDigestEnabled: Boolean = false,
     val autoBackupEnabled: Boolean = false,
     val autoBackupTreeUri: String = "",
@@ -164,6 +165,11 @@ class SettingsViewModel @Inject constructor(
     private val _effects = MutableStateFlow<SettingsUiEffect?>(null)
     val effects: StateFlow<SettingsUiEffect?> = _effects.asStateFlow()
 
+    /** True while the restore-password dialog should be visible (plan 011). */
+    private val _restoreNeedsPassword = MutableStateFlow(false)
+    val restoreNeedsPassword: StateFlow<Boolean> = _restoreNeedsPassword.asStateFlow()
+    private var pendingRestoreUri: Uri? = null
+
     private var csvTransferManager: CsvTransferManager? = null
     private var importLauncher: ActivityResultLauncher<Array<String>>? = null
 
@@ -191,6 +197,14 @@ class SettingsViewModel @Inject constructor(
         val newValue = !uiState.value.thresholdAlertsEnabled
         viewModelScope.launch {
             settingsRepository.setThresholdAlertsEnabled(newValue)
+        }
+    }
+
+    /** Category-envelope alerts toggle (plan 007). */
+    fun onEnvelopeAlertsToggle() {
+        val newValue = !uiState.value.envelopeAlertsEnabled
+        viewModelScope.launch {
+            settingsRepository.setEnvelopeAlertsEnabled(newValue)
         }
     }
 
@@ -498,9 +512,13 @@ class SettingsViewModel @Inject constructor(
         restoreLauncher = launcher
     }
 
-    fun onCreateBackup() {
+    fun onCreateBackup(password: CharArray?) {
         viewModelScope.launch {
-            val uri = backupTransferManager?.exportBackup()
+            val uri = if (password != null) {
+                backupTransferManager?.exportEncryptedBackup(password)
+            } else {
+                backupTransferManager?.exportBackup()
+            }
             if (uri != null) backupTransferManager?.toastSaved()
         }
     }
@@ -530,11 +548,44 @@ class SettingsViewModel @Inject constructor(
     fun onRestoreBackupResult(uri: Uri?) {
         uri ?: return
         viewModelScope.launch {
-            val message = backupTransferManager?.restoreFrom(uri)
-            message?.let {
-                android.widget.Toast.makeText(context, it, android.widget.Toast.LENGTH_LONG).show()
+            when (val outcome = backupTransferManager?.restoreFrom(uri)) {
+                is com.sachit.moneypal.presentation.ui.settings.backup.BackupTransferManager.RestoreOutcome.Success ->
+                    toast(outcome.message)
+                is com.sachit.moneypal.presentation.ui.settings.backup.BackupTransferManager.RestoreOutcome.PasswordRequired -> {
+                    pendingRestoreUri = uri
+                    _restoreNeedsPassword.value = true
+                }
+                is com.sachit.moneypal.presentation.ui.settings.backup.BackupTransferManager.RestoreOutcome.Failure ->
+                    toast(outcome.message)
+                null -> Unit
             }
         }
+    }
+
+    /** Password submitted from the restore-password dialog (plan 011). */
+    fun onRestorePasswordEntered(password: CharArray) {
+        val uri = pendingRestoreUri ?: return
+        _restoreNeedsPassword.value = false
+        viewModelScope.launch {
+            when (val outcome = backupTransferManager?.restoreFrom(uri, password)) {
+                is com.sachit.moneypal.presentation.ui.settings.backup.BackupTransferManager.RestoreOutcome.Success ->
+                    toast(outcome.message)
+                is com.sachit.moneypal.presentation.ui.settings.backup.BackupTransferManager.RestoreOutcome.PasswordRequired ->
+                    toast(context.getString(com.sachit.moneypal.R.string.backup_password_wrong))
+                is com.sachit.moneypal.presentation.ui.settings.backup.BackupTransferManager.RestoreOutcome.Failure ->
+                    toast(outcome.message)
+                null -> Unit
+            }
+        }
+    }
+
+    fun onRestorePasswordDialogDismissed() {
+        _restoreNeedsPassword.value = false
+        pendingRestoreUri = null
+    }
+
+    private fun toast(message: String) {
+        android.widget.Toast.makeText(context, message, android.widget.Toast.LENGTH_LONG).show()
     }
 
     fun onResetTutorial() {

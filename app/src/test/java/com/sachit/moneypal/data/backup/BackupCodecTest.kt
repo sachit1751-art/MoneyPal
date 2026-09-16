@@ -1,5 +1,6 @@
 package com.sachit.moneypal.data.backup
 
+import com.sachit.moneypal.domain.model.SKIPPED_OCCURRENCE_MARKER
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
@@ -41,6 +42,7 @@ class BackupCodecTest {
                 recurrentFrequency = "MONTHLY",
                 recurrentEndDate = 1_780_000_000_000,
                 subscriptionDay = 15,
+                pausedAtEpochMs = 1_770_000_000_000, // plan 008 paused recurring
             ),
         ),
         categories = listOf(
@@ -59,7 +61,14 @@ class BackupCodecTest {
                 createdAt = 10L,
             ),
         ),
-        paidOccurrences = listOf(BackupPaidOccurrence(transactionId = 3, occurrenceDateEpochDay = 20_000)),
+        paidOccurrences = listOf(
+            BackupPaidOccurrence(transactionId = 3, occurrenceDateEpochDay = 20_000),
+            BackupPaidOccurrence(
+                transactionId = 3,
+                occurrenceDateEpochDay = 20_030,
+                paidAt = SKIPPED_OCCURRENCE_MARKER, // plan 008 skipped occurrence
+            ),
+        ),
         budgetSettings = BackupBudgetSettings(
             totalBudget = "3000.00",
             period = "MONTHLY",
@@ -122,5 +131,79 @@ class BackupCodecTest {
     fun `schema version 1 decodes fine`() {
         val decoded = BackupCodec.decode(BackupCodec.encode(sampleBackup()))
         assertEquals(1, decoded.schemaVersion)
+    }
+
+    // ---- Encrypted backup support (plan 011) ----
+
+    @Test
+    fun `encrypted round trip preserves all fields`() {
+        val password = "strong pass".toCharArray()
+        val original = sampleBackup()
+        val decoded = BackupCodec.decode(
+            BackupCodec.encodeEncrypted(original, password),
+            password,
+        )
+        assertEquals(original, decoded)
+    }
+
+    @Test
+    fun `encrypted file without password reports password protected`() {
+        val encoded = BackupCodec.encodeEncrypted(sampleBackup(), "pw123456".toCharArray())
+        val exception = assertThrows(BackupFormatException::class.java) {
+            BackupCodec.decode(encoded)
+        }
+        assertEquals(BackupCodec.BACKUP_PASSWORD_REQUIRED_MESSAGE, exception.message)
+    }
+
+    @Test
+    fun `encrypted file with wrong password fails cleanly`() {
+        val encoded = BackupCodec.encodeEncrypted(sampleBackup(), "pw123456".toCharArray())
+        assertThrows(BackupFormatException::class.java) {
+            BackupCodec.decode(encoded, "wrong-pw".toCharArray())
+        }
+    }
+
+    @Test
+    fun `plaintext still decodes when a password is supplied`() {
+        val decoded = BackupCodec.decode(
+            BackupCodec.encode(sampleBackup()),
+            "irrelevant".toCharArray(),
+        )
+        assertEquals(sampleBackup(), decoded)
+    }
+
+    @Test
+    fun `garbage throws BackupFormatException`() {
+        assertThrows(BackupFormatException::class.java) {
+            BackupCodec.decode("random bytes", null)
+        }
+    }
+
+    // ---- Pause / skip round trip (plan 008) ----
+
+    @Test
+    fun `pause and skip state survive a round trip`() {
+        val original = sampleBackup()
+        val decoded = BackupCodec.decode(BackupCodec.encode(original))
+
+        assertEquals(1_770_000_000_000L, decoded.transactions.last { it.isRecurrent }.pausedAtEpochMs)
+        assertEquals(2, decoded.paidOccurrences.size)
+        assertEquals(
+            SKIPPED_OCCURRENCE_MARKER,
+            decoded.paidOccurrences.last().paidAt,
+        )
+    }
+
+    @Test
+    fun `old v1 file without pause or skip fields still decodes`() {
+        val json = BackupCodec.encode(sampleBackup())
+        // Strip the plan 008 keys to simulate a pre-008 v1 backup file.
+        val legacyJson = json
+            .replace(",\"pausedAtEpochMs\":1770000000000", "")
+            .replace(",\"paidAt\":-1", "")
+        val decoded = BackupCodec.decode(legacyJson)
+
+        assertEquals(null, decoded.transactions.last { it.isRecurrent }.pausedAtEpochMs)
+        assertEquals(0L, decoded.paidOccurrences.first().paidAt)
     }
 }

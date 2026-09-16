@@ -33,6 +33,8 @@ sealed interface HistoryUiIntent {
     data class SaveEditedTransaction(val transaction: Transaction) : HistoryUiIntent
     data class ConfirmDeleteRecurrent(val transaction: Transaction) : HistoryUiIntent
     data class MarkTransactionAsPaid(val transaction: Transaction) : HistoryUiIntent
+    /** Skips the next occurrence of a recurring expense (plan 008). */
+    data class SkipNextOccurrence(val transaction: Transaction) : HistoryUiIntent
     /** Duplicates [transaction] with today's date. */
     data class CloneTransaction(val transaction: Transaction) : HistoryUiIntent
     /** Toggles the refund-expected flag on [transaction]. */

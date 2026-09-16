@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.core.content.FileProvider
 import com.sachit.moneypal.R
 import com.sachit.moneypal.data.backup.BackupCodec
+import com.sachit.moneypal.data.backup.BackupEncryption
 import com.sachit.moneypal.data.backup.BackupFormatException
 import com.sachit.moneypal.data.backup.MoneyPalBackup
 import com.sachit.moneypal.domain.usecase.CreateBackupUseCase
@@ -56,6 +57,18 @@ class BackupTransferManager @Inject constructor(
     }
 
     /**
+     * Password-encrypted manual export (plan 011). Same file naming and
+     * transport as [exportBackup]; the payload is wrapped with the
+     * `MONEYPAL_ENC1:` AES-GCM envelope.
+     */
+    suspend fun exportEncryptedBackup(password: CharArray): Uri? =
+        withContext(Dispatchers.IO) {
+            val fileName = backupFileName()
+            val payload = BackupCodec.encodeEncrypted(createBackupUseCase(), password)
+            saveToDownloads(fileName, payload)
+        }
+
+    /**
      * Writes a fresh backup into a user-chosen SAF tree (e.g. a Syncthing or
      * Nextcloud-synced folder), giving the FOSS flavor an off-device,
      * Play-Services-free backup target. Returns true on success.
@@ -85,26 +98,52 @@ class BackupTransferManager @Inject constructor(
      * Restores a backup from [uri]. Returns a user-facing result message, or
      * null when the restore failed (message already toasted/logged).
      */
-    suspend fun restoreFrom(uri: Uri): String? = withContext(Dispatchers.IO) {
-        try {
-            val raw = context.contentResolver.openInputStream(uri)?.use { input ->
-                input.readBytes().toString(Charsets.UTF_8)
-            } ?: throw BackupFormatException("Could not read the selected file")
-            val backup = BackupCodec.decode(raw)
-            val result = restoreBackupUseCase(backup)
-            context.getString(
-                R.string.backup_restore_result,
-                result.transactionsRestored,
-                result.transactionsSkipped,
-                result.categoriesRestored,
-            )
-        } catch (e: BackupFormatException) {
-            errorLogRecorder.record("BackupTransferManager.restoreFrom", e)
-            context.getString(R.string.backup_restore_invalid_file)
-        } catch (e: Exception) {
-            errorLogRecorder.record("BackupTransferManager.restoreFrom", e)
-            context.getString(R.string.backup_restore_failed)
+    /**
+     * Restores a backup from [uri]. Returns a user-facing result message, or
+     * null when the restore failed (message already toasted/logged).
+     *
+     * Password-protected files are detected up front ([BackupEncryption.isEncrypted])
+     * and reported via [RestoreOutcome.PasswordRequired] so the UI can prompt
+     * without decoding twice.
+     */
+    suspend fun restoreFrom(uri: Uri, password: CharArray? = null): RestoreOutcome =
+        withContext(Dispatchers.IO) {
+            try {
+                val raw = context.contentResolver.openInputStream(uri)?.use { input ->
+                    input.readBytes().toString(Charsets.UTF_8)
+                } ?: throw BackupFormatException("Could not read the selected file")
+                if (password == null && BackupEncryption.isEncrypted(raw)) {
+                    return@withContext RestoreOutcome.PasswordRequired
+                }
+                val backup = BackupCodec.decode(raw, password)
+                val result = restoreBackupUseCase(backup)
+                RestoreOutcome.Success(
+                    context.getString(
+                        R.string.backup_restore_result,
+                        result.transactionsRestored,
+                        result.transactionsSkipped,
+                        result.categoriesRestored,
+                    )
+                )
+            } catch (e: BackupFormatException) {
+                errorLogRecorder.record("BackupTransferManager.restoreFrom", e)
+                RestoreOutcome.Failure(context.getString(R.string.backup_restore_invalid_file))
+            } catch (e: Exception) {
+                errorLogRecorder.record("BackupTransferManager.restoreFrom", e)
+                RestoreOutcome.Failure(context.getString(R.string.backup_restore_failed))
+            }
         }
+
+    /** Result of [restoreFrom] (plan 011). */
+    sealed class RestoreOutcome {
+        /** Restore finished; [message] is user-facing. */
+        data class Success(val message: String) : RestoreOutcome()
+
+        /** The file is encrypted — ask the user for the password and retry. */
+        data object PasswordRequired : RestoreOutcome()
+
+        /** Restore failed; [message] is user-facing. */
+        data class Failure(val message: String) : RestoreOutcome()
     }
 
     private suspend fun saveToDownloads(fileName: String, payload: String): Uri? =

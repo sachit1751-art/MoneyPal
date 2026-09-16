@@ -58,6 +58,9 @@ class MoneyPalApplication : Application(), Configuration.Provider {
     lateinit var thresholdAlertObserver: com.sachit.moneypal.presentation.notification.ThresholdAlertObserver
 
     @Inject
+    lateinit var envelopeAlertObserver: com.sachit.moneypal.presentation.notification.EnvelopeAlertObserver
+
+    @Inject
     @ApplicationScope
     lateinit var applicationScope: CoroutineScope
 
@@ -72,6 +75,7 @@ class MoneyPalApplication : Application(), Configuration.Provider {
 
         phoneWearMessageListener.start()
         thresholdAlertObserver.start()
+        envelopeAlertObserver.start()
 
         applicationScope.launch {
             runCatching { backfillOrphanedPeriodsUseCase() }

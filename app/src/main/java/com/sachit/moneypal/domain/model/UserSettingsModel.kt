@@ -30,6 +30,8 @@ data class UserSettings(
     val showPastTransactions: Boolean = true,
     val smsCaptureEnabled: Boolean = false,
     val thresholdAlertsEnabled: Boolean = false,
+    /** Opt-in category-envelope limit alerts (plan 007). */
+    val envelopeAlertsEnabled: Boolean = false,
     val isRoundedFontEnabled: Boolean = true,
     val isAmoledEnabled: Boolean = false,
     val appLockEnabled: Boolean = false,

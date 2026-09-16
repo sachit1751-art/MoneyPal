@@ -97,6 +97,11 @@ interface SettingsRepository {
 
     suspend fun setThresholdAlertsEnabled(enabled: Boolean)
 
+    /** Opt-in category-envelope alerts (plan 007). */
+    fun observeEnvelopeAlertsEnabled(): Flow<Boolean>
+
+    suspend fun setEnvelopeAlertsEnabled(enabled: Boolean)
+
     suspend fun getDailyAlertedThreshold(todayEpochDay: Long): BudgetThreshold?
 
     suspend fun setDailyAlertedThreshold(threshold: BudgetThreshold?, todayEpochDay: Long)

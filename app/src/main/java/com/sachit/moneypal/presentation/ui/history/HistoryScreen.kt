@@ -215,6 +215,9 @@ fun History(
                     onProcessIntent(HistoryUiIntent.MarkTransactionAsPaid(expense))
                     onShowInfoSnackbar(resources.getString(R.string.mark_as_paid_success))
                 },
+                onSkipNext = { expense ->
+                    onProcessIntent(HistoryUiIntent.SkipNextOccurrence(expense))
+                },
                 onClick = { expense ->
                     onProcessIntent(
                         HistoryUiIntent.ToggleExpandedTransaction(
@@ -290,6 +293,9 @@ fun History(
                 onMarkAsPaid = { expense ->
                     onProcessIntent(HistoryUiIntent.MarkTransactionAsPaid(expense))
                     onShowInfoSnackbar(resources.getString(R.string.mark_as_paid_success))
+                },
+                onSkipNext = { expense ->
+                    onProcessIntent(HistoryUiIntent.SkipNextOccurrence(expense))
                 },
                 onClick = { expense ->
                     onProcessIntent(

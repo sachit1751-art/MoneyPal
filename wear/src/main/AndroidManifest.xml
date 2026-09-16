@@ -45,6 +45,16 @@
         </activity>
 
         <service
+            android:name=".presentation.BudgetTileService"
+            android:exported="true"
+            android:label="@string/tile_budget_label"
+            android:permission="com.google.android.wearable.permission.BIND_TILE_SERVICE">
+            <intent-filter>
+                <action android:name="androidx.wear.tiles.action.BIND_TILE_SERVICE" />
+            </intent-filter>
+        </service>
+
+        <service
             android:name=".sync.WearWatchListenerService"
             android:enabled="true"
             android:exported="true"
