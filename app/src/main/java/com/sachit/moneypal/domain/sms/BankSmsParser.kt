@@ -110,6 +110,7 @@ object BankSmsParser {
                     sender = sender.trim(),
                     timestampMillis = timestampMillis,
                     rawAmountText = connector.groupValues[1],
+                    body = body,
                 )
             }
 
@@ -154,6 +155,7 @@ object BankSmsParser {
             sender = sender.trim(),
             timestampMillis = timestampMillis,
             rawAmountText = amountText,
+            body = body,
         )
     }
 

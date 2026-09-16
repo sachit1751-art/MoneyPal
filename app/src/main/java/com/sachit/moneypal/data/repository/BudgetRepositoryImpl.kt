@@ -84,7 +84,9 @@ class BudgetRepositoryImpl @Inject constructor(
         	PaymentMethod.OTHER
         },
         isIncome = this.isIncome,
-        pausedAtEpochMs = this.pausedAtEpochMs
+        pausedAtEpochMs = this.pausedAtEpochMs,
+        source = this.source,
+        captureConfidence = this.captureConfidence
     )
 
     private fun Transaction.toEntity(): TransactionEntity = TransactionEntity(
@@ -112,7 +114,9 @@ class BudgetRepositoryImpl @Inject constructor(
         refundedAt = this.refundedAt,
         paymentMethod = this.paymentMethod.name,
         isIncome = this.isIncome,
-        pausedAtEpochMs = this.pausedAtEpochMs
+        pausedAtEpochMs = this.pausedAtEpochMs,
+        source = this.source,
+        captureConfidence = this.captureConfidence
     )
 
     private fun QueuedTransactionEntity.toDomain(): Transaction = Transaction(

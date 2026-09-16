@@ -3,6 +3,7 @@ package com.sachit.moneypal.domain.usecase
 import com.google.common.truth.Truth.assertThat
 import com.sachit.moneypal.data.repository.BudgetRepository
 import com.sachit.moneypal.data.repository.SettingsRepository
+import com.sachit.moneypal.domain.calculator.CategorySuggester
 import com.sachit.moneypal.domain.model.BudgetPeriod
 import com.sachit.moneypal.domain.model.BudgetSettings
 import com.sachit.moneypal.domain.model.UserSettings
@@ -44,7 +45,7 @@ class ProcessIncomingSmsUseCaseTest {
         coEvery { settingsRepository.isSmsSeen(any()) } returns false
         coEvery { budgetRepository.getBudgetSettingsSync() } returns budgetSettings
         coEvery { settingsRepository.getCurrentPeriodId() } returns 42L
-        useCase = ProcessIncomingSmsUseCase(budgetRepository, settingsRepository)
+        useCase = ProcessIncomingSmsUseCase(budgetRepository, settingsRepository, CategorySuggester())
     }
 
     /** Epoch millis for local noon today — always inside the current monthly period. */
@@ -140,6 +141,32 @@ class ProcessIncomingSmsUseCaseTest {
 
         assertThat(result).isInstanceOf(ProcessIncomingSmsUseCase.Result.Captured::class.java)
         coVerify(exactly = 1) { budgetRepository.addTransaction(any()) }
+    }
+
+    @Test
+    fun `captured sms gets merchant comment and source`() = runTest {
+        val result = useCase("HDFC-BANK", "Rs 500 debited at AMAZON on 12-03", ts)
+
+        val captured = result as ProcessIncomingSmsUseCase.Result.Captured
+        assertThat(captured.isCredit).isFalse()
+        val txSlot = slot<com.sachit.moneypal.domain.model.Transaction>()
+        coVerify(exactly = 1) { budgetRepository.addTransaction(capture(txSlot)) }
+        val tx = txSlot.captured
+        assertThat(tx.comment).isEqualTo("Amazon")
+        assertThat(tx.source).isEqualTo("sms")
+        assertThat(tx.captureConfidence).isAtLeast(1)
+    }
+
+    @Test
+    fun `sender without merchant still captures with sender comment`() = runTest {
+        val result = useCase("HDFC-BANK", "Rs 300 debited from a/c XX99 ref 8812", ts)
+
+        assertThat(result).isInstanceOf(ProcessIncomingSmsUseCase.Result.Captured::class.java)
+        val txSlot = slot<com.sachit.moneypal.domain.model.Transaction>()
+        coVerify(exactly = 1) { budgetRepository.addTransaction(capture(txSlot)) }
+        val tx = txSlot.captured
+        assertThat(tx.comment).isEqualTo("HDFC-BANK")
+        assertThat(tx.captureConfidence).isNotNull()
     }
 
     @Test

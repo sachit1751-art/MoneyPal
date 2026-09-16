@@ -13,4 +13,6 @@ data class BankSmsMatch(
     val timestampMillis: Long,
     /** Raw numeric string as it appeared in the message (e.g. "1,234.56"), for logging. */
     val rawAmountText: String,
+    /** Full message body — saves downstream consumers from re-parsing (plan 014). */
+    val body: String = "",
 )

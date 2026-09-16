@@ -2,9 +2,13 @@ package com.sachit.moneypal.domain.usecase
 
 import com.sachit.moneypal.data.repository.BudgetRepository
 import com.sachit.moneypal.data.repository.SettingsRepository
+import com.sachit.moneypal.domain.calculator.CategorySuggester
 import com.sachit.moneypal.domain.model.Transaction
 import com.sachit.moneypal.domain.sms.BankSmsMatch
 import com.sachit.moneypal.domain.sms.BankSmsParser
+import com.sachit.moneypal.domain.sms.SmsCaptureConfidence
+import com.sachit.moneypal.domain.sms.SmsMerchantExtractor
+import kotlinx.coroutines.flow.first
 import logcat.logcat
 import java.math.BigDecimal
 import java.time.Instant
@@ -35,6 +39,7 @@ import javax.inject.Inject
 class ProcessIncomingSmsUseCase @Inject constructor(
     private val budgetRepository: BudgetRepository,
     private val settingsRepository: SettingsRepository,
+    private val categorySuggester: CategorySuggester,
 ) {
 
     sealed interface Result {
@@ -85,12 +90,35 @@ class ProcessIncomingSmsUseCase @Inject constructor(
             val isPastPeriodEnd =
                 budgetSettings != null && captureDate.isAfter(budgetSettings.getPeriodEndDate())
 
+            // Smart capture (plan 014): extract the merchant from the body,
+            // suggest a category from history, score the capture confidence.
+            val merchant = SmsMerchantExtractor.extract(match.body)
+            val suggestedCategory = if (!match.isCredit) {
+                runCatching {
+                    val history = budgetRepository.getTransactions().first()
+                    val categories = budgetRepository.getActiveCategories().first()
+                    val index = categorySuggester.buildIndex(history)
+                    categorySuggester.suggest(merchant ?: "", categories, index)
+                }.getOrNull()
+            } else {
+                null
+            }
+            val confidence = SmsCaptureConfidence.score(
+                senderLooksLikeBank = BankSmsParser.isLikelyBankSender(sender),
+                merchantFound = merchant != null,
+                categorySuggested = suggestedCategory != null,
+                amount = match.amount,
+            )
+
             val transaction = Transaction.create(
                 amount = amount,
-                comment = match.sender,
+                comment = merchant ?: match.sender,
                 date = eventTime,
                 periodId = if (isPastPeriodEnd) 0L else getCurrentPeriodId(),
                 isAdjustment = match.isCredit,
+                categoryId = suggestedCategory?.category?.id,
+                source = "sms",
+                captureConfidence = confidence,
             )
 
             if (isPastPeriodEnd) {

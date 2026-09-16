@@ -25,14 +25,15 @@ import com.sachit.moneypal.data.local.entity.TransactionEntity
         ArchivedBudgetEntity::class,
         PaidRecurrentOccurrenceEntity::class
     ],
-    version = 22,
+    version = 23,
     autoMigrations = [
         AutoMigration(from = 16, to = 17),
         AutoMigration(from = 17, to = 18),
         AutoMigration(from = 18, to = 19),
         AutoMigration(from = 19, to = 20),
         AutoMigration(from = 20, to = 21),
-        AutoMigration(from = 21, to = 22)
+        AutoMigration(from = 21, to = 22),
+        AutoMigration(from = 22, to = 23)
     ],
     exportSchema = true
 )

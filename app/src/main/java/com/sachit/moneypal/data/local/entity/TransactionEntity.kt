@@ -54,7 +54,13 @@ data class TransactionEntity(
     val isIncome: Boolean = false,
     /** Epoch millis when this recurring expense was paused; NULL while active (plan 008). */
     @ColumnInfo(defaultValue = "NULL")
-    val pausedAtEpochMs: Long? = null
+    val pausedAtEpochMs: Long? = null,
+    /** Where this row came from: "manual", "sms", "wear" (null = legacy/manual). */
+    @ColumnInfo(defaultValue = "NULL")
+    val source: String? = null,
+    /** SMS capture confidence 0..100 (null when source != "sms"). */
+    @ColumnInfo(defaultValue = "NULL")
+    val captureConfidence: Int? = null
 ) {
     companion object {
         fun fromDomain(
@@ -74,7 +80,9 @@ data class TransactionEntity(
             originalCurrency: String? = null,
             paymentMethod: String = "OTHER",
             isIncome: Boolean = false,
-            pausedAtEpochMs: Long? = null
+            pausedAtEpochMs: Long? = null,
+            source: String? = null,
+            captureConfidence: Int? = null
         ): TransactionEntity = TransactionEntity(
             id = 0,
             amount = amount,
@@ -93,7 +101,9 @@ data class TransactionEntity(
             originalCurrency = originalCurrency,
             paymentMethod = paymentMethod,
             isIncome = isIncome,
-            pausedAtEpochMs = pausedAtEpochMs
+            pausedAtEpochMs = pausedAtEpochMs,
+            source = source,
+            captureConfidence = captureConfidence
         )
     }
 }

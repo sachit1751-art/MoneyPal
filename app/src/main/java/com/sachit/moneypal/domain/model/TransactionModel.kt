@@ -41,6 +41,10 @@ data class Transaction(
      * Meaningful only when [isRecurrent] (plan 008).
      */
     val pausedAtEpochMs: Long? = null,
+    /** Where this row came from: "manual", "sms", "wear"; null = legacy/manual (plan 014). */
+    val source: String? = null,
+    /** SMS capture confidence 0..100; null when [source] != "sms" (plan 014). */
+    val captureConfidence: Int? = null,
 ) {
     /** True when this recurring expense is paused (reminders and due-today sums off). */
     val isRecurrentPaused: Boolean get() = isRecurrent && pausedAtEpochMs != null
@@ -67,7 +71,9 @@ data class Transaction(
             refundedAt: Long? = null,
             paymentMethod: PaymentMethod = PaymentMethod.OTHER,
             isIncome: Boolean = false,
-            pausedAtEpochMs: Long? = null
+            pausedAtEpochMs: Long? = null,
+            source: String? = null,
+            captureConfidence: Int? = null
         ): Transaction {
             require(!(isAdjustment && isIncome)) { "An adjustment cannot be income" }
             return Transaction(
@@ -94,6 +100,8 @@ data class Transaction(
             paymentMethod = paymentMethod,
             isIncome = isIncome,
             pausedAtEpochMs = pausedAtEpochMs,
+            source = source,
+            captureConfidence = captureConfidence,
         )
         }
     }
