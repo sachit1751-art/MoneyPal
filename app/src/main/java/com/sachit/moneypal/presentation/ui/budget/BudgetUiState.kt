@@ -53,6 +53,8 @@ data class BudgetUiState(
     val numpadDraftAmount: BigDecimal? = null,
     /** No-spend streak snapshot (see [com.sachit.moneypal.domain.calculator.NoSpendStreak]). */
     val noSpendStreak: com.sachit.moneypal.domain.calculator.NoSpendStreak? = null,
+    /** Plan 021: learned quick-amount presets for the numpad chips row. */
+    val quickAmounts: List<BigDecimal> = emptyList(),
 ) {
     companion object {
         val INITIAL = BudgetUiState()

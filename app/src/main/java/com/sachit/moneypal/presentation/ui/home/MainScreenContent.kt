@@ -1351,12 +1351,7 @@ private fun MainScreenNumpadSection(
         leftContent = categoryGridContent,
         topContent = suggestionChip,
         tutorialBoxState = tutorialBoxState,
-        quickAmounts = remember { listOf(
-            java.math.BigDecimal(10),
-            java.math.BigDecimal(50),
-            java.math.BigDecimal(100),
-            java.math.BigDecimal(500),
-        ) },
+        quickAmounts = budgetUiState.quickAmounts,
         onQuickAmount = { amount ->
             actions.onProcessIntent(
                 MainScreenUiIntent.ProcessBudgetNumpadIntent(

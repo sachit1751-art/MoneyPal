@@ -95,6 +95,9 @@ class BudgetViewModel @Inject constructor(
     private val categorySuggester =
         com.sachit.moneypal.domain.calculator.CategorySuggester()
 
+    private val quickAmountPicker =
+        com.sachit.moneypal.domain.calculator.QuickAmountPicker()
+
     /** Hoisted per transaction-list emission so suggesting is O(tokens) per keystroke (plan 009). */
     private var categoryIndex: com.sachit.moneypal.domain.calculator.CategoryIndex? = null
 
@@ -187,6 +190,9 @@ class BudgetViewModel @Inject constructor(
         // keystroke), then suggest for the comment currently being typed.
         val newCategoryIndex = categorySuggester.buildIndex(transactions)
         categoryIndex = newCategoryIndex
+
+        // Plan 021: learned quick-amount chips from spending history.
+        val quickAmounts = quickAmountPicker.pick(transactions)
         val suggestedCategory = if (editorState.editMode == EditMode.ADD && editorState.isIncomeModeEnabled.not()) {
             categorySuggester.suggest(editorState.currentComment, categories, newCategoryIndex)?.category
         } else {
@@ -232,6 +238,7 @@ class BudgetViewModel @Inject constructor(
             debtAdjustedBalance = debtAdjustedBalance,
             calculationPreview = calculateCalculationPreview(numpadInput, settings?.currencyCode ?: "USD"),
             numpadDraftAmount = parseNumpadDraftAmount(numpadInput),
+            quickAmounts = quickAmounts,
         )
     }.catch { error ->
         logcat(TAG) { "Error in uiState pipeline: ${error.asLog()}" }
