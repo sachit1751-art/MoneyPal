@@ -41,6 +41,8 @@ sealed interface HistoryUiIntent {
     data class ToggleRefundExpected(val transaction: Transaction) : HistoryUiIntent
     /** Marks a refund as received for [transaction]. */
     data class MarkRefunded(val transaction: Transaction) : HistoryUiIntent
+    /** Plan 017: completes a pending refund (budget credit + settle original). */
+    data class RefundReceived(val transaction: Transaction) : HistoryUiIntent
 
     data class SetLockSwipeable(val locked: Boolean) : HistoryUiIntent
 
@@ -90,6 +92,9 @@ data class HistoryUiState(
     /** Plan 015: low-confidence SMS review inbox. */
     val showSmsReviewDialog: Boolean = false,
     val smsReviewCandidates: List<Transaction> = emptyList(),
+
+    /** Plan 017: expenses awaiting their refund. */
+    val pendingRefunds: List<Transaction> = emptyList(),
 
     val displayTransactions: List<Transaction> = emptyList(),
     val groupedCurrentTransactions: Map<LocalDate?, List<Transaction>> = emptyMap(),

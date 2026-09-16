@@ -49,6 +49,7 @@ const val ROUNDED_FONT_KEY_NAME = "rounded_font_enabled"
 const val AMOLED_KEY_NAME = "amoled_enabled"
 const val APP_LOCK_ENABLED_KEY_NAME = "app_lock_enabled"
 const val WEEKLY_DIGEST_ENABLED_KEY_NAME = "weekly_digest_enabled"
+const val REFUND_NUDGE_ENABLED_KEY_NAME = "refund_nudge_enabled"
 const val AUTO_BACKUP_ENABLED_KEY_NAME = "auto_backup_enabled"
 const val AUTO_BACKUP_TREE_URI_KEY_NAME = "auto_backup_tree_uri"
 const val AUTO_BACKUP_LAST_RUN_KEY_NAME = "auto_backup_last_run"
@@ -109,6 +110,8 @@ private val APP_LOCK_ENABLED =
     booleanPreferencesKey(APP_LOCK_ENABLED_KEY_NAME)
 private val WEEKLY_DIGEST_ENABLED =
     booleanPreferencesKey(WEEKLY_DIGEST_ENABLED_KEY_NAME)
+private val REFUND_NUDGE_ENABLED =
+    booleanPreferencesKey(REFUND_NUDGE_ENABLED_KEY_NAME)
 private val AUTO_BACKUP_ENABLED =
     booleanPreferencesKey(AUTO_BACKUP_ENABLED_KEY_NAME)
 private val AUTO_BACKUP_TREE_URI =
@@ -197,6 +200,7 @@ class SettingsRepositoryImpl @Inject constructor(
                 isAmoledEnabled = preferences[AMOLED] ?: false,
                 appLockEnabled = preferences[APP_LOCK_ENABLED] ?: false,
                 weeklyDigestEnabled = preferences[WEEKLY_DIGEST_ENABLED] ?: false,
+                refundNudgeEnabled = preferences[REFUND_NUDGE_ENABLED] ?: false,
                 autoBackupEnabled = preferences[AUTO_BACKUP_ENABLED] ?: false,
                 autoBackupTreeUri = preferences[AUTO_BACKUP_TREE_URI] ?: "",
                 autoBackupLastRunAt = preferences[AUTO_BACKUP_LAST_RUN] ?: 0L,
@@ -398,6 +402,12 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun setWeeklyDigestEnabled(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[WEEKLY_DIGEST_ENABLED] = enabled
+        }
+    }
+
+    override suspend fun setRefundNudgeEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[REFUND_NUDGE_ENABLED] = enabled
         }
     }
 

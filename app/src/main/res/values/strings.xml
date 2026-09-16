@@ -691,6 +691,14 @@
     <string name="refund_received">Received</string>
     <string name="refund_expect_action">Expect refund</string>
     <string name="refund_mark_received">Refund received</string>
+    <string name="refund_section_title">Pending refunds</string>
+    <string name="refund_pending_days">Pending %1$d days</string>
+    <string name="refund_comment_prefix">Refund: </string>
+    <string name="refund_received_failed">Could not record the refund</string>
+    <string name="refund_nudge_title">Refunds waiting</string>
+    <string name="refund_nudge_body">You have %1$d expenses waiting for their refund</string>
+    <string name="settings_refund_nudge">Refund reminders</string>
+    <string name="settings_refund_nudge_summary">Weekly nudge when expenses you flagged are still awaiting their refund</string>
     <string name="quick_amounts_add">Add quick amount</string>
 
     <!-- Category personalization -->

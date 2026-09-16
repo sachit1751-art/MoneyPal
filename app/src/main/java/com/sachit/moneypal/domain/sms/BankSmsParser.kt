@@ -73,6 +73,11 @@ object BankSmsParser {
         RegexOption.IGNORE_CASE,
     )
 
+    /** Credit messages matching this are labelled refunds (plan 017). */
+    val REFUND_CUE: Regex = Regex(
+        "(?i)\\b(?:refund|refunded|reversed|cashback|cash_back)\\b"
+    )
+
     /**
      * Heuristic used by smart-capture (plan 014): does this sender look like a
      * bank/PSP sender? Indian-style ID senders (`JD-HDFC`, `VM-XXXPAY`),

@@ -37,6 +37,8 @@ data class UserSettings(
     val appLockEnabled: Boolean = false,
     /** Opt-in weekly digest notification (plan 003). */
     val weeklyDigestEnabled: Boolean = false,
+    /** Opt-in weekly refund nudge (plan 017). */
+    val refundNudgeEnabled: Boolean = false,
     /** Opt-in automatic SAF-folder backup (plan 004). */
     val autoBackupEnabled: Boolean = false,
     /** SAF tree URI of the auto-backup folder (plan 004). */

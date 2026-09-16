@@ -110,9 +110,17 @@ class ProcessIncomingSmsUseCase @Inject constructor(
                 amount = match.amount,
             )
 
+            // Plan 017: refund-credit SMS get a consistent comment so users can
+            // spot them (full matching to the original expense is out of scope).
+            val isRefundCredit = match.isCredit && BankSmsParser.REFUND_CUE.containsMatchIn(match.body)
+            val comment = when {
+                isRefundCredit -> "Refund: ${merchant ?: match.sender}"
+                else -> merchant ?: match.sender
+            }
+
             val transaction = Transaction.create(
                 amount = amount,
-                comment = merchant ?: match.sender,
+                comment = comment,
                 date = eventTime,
                 periodId = if (isPastPeriodEnd) 0L else getCurrentPeriodId(),
                 isAdjustment = match.isCredit,

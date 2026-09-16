@@ -269,6 +269,29 @@ class BudgetTransactionHandler @Inject constructor(
         }.onFailure { errorLogRecorder.record("BudgetTransactionHandler.markRecurrentOccurrencePaid id=${transaction.id}", it) }
     }
 
+    /**
+     * Completes a refund (plan 017): inserts a budget credit the same way a
+     * manual `+` adjustment works (negative amount + `isAdjustment`), then
+     * marks the ORIGINAL row's `refundedAt`. The credit row itself never gets
+     * `refundedAt` — that column tracks the original expense, so completion is
+     * idempotent per original row even if the credit row is later deleted.
+     */
+    suspend fun creditRefund(original: Transaction, commentPrefix: String): Result<Unit> {
+        return runCatching {
+            val credit = Transaction.create(
+                amount = original.amount.negate(),
+                comment = "$commentPrefix${original.comment.ifBlank { "expense" }}",
+                date = LocalDateTime.now(),
+                isAdjustment = true,
+            )
+            addTransactionUseCase(credit)
+            budgetRepository.markRefundReceived(
+                transactionId = original.sourceTransactionId ?: original.id,
+                atMillis = System.currentTimeMillis(),
+            )
+        }.onFailure { errorLogRecorder.record("BudgetTransactionHandler.creditRefund id=${original.id}", it) }
+    }
+
     suspend fun restoreTransaction(transaction: Transaction): Result<Unit> {
         return runCatching {
             addTransactionUseCase(transaction)

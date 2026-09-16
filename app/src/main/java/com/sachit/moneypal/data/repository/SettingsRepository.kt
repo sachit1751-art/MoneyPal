@@ -62,6 +62,9 @@ interface SettingsRepository {
     /** Opt-in weekly digest notification (plan 003). */
     suspend fun setWeeklyDigestEnabled(enabled: Boolean)
 
+    /** Opt-in weekly refund nudge (plan 017). */
+    suspend fun setRefundNudgeEnabled(enabled: Boolean)
+
     /** Auto-backup preferences (plan 004). */
     suspend fun setAutoBackupEnabled(enabled: Boolean)
 

@@ -172,6 +172,8 @@ fun SettingsScreen(
         onEnvelopeAlertsToggle = viewModel::onEnvelopeAlertsToggle,
         weeklyDigestEnabled = uiState.weeklyDigestEnabled,
         onWeeklyDigestToggle = viewModel::onWeeklyDigestToggle,
+        refundNudgeEnabled = uiState.refundNudgeEnabled,
+        onRefundNudgeToggle = viewModel::onRefundNudgeToggle,
         autoBackupEnabled = uiState.autoBackupEnabled,
         onAutoBackupToggle = viewModel::onAutoBackupToggle,
         onAutoBackupBackUpNow = viewModel::onAutoBackupNow,

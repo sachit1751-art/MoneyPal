@@ -440,6 +440,14 @@
     <!-- Upcoming Recurrent Item -->
     <string name="upcoming_recurrent_today">Aujourd\'hui</string>
     <string name="recurrent_paid_cycles">Payé %1$d fois cette année</string>
+    <string name="refund_section_title">Remboursements en attente</string>
+    <string name="refund_pending_days">En attente %1$d jours</string>
+    <string name="refund_comment_prefix">Remboursement : </string>
+    <string name="refund_received_failed">Impossible d\'enregistrer le remboursement</string>
+    <string name="refund_nudge_title">Remboursements en attente</string>
+    <string name="refund_nudge_body">Vous avez %1$d dépenses en attente de remboursement</string>
+    <string name="settings_refund_nudge">Rappels de remboursement</string>
+    <string name="settings_refund_nudge_summary">Rappel hebdomadaire quand vos dépenses marquées attendent toujours leur remboursement</string>
     <string name="upcoming_recurrent_tomorrow">Demain</string>
     <string name="upcoming_recurrent_in_days">Dans %1$d jours</string>
     <string name="upcoming_recurrent_in_weeks">Dans %1$d semaines</string>

@@ -71,6 +71,11 @@ class HistoryViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000L), emptyList())
     private val _showSmsReviewDialog = MutableStateFlow(false)
 
+    /** Plan 017: expenses awaiting their refund. */
+    val pendingRefunds: StateFlow<List<Transaction>> = budgetTransactionHandler.budgetRepository
+        .observePendingRefunds()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000L), emptyList())
+
     private val _effects = MutableSharedFlow<HistoryUiEffect>()
     val effects: SharedFlow<HistoryUiEffect> = _effects.asSharedFlow()
 
@@ -91,7 +96,8 @@ class HistoryViewModel @Inject constructor(
             _pendingRemovedTransactions,
             _filter,
             _showSmsReviewDialog,
-            smsReviewCandidates
+            smsReviewCandidates,
+            pendingRefunds,
         )
     ) { array ->
         UIInputs(
@@ -109,6 +115,7 @@ class HistoryViewModel @Inject constructor(
             filter = array[11] as HistoryFilterState,
             showSmsReviewDialog = array[12] as Boolean,
             smsReviewCandidates = array[13] as List<Transaction>,
+            pendingRefunds = array[14] as List<Transaction>,
         )
     }
 
@@ -174,6 +181,7 @@ class HistoryViewModel @Inject constructor(
             is HistoryUiIntent.CloneTransaction -> cloneTransaction(intent.transaction)
             is HistoryUiIntent.ToggleRefundExpected -> toggleRefundExpected(intent.transaction)
             is HistoryUiIntent.MarkRefunded -> markRefunded(intent.transaction)
+            is HistoryUiIntent.RefundReceived -> onRefundReceived(intent.transaction)
             is HistoryUiIntent.SetLockSwipeable -> _lockSwipeable.value = intent.locked
             is HistoryUiIntent.ToggleExpandedTransaction -> toggleExpandedTransaction(intent.transactionId)
             is HistoryUiIntent.UpdateCreditCutoffDay -> updateCreditCutoffDay(intent.day)
@@ -344,6 +352,27 @@ class HistoryViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Plan 017: user tapped "Received" on a pending refund — credit the
+     * budget and settle the original row.
+     */
+    private fun onRefundReceived(transaction: Transaction) {
+        viewModelScope.launch {
+            val result = budgetTransactionHandler.creditRefund(
+                original = transaction,
+                commentPrefix = context.getString(R.string.refund_comment_prefix),
+            )
+            if (result.isFailure) {
+                logcat(TAG) { "onRefundReceived failed for id=${transaction.id}: ${result.exceptionOrNull()}" }
+                _effects.emit(
+                    HistoryUiEffect.ShowSnackbar(
+                        context.getString(R.string.refund_received_failed)
+                    )
+                )
+            }
+        }
+    }
+
     private fun toggleExpandedDate(date: LocalDate) {
         _expandedDates.update { expanded ->
             val currentExpanded = if (expanded.isEmpty()) {
@@ -505,6 +534,7 @@ class HistoryViewModel @Inject constructor(
             futureRecurrentOutOfPeriod = futureOutOfPeriod,
             creditOwed = creditOwed,
             debtAdjustedBalance = debtAdjustedBalance,
+            pendingRefunds = inputs.pendingRefunds,
         )
     }
 
@@ -523,6 +553,7 @@ class HistoryViewModel @Inject constructor(
         val filter: HistoryFilterState = HistoryFilterState(),
         val showSmsReviewDialog: Boolean = false,
         val smsReviewCandidates: List<Transaction> = emptyList(),
+        val pendingRefunds: List<Transaction> = emptyList(),
     )
 
     companion object {

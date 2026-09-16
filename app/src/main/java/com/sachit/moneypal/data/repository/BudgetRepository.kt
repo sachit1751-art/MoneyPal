@@ -76,6 +76,12 @@ interface BudgetRepository {
     /** User confirmed a low-confidence SMS capture: trust it from now on (plan 015). */
     suspend fun confirmSmsCapture(transactionId: Long)
 
+    /** Expenses the user expects to be refunded, not yet settled (plan 017). */
+    fun observePendingRefunds(): Flow<List<Transaction>>
+
+    /** Marks the refund as received on the ORIGINAL row at [atMillis] (plan 017). */
+    suspend fun markRefundReceived(transactionId: Long, atMillis: Long)
+
     suspend fun incrementCategoryUsage(name: String)
 
     suspend fun getPeriodCount(): Int

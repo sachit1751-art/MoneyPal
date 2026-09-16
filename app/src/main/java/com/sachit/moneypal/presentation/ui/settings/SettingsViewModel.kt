@@ -76,6 +76,7 @@ data class SettingsUiState(
     val thresholdAlertsEnabled: Boolean = false,
     val envelopeAlertsEnabled: Boolean = false,
     val weeklyDigestEnabled: Boolean = false,
+    val refundNudgeEnabled: Boolean = false,
     val autoBackupEnabled: Boolean = false,
     val autoBackupTreeUri: String = "",
     val autoBackupLastRunAt: Long = 0L,
@@ -152,6 +153,7 @@ class SettingsViewModel @Inject constructor(
             appLockEnabled = settings.appLockEnabled,
             thresholdAlertsEnabled = settings.thresholdAlertsEnabled,
             weeklyDigestEnabled = settings.weeklyDigestEnabled,
+            refundNudgeEnabled = settings.refundNudgeEnabled,
             autoBackupEnabled = settings.autoBackupEnabled,
             autoBackupTreeUri = settings.autoBackupTreeUri,
             autoBackupLastRunAt = settings.autoBackupLastRunAt,
@@ -217,6 +219,15 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    /** Refund nudge toggle (plan 017): also enqueues/cancels the periodic work. */
+    fun onRefundNudgeToggle() {
+        val newValue = !uiState.value.refundNudgeEnabled
+        viewModelScope.launch {
+            settingsRepository.setRefundNudgeEnabled(newValue)
+            refundNudgeScheduler.reschedule(newValue)
+        }
+    }
+
     /** Auto-backup toggle (plan 004): also enqueues/cancels the periodic work. */
     fun onAutoBackupToggle() {
         val newValue = !uiState.value.autoBackupEnabled
@@ -250,6 +261,8 @@ class SettingsViewModel @Inject constructor(
         fun weeklyDigestScheduler(): com.sachit.moneypal.presentation.notification.WeeklyDigestScheduler
 
         fun autoBackupScheduler(): com.sachit.moneypal.presentation.notification.AutoBackupScheduler
+
+        fun refundNudgeScheduler(): com.sachit.moneypal.presentation.notification.RefundNudgeScheduler
     }
 
     private val weeklyDigestScheduler: com.sachit.moneypal.presentation.notification.WeeklyDigestScheduler
@@ -257,6 +270,12 @@ class SettingsViewModel @Inject constructor(
             context.applicationContext,
             SchedulerEntryPoint::class.java,
         ).weeklyDigestScheduler()
+
+    private val refundNudgeScheduler: com.sachit.moneypal.presentation.notification.RefundNudgeScheduler
+        get() = dagger.hilt.android.EntryPointAccessors.fromApplication(
+            context.applicationContext,
+            SchedulerEntryPoint::class.java,
+        ).refundNudgeScheduler()
 
     private val autoBackupScheduler: com.sachit.moneypal.presentation.notification.AutoBackupScheduler
         get() = dagger.hilt.android.EntryPointAccessors.fromApplication(

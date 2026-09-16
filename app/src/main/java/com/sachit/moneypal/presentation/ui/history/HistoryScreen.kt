@@ -36,6 +36,7 @@ import com.sachit.moneypal.domain.model.Transaction
 import com.sachit.moneypal.presentation.ui.history.dialogs.DeleteRecurrentExpenseDialog
 import com.sachit.moneypal.presentation.ui.history.dialogs.SmsReviewDialog
 import com.sachit.moneypal.presentation.ui.history.dialogs.TransactionEditDialog
+import com.sachit.moneypal.presentation.ui.history.sections.PendingRefundsSection
 import com.sachit.moneypal.presentation.ui.history.sections.budgetDisplaySection
 import com.sachit.moneypal.presentation.ui.history.sections.currentPeriodRecurrentSection
 import com.sachit.moneypal.presentation.ui.history.sections.futureRecurrentSection
@@ -192,6 +193,15 @@ fun History(
                         onClick = { onProcessIntent(HistoryUiIntent.SetSmsReviewDialogVisible) },
                     )
                 }
+            }
+
+            item(key = "pending_refunds_section") {
+                PendingRefundsSection(
+                    pendingRefunds = uiState.pendingRefunds,
+                    onReceived = { expense ->
+                        onProcessIntent(HistoryUiIntent.RefundReceived(expense))
+                    },
+                )
             }
 
             currentPeriodRecurrentSection(

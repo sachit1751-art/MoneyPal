@@ -440,6 +440,14 @@
     <!-- Upcoming Recurrent Item -->
     <string name="upcoming_recurrent_today">Hoy</string>
     <string name="recurrent_paid_cycles">Pagado %1$d veces este año</string>
+    <string name="refund_section_title">Reembolsos pendientes</string>
+    <string name="refund_pending_days">Pendiente %1$d días</string>
+    <string name="refund_comment_prefix">Reembolso: </string>
+    <string name="refund_received_failed">No se pudo registrar el reembolso</string>
+    <string name="refund_nudge_title">Reembolsos en espera</string>
+    <string name="refund_nudge_body">Tienes %1$d gastos esperando su reembolso</string>
+    <string name="settings_refund_nudge">Recordatorios de reembolso</string>
+    <string name="settings_refund_nudge_summary">Aviso semanal cuando tus gastos marcados siguen esperando su reembolso</string>
     <string name="upcoming_recurrent_tomorrow">Mañana</string>
     <string name="upcoming_recurrent_in_days">En %1$d días</string>
     <string name="upcoming_recurrent_in_weeks">En %1$d semanas</string>

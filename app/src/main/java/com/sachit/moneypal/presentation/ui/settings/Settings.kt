@@ -197,6 +197,8 @@ fun Settings(
     onEnvelopeAlertsToggle: () -> Unit = {},
     weeklyDigestEnabled: Boolean = false,
     onWeeklyDigestToggle: () -> Unit = {},
+    refundNudgeEnabled: Boolean = false,
+    onRefundNudgeToggle: () -> Unit = {},
     autoBackupEnabled: Boolean = false,
     onAutoBackupToggle: () -> Unit = {},
     onAutoBackupBackUpNow: () -> Unit = {},
@@ -559,6 +561,28 @@ fun Settings(
                                 checked = weeklyDigestEnabled,
                                 onCheckedChange = { onWeeklyDigestToggle() },
                                 modifier = Modifier.testTag("SettingsWeeklyDigestSwitch")
+                            )
+                        }
+                    )
+
+                    SelectablePaddedItem(
+                        label = stringResource(R.string.settings_refund_nudge),
+                        subtitle = stringResource(R.string.settings_refund_nudge_summary),
+                        isActive = refundNudgeEnabled,
+                        onClick = onRefundNudgeToggle,
+                        position = PaddedListItemPosition.Middle,
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Filled.Savings,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        },
+                        trailingContent = {
+                            Switch(
+                                checked = refundNudgeEnabled,
+                                onCheckedChange = { onRefundNudgeToggle() },
+                                modifier = Modifier.testTag("SettingsRefundNudgeSwitch")
                             )
                         }
                     )

@@ -449,6 +449,14 @@ class BudgetRepositoryImpl @Inject constructor(
         transactionDao.confirmSmsCapture(transactionId)
     }
 
+    override fun observePendingRefunds(): Flow<List<Transaction>> {
+        return transactionDao.observePendingRefunds().map { entities -> entities.map { it.toDomain() } }
+    }
+
+    override suspend fun markRefundReceived(transactionId: Long, atMillis: Long) {
+        transactionDao.markRefundReceived(transactionId, atMillis)
+    }
+
     override suspend fun getPeriodCount(): Int {
         return transactionDao.countDistinctPeriods()
     }

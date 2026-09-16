@@ -170,6 +170,18 @@ class ProcessIncomingSmsUseCaseTest {
     }
 
     @Test
+    fun `refund credit sms gets Refund comment prefix`() = runTest {
+        val result = useCase("HDFC-BANK", "Rs 250 refunded to your account XX1234", ts)
+
+        assertThat(result).isInstanceOf(ProcessIncomingSmsUseCase.Result.Captured::class.java)
+        val txSlot = slot<com.sachit.moneypal.domain.model.Transaction>()
+        coVerify(exactly = 1) { budgetRepository.addTransaction(capture(txSlot)) }
+        val tx = txSlot.captured
+        assertThat(tx.isAdjustment).isTrue()
+        assertThat(tx.comment).startsWith("Refund: ")
+    }
+
+    @Test
     fun `queues when past period end`() = runTest {
         val staleSettings = budgetSettings.copy(
             startDate = today.minusMonths(1).withDayOfMonth(1),

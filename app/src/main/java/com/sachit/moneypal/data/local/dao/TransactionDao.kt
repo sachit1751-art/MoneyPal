@@ -103,6 +103,17 @@ interface TransactionDao {
     @Query("UPDATE transactions SET captureConfidence = 100 WHERE id = :transactionId")
     suspend fun confirmSmsCapture(transactionId: Long)
 
+    /** Expenses the user expects to be refunded, not yet settled (plan 017). */
+    @Query(
+        "SELECT * FROM transactions WHERE refundExpected = 1 AND refundedAt IS NULL " +
+            "ORDER BY date DESC"
+    )
+    fun observePendingRefunds(): Flow<List<TransactionEntity>>
+
+    /** Marks the refund as received at [atMillis] on the ORIGINAL row (plan 017). */
+    @Query("UPDATE transactions SET refundedAt = :atMillis WHERE id = :transactionId")
+    suspend fun markRefundReceived(transactionId: Long, atMillis: Long)
+
     @Query("""
         UPDATE transactions 
         SET isCreditPaid = 1 

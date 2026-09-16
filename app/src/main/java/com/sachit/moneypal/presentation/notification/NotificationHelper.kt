@@ -44,6 +44,7 @@ class NotificationHelper @Inject constructor(
         private const val NOTIFICATION_ID_THRESHOLD_PERIOD_100 = 1008
         const val CHANNEL_DIGEST = "weekly_digest"
         private const val NOTIFICATION_ID_DIGEST = 1009
+        private const val NOTIFICATION_ID_REFUND_NUDGE = 1010
         const val CHANNEL_ENVELOPE = "envelope_alerts"
     }
 
@@ -258,6 +259,40 @@ class NotificationHelper @Inject constructor(
             .build()
         NotificationManagerCompat.from(context).notify(NOTIFICATION_ID_DIGEST, notification)
         logcat { "Weekly digest notification shown" }
+    }
+
+    /** Weekly nudge about unsettled refunds (plan 017). */
+    fun showRefundNudge(pendingCount: Int) {
+        val hasPermission = checkNotificationPermission()
+        if (!hasPermission) {
+            logcat { "Cannot show refund nudge - permission not granted" }
+            return
+        }
+
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            NOTIFICATION_ID_REFUND_NUDGE,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(context, CHANNEL_DIGEST)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(context.getString(R.string.refund_nudge_title))
+            .setContentText(context.getString(R.string.refund_nudge_body, pendingCount))
+            .setStyle(
+                NotificationCompat.BigTextStyle()
+                    .bigText(context.getString(R.string.refund_nudge_body, pendingCount))
+            )
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build()
+        NotificationManagerCompat.from(context).notify(NOTIFICATION_ID_REFUND_NUDGE, notification)
+        logcat { "Refund nudge notification shown" }
     }
 
     private fun buildPeriodEndMessage(remainingBudget: String, formattedAmount: String): String {
