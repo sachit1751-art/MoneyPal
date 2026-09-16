@@ -1,45 +1,65 @@
-# MoneyPal — feature round 4 (fresh round, written 2026-09-15)
+# MoneyPal — Implementation Plans (round 3)
 
-Written against commit **`5023888`** (`git rev-parse --short HEAD` must print
-`5023888`). Previous round-1/2/3 plan sets were deleted at the maintainer's
-request once their status was confirmed all-DONE (round-3b backlog items that
-never shipped — envelopes, savings goals, digest, shortcuts, etc. — are
-re-planned here).
+> Written against commit `ff6f773` (2026-09-16) by an `/improve` audit.
+> Plans 001–005 and 006–011 from earlier rounds have landed; this round covers
+> the audit findings plus 10 new features. **Watch-related (`:wear` module,
+> Wear tile, watch sync) features are intentionally excluded** per maintainer
+> request — the only cross-module work is a one-line APK rename (plan 020).
 
-## Scope
+Build prerequisites (every plan): JDK 17/21, Android SDK 36, flavor-qualified
+Gradle tasks. Global verification gate (run at the end of every plan):
 
-Six user-selected features, executed this session:
+```bash
+export JAVA_HOME="C:/Program Files/Android/Android Studio/jbr"
+./gradlew :app:compileFossDebugKotlin :app:compileWearDebugKotlin :sync-contract:compileKotlin
+./gradlew :app:testFossDebugUnitTest :sync-contract:test
+```
 
-| Order | Plan | Summary | Migration | Status |
-|:------|:-----|:--------|:----------|:-------|
-| 1 | `001-category-envelopes-and-payment-methods.md` | Per-category monthly limits + cash/card/other payment-method tags; **single shared Room 19→20 migration** | Room 19→20 | DONE |
-| 2 | `002-tracked-savings-goals.md` | Progress toward the existing savings goal (saved-per-period, progress bar, ETA) | none | DONE |
-| 3 | `003-weekly-digest-and-shortcut.md` | Opt-in Monday-morning digest notification + static "Add expense" home-screen shortcut | none | DONE |
-| 4 | `004-auto-backup-saf.md` | Scheduled full-data backup into a user-picked SAF folder (15-day cadence, opt-in) | none | DONE |
-| 5 | `005-notification-quick-add.md` | Reply "12.5 groceries" to period/subscription notifications to log an expense | none | DONE |
+Conventions for executors: user-facing strings in `values/strings.xml` (+ es/fr
+copies), money = `BigDecimal`/plain strings never floats/`Double`, MVI
+contracts per screen, pure logic in `domain/` with JUnit4 + Truth tests,
+conventional commits, one commit per plan.
 
-## Round-4 execution notes (2026-09-15)
+## Status
 
-All five plans were executed and verified: `:app:testFossDebugUnitTest` passes
-(650+ tests incl. the new `SavingsGoalCalculatorTest`), both debug APKs build,
-and `schema 20.json` was committed. Deviations from plan text: the weekly
-digest uses `EntryPointAccessors` (matching `RecurrentExpenseNotificationWorker`)
-rather than `@HiltWorker`; the savings-goal saved amount is derived from
-archived budgets' savings share rather than a new transaction field; the
-quick-add action ships on the period-end notification channel first; the
-`es-ES`/`fr` string translations for the new features are pending (Crowdin).
+| # | Plan | Type | Priority | Depends on | Status |
+|:--|:-----|:-----|:---------|:-----------|:-------|
+| [012](012-sms-dedupe-atomic.md) | SMS dedupe: atomic + bounded store | fix (audit #1/#2) | 0 — correctness first | — | TODO |
+| [013](013-sms-parser-coverage.md) | SMS parser: real-world format coverage | feature (user priority) | 1 | — | TODO |
+| [014](014-sms-smart-capture.md) | SMS capture: merchant + auto-category + confidence | feature (user priority) | 2 | 012, 013 | TODO |
+| [015](015-sms-review-inbox.md) | Low-confidence SMS review inbox | feature | 3 | 014 | TODO |
+| [016](016-recurring-merchant-aliases.md) | Recurring payment merchant aliases | feature | 4 | — | TODO |
+| [017](017-refund-tracker.md) | Refund tracker completion flow | feature | 5 | — | TODO |
+| [018](018-burn-rate-forecast-card.md) | Analytics: burn-rate forecast card | feature | 6 | — | TODO |
+| [019](019-monthly-report-export.md) | Monthly report share (text) | feature | 7 | — | TODO |
+| [020](020-apk-rename-and-build-script.md) | APK rename + one-click build script wiring | DX (audit #7/#8) | 8 | — | TODO |
+| [021](021-quick-expense-presets.md) | Quick-amount presets on the numpad | feature | 9 | — | TODO |
+| [022](022-savings-goal-progress-widget.md) | Savings goal home-screen widget | feature | 10 | — | TODO |
 
-## Key ground rules for executors
+## Recommended execution order
 
-- Verification gates are flavor-qualified — `:app` has no default flavor.
-  Full gate: `:app:testFossDebugUnitTest` and `:app:verifyPaparazziFossDebug`
-  (JDK 17–21 required; wrapper fails on JDK 25).
-- One **shared** Room migration 19→20 carries both `category.monthlyLimit` and
-  `transactions.paymentMethod` — do not create two migrations for this round.
-- New schema export `app/schemas/.../20.json` **must** be committed.
-- Strings in `values/strings.xml` (+ es/fr translations where the pattern file
-  exists), MVI intent/controller patterns, `TimeProvider` for anything
-  date-dependent (established round-1 pattern).
-- The Gradle changelog generator skips versions whose tag doesn't exist yet —
-  expected pre-release; the new changelog entries land in the next
-  `prep_release`.
+1. **012** (SMS correctness fixes) before anything SMS-related.
+2. **013 → 014 → 015** form the "make SMS auto-parsing better" chain (user
+   priority); 013 and 012 are independent and can be parallelized.
+3. Independent batch any time: **016, 017, 018**.
+4. **020** (DX) any time; land it before the next release train so the
+   watch-flavor/watch-module APK name collision is gone before anyone runs
+   `scripts/build-apks.sh`.
+5. **019, 021, 022** round out the feature set.
+
+Dependency rules: only ONE Room migration per release train — 014 and 016 both
+add columns; if both land in the same train, chain them (014 documents the
+version-shift rule). 015 needs 014's confidence model. No plan touches the
+watch module except 020's one-line rename.
+
+## Considered and rejected (do not re-audit)
+
+- **Honoring `https_proxy`-style env in any networking code** — not applicable;
+  the app's only network surface is Wear Data Layer + SAF file I/O.
+- **Watch-side review inbox / watch tile enhancements** — excluded by
+  maintainer request this round.
+- **Migration to `androidx.security-crypto` for backup passwords** — rejected
+  in round 2; the custom Keystore wrapper (plan 011) is kept deliberately.
+- **Per-bank SMS parser templates** — contradicts the documented generic-parser
+  design decision (see `BankSmsParser` header, decided 2026-09-08); plan 013
+  extends the generic patterns instead.
