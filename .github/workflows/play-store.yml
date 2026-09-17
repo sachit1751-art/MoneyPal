@@ -92,10 +92,19 @@ jobs:
           MONEYPAL_RELEASE_KEY_ALIAS: ${{ secrets.MONEYPAL_RELEASE_KEY_ALIAS }}
           MONEYPAL_RELEASE_KEY_PASSWORD: ${{ secrets.MONEYPAL_RELEASE_KEY_PASSWORD }}
         run: |
-          test -n "$MONEYPAL_RELEASE_KEYSTORE_BASE64"
-          test -n "$MONEYPAL_RELEASE_STORE_PASSWORD"
-          test -n "$MONEYPAL_RELEASE_KEY_ALIAS"
-          test -n "$MONEYPAL_RELEASE_KEY_PASSWORD"
+          missing=0
+          for name in \
+            MONEYPAL_RELEASE_KEYSTORE_BASE64 \
+            MONEYPAL_RELEASE_STORE_PASSWORD \
+            MONEYPAL_RELEASE_KEY_ALIAS \
+            MONEYPAL_RELEASE_KEY_PASSWORD
+          do
+            if [ -z "${!name}" ]; then
+              echo "::error::Missing or empty secret: $name (add it under Settings → Secrets and variables → Actions)"
+              missing=1
+            fi
+          done
+          exit "$missing"
 
       - name: Decode release keystore
         env:
