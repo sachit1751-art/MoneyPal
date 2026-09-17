@@ -48,6 +48,12 @@ CANDIDATE_JDKS=(
   "$HOME/.jdks/corretto-21"
   "$HOME/.jdks/temurin-17"
 )
+# Also scan ~/.jdks/* (IntelliJ-downloaded JDKs) as fallback candidates.
+for jdk_dir in "$HOME"/.jdks/*/; do
+  [ -d "$jdk_dir" ] || continue
+  CANDIDATE_JDKS+=("${jdk_dir%/}")
+done
+
 JDK_OK=""
 for candidate in "${CANDIDATE_JDKS[@]}"; do
   [ -n "$candidate" ] || continue

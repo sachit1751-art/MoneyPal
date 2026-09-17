@@ -75,11 +75,6 @@ Notes:
   If the database class package ever changes, move the `*.json` files to the new
   folder too, or Room auto-migration generation fails with
   `Schema 'N.json' required for migration was not found`.
-- **Improvement plans**: `plans/` holds self-contained implementation plans
-  (audit-driven feature/fix work) with a status index in `plans/README.md`.
-  New plan files must keep numbering monotonic and update the index status
-  column when executed. Watch-related (`:wear` module) features are excluded
-  from plan rounds per maintainer request.
 - `preBuild` runs `:app:generateChangelogKotlin`, which regenerates
   `app/build/generated/source/changelog/GeneratedChangelog.kt` from
   `fastlane/metadata/android/*/changelogs/*.txt`. Commit `.txt` changelogs for
