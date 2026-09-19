@@ -37,8 +37,9 @@ CSV import/export, home-screen widgets, and a Wear OS companion app.
 
 ## Build prerequisites
 
-- JDK 17 (the Gradle wrapper is 8.13; it does **not** run on newer JDKs such as 25 —
-  use a JDK 17/21 toolchain).
+- JDK 21 for the Gradle daemon (pinned via `gradle/gradle-daemon-jvm.properties`);
+  the wrapper is Gradle 9.5.0 with AGP 9.3.3. The launcher JVM may be newer
+  (e.g. Android Studio's JBR 25) — only the daemon must be 21.
 - Android SDK with platform 36, `ANDROID_HOME` set or `local.properties`
   (`sdk.dir`) present. `local.properties` is gitignored.
 - `gradle.properties` must **not** contain machine-specific paths (e.g.

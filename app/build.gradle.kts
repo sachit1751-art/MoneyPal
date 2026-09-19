@@ -136,13 +136,8 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
 
-            postprocessing {
-                isRemoveUnusedCode = true
-                isRemoveUnusedResources = true
-                isObfuscate = false
-                isOptimizeCode = true
-            }
-
+            // Old PostProcessingSettings intent preserved in proguard-rules.pro:
+            // shrink + optimize unused code/resources, but never obfuscate.
             if (hasReleaseSigningConfig) {
                 signingConfig = signingConfigs.getByName("release")
             }
@@ -181,10 +176,10 @@ android {
 
     sourceSets {
         getByName("main") {
-            kotlin.srcDir(layout.buildDirectory.dir("generated/source/changelog"))
+            kotlin.srcDirs(layout.buildDirectory.dir("generated/source/changelog"))
         }
         getByName("androidTest") {
-            assets.srcDir(files("$projectDir/schemas"))
+            assets.srcDirs(files("$projectDir/schemas"))
         }
     }
 

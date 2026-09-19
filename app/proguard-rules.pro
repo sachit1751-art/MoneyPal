@@ -20,3 +20,7 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
+# Preserve the removed AGP `postprocessing` intent (shrink + optimize, no
+# obfuscation). R8 still runs for code shrinking/optimization.
+-dontobfuscate
+
