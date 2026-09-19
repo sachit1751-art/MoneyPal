@@ -1,13 +1,20 @@
-# MoneyPal — Implementation Plans (round 4)
+# MoneyPal — Implementation Plans
 
-> Written against commit `675fce7` (2026-09-17) by an `/improve` audit.
-> Round 3 (plans 012–022) is fully executed and its docs were removed; this
-> round focuses on correctness bugs found in the backup/restore, SMS-capture,
-> and SQL layers, plus a test safety net and worker error-contract hardening.
-> Watch-related (`:wear` module) features remain excluded per maintainer request.
+Two plan tracks live here:
 
-Build prerequisites (every plan): JDK 17/21, Android SDK 36, flavor-qualified
-Gradle tasks. Global verification gate (run at the end of every plan):
+- **Round 4 (audit fixes)** — plans 023–029, written 2026-09-17 against
+  `675fce7`. Correctness/hardening for backup/restore, SMS capture, SQL
+  precision, and worker contracts. All TODO at time of writing.
+- **Round 5 (features)** — plans 030–041, written 2026-09-19 against
+  `467ce9d` by a `/improve next`-style direction audit. Twelve maintainer-
+  approved feature plans. **Round 5 plans assume round 4 has landed** where
+  noted (backup/restore-touching features depend on plan 028's
+  characterization tests landing first).
+
+Build prerequisites (every plan): JDK 21 for the Gradle daemon (pinned via
+`gradle/gradle-daemon-jvm.properties`; Gradle 9.5.0 + AGP 9.3.3), Android SDK
+36, flavor-qualified Gradle tasks. Global verification gate (run at the end of
+every plan):
 
 ```bash
 export JAVA_HOME="C:/Program Files/Android/Android Studio/jbr"
@@ -15,53 +22,63 @@ export JAVA_HOME="C:/Program Files/Android/Android Studio/jbr"
 ./gradlew :app:testFossDebugUnitTest :sync-contract:test
 ```
 
-Conventions for executors: user-facing strings in `values/strings.xml` (+ es/fr
-copies), money = `BigDecimal`/plain strings never floats/`Double`, MVI
-contracts per screen, pure logic in `domain/` with JUnit4 + Truth tests,
-conventional commits, one commit per plan.
+Conventions for executors: user-facing strings in `values/strings.xml` (+ es
+and fr copies; other locales are Crowdin-managed), money = `BigDecimal`/plain
+strings never floats/`Double`, MVI contracts per screen, pure logic in
+`domain/` with JUnit4 + Truth tests, conventional commits, one commit per plan.
 
-## Status
+## Status — round 5 (features)
 
 | # | Plan | Type | Priority | Depends on | Status |
 |:--|:-----|:-----|:---------|:-----------|:-------|
-| [023](023-sms-undo-real-transaction-id.md) | SMS undo: return the real inserted row id | fix (user-visible) | 0 | — | TODO |
-| [024](024-duplicate-check-affinity-hardening.md) | Duplicate check: exact + REAL belt-and-braces | fix (hardening) | 4 | — | TODO |
-| [025](025-restore-id-integrity.md) | Restore: remap paid-occurrence + category ids | fix (data integrity) | 2 | 028 | TODO |
-| [026](026-remove-backupdates-dead-code.md) | Delete dead BackupDates/backupString helpers | chore | 5 | — | TODO |
-| [027](027-decimal-totals-in-sql.md) | Spend totals: sum BigDecimal, not SUM(CAST AS REAL) | fix (precision) | 1 | — | TODO |
-| [028](028-restore-characterization-tests.md) | Characterization tests for backup/restore | tests | 0 — lands first | — | TODO |
-| [029](029-background-job-error-contract.md) | Workers: bounded retries + correct completion results | fix (reliability) | 3 | — | TODO |
+| [030](030-csv-import-foreign-formats.md) | CSV import: foreign formats + column mapping | feature (medium) | 2 | 029 preferred | TODO |
+| [031](031-spending-calendar-heatmap.md) | Spending calendar heatmap in History | feature (medium) | 3 | — | TODO |
+| [032](032-year-in-review.md) | Year in review summary screen | feature (delight) | 4 | 027 preferred | TODO |
+| [033](033-recurring-payment-detection.md) | Recurring-pattern detection + one-tap template | feature (medium) | 2 | — | TODO |
+| [034](034-upcoming-payments-timeline.md) | Upcoming payments timeline + committed total | feature (S–M) | 1 | — | TODO |
+| [035](035-smart-insight-cards.md) | Smart insight cards (rule-based anomaly detection) | feature (medium) | 2 | 027 preferred | TODO |
+| [036](036-multiple-accounts-wallets.md) | Multiple accounts/wallets + transfers | feature (L) | 5 | **028, 025** | TODO |
+| [037](037-bulk-edit-history.md) | Bulk edit (multi-select) in History | feature (S–M) | 1 | — | TODO |
+| [038](038-custom-budget-periods.md) | Custom & payday-aligned budget periods | feature (medium) | 3 | 028 preferred | TODO |
+| [039](039-monthly-report-pdf-export.md) | Monthly report PDF export/share | feature (medium) | 3 | 027 preferred | TODO |
+| [040](040-notification-actions-mark-paid-snooze.md) | Notification actions: mark paid / snooze | feature (S–M) | 2 | 029 preferred | TODO |
+| [041](041-privacy-auto-lock-timeout-flag-secure.md) | Auto-lock timeout + screenshot blocking | feature (S) | 1 | — | TODO |
 
 ## Recommended execution order
 
-1. **028** (characterization tests) first — it pins current restore behavior so
-   **025** cannot silently change what it must not change.
-2. **023** (SMS undo) — smallest user-visible fix; independent.
-3. **027** (decimal totals) — independent; touches DAO + repository only.
-4. **025** after 028 lands; independent of everything else.
-5. **029**, **024**, **026** round out the round; all independent.
+Within round 5 (after the round-4 fixes, or interleaved where independent):
 
-Dependency rules: only 025 depends on 028. No plan adds a Room migration, so
-the one-migration-per-train rule is not exercised this round. No plan touches
-the watch module.
+1. **Quick wins first:** 041 (auto-lock/FLAG_SECURE), 037 (bulk edit),
+   034 (timeline) — small, independent, immediately visible.
+2. **Pure-domain features (parallelizable):** 033 (recurring detection),
+   035 (insights), 031 (heatmap).
+3. **Data-in/data-out:** 030 (foreign CSV) after 029 (it touches
+   `CsvImportWorker`), then 032 (year review), 039 (PDF report — reuses 032's
+   aggregation shape).
+4. **Structural, last:** 038 (periods) after 028; then 036 (accounts) — the
+   only L-effort plan, gated on 028 + 025 landing first.
+5. **040 (notification actions)** anytime after 029.
+
+Dependency rules: 036 → {028, 025} (hard). Soft preferences (merge friction /
+exactness only): 030 → 029; 032, 035, 039 → 027. Everything else independent.
+Only plan 036 adds a Room migration (23→24) this round; 038 explicitly avoids
+one. No plan touches the watch module (`:wear`); `:sync-contract` is unchanged.
 
 ## Considered and rejected (do not re-audit)
 
-- **Watch-side features / watch sync enhancements** — excluded by maintainer
-  request (carried from round 3).
-- **Per-bank SMS parser templates** — contradicts the documented generic-parser
-  design decision (`BankSmsParser` header, decided 2026-09-08).
-- **Migrating to `androidx.security-crypto`** — rejected in round 2; the custom
-  Keystore wrapper (`BackupPasswordStore`) is deliberate.
-- **`BackupEncryption` scheme** — audited round 4: AES-256-GCM, per-file salt/IV,
-  210k PBKDF2 iterations, constant-failure decrypt path. Correct as-is; do not
-  flag or "modernize".
-- **Honoring `https_proxy`-style env in networking code** — not applicable
-  (carried from round 3).
-- **`QuickAmountPicker` BigDecimal key handling** — audited round 4: the
-  plain-string key merge for 50.00/50 is correct; no finding.
-- **`ProcessIncomingSmsUseCase` dedupe/error ordering** — audited round 4:
-  plan-012 semantics correctly implemented (mark-seen failure swallowed,
-  `Result.Error` reserved for insert failures). No finding.
-- **AutoBackupScheduler pruning/cadence math** — correct; the only issue is the
-  worker's misuse of `Result.retry()` for a "not due" outcome (plan 029).
+Carried from round 4 (see git history for the full prior list): watch-side
+features (maintainer exclusion), per-bank SMS templates, `androidx.security-
+crypto` migration, `BackupEncryption` scheme changes, `https_proxy` handling.
+
+New this round:
+
+- **Scheduled encrypted backup to SAF/WebDAV** — already implemented (plan
+  004: `AutoBackupScheduler`/`AutoBackupWorker`, SAF tree URI, 15-day
+  cadence; settings rows exist in `Settings.kt`). Replaced in the slate by
+  plan 037 (bulk edit).
+- **Tags on transactions** — the codebase's "tags" are numpad comment chips
+  (`Editor.kt` `onDeleteTag`), not a tagging system; a real tag system was
+  judged lower-leverage than the twelve selected features and cut during
+  slate selection.
+- **Quick-tile / shortcuts additions** — shortcuts (plan 003) and a quick-
+  settings tile already exist.
