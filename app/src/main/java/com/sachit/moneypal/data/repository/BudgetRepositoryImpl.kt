@@ -38,6 +38,14 @@ import java.time.ZoneOffset
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Sums raw stored amount strings exactly with BigDecimal. Throws on an
+ * unparseable row on purpose: a bad amount is data corruption, and a loud
+ * failure beats a silently wrong total (plan 027).
+ */
+internal fun sumAmounts(amounts: List<String>): BigDecimal =
+    amounts.fold(BigDecimal.ZERO) { acc, raw -> acc.add(BigDecimal(raw)) }
+
 @Singleton
 class BudgetRepositoryImpl @Inject constructor(
     private val appDatabase: AppDatabase,
@@ -319,15 +327,15 @@ class BudgetRepositoryImpl @Inject constructor(
     override fun getSpentForDate(date: LocalDate): Flow<BigDecimal> {
         val startOfDay = date.toEpochDay() * 86400000
         val endOfDay = (date.plusDays(1)).toEpochDay() * 86400000
-        return transactionDao.getTotalSpentForDay(startOfDay, endOfDay)
-            .map { it?.let { BigDecimal(it) } ?: BigDecimal.ZERO }
+        return transactionDao.getAmountsForDay(startOfDay, endOfDay)
+            .map { amounts -> sumAmounts(amounts) }
     }
 
     override fun getSpentForPeriod(start: LocalDate, end: LocalDate): Flow<BigDecimal> {
         val startMillis = start.toEpochDay() * 86400000
         val endMillis = end.toEpochDay() * 86400000
-        return transactionDao.getTotalSpentForPeriod(startMillis, endMillis)
-            .map { it?.let { BigDecimal(it) } ?: BigDecimal.ZERO }
+        return transactionDao.getAmountsForPeriod(startMillis, endMillis)
+            .map { amounts -> sumAmounts(amounts) }
     }
 
     override fun getBudgetSettings(): Flow<BudgetSettings?> {

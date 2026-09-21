@@ -39,22 +39,22 @@ interface TransactionDao {
     ): Flow<List<TransactionEntity>>
 
     @Query("""
-        SELECT SUM(CAST(amount AS REAL)) FROM transactions 
+        SELECT amount FROM transactions 
         WHERE date >= :startOfDay AND date < :endOfDay
     """)
-    fun getTotalSpentForDay(
+    fun getAmountsForDay(
         startOfDay: Long,
         endOfDay: Long
-    ): Flow<Double?>
+    ): Flow<List<String>>
 
     @Query("""
-        SELECT SUM(CAST(amount AS REAL)) FROM transactions 
+        SELECT amount FROM transactions 
         WHERE date >= :startDate AND date < :endDate
     """)
-    fun getTotalSpentForPeriod(
+    fun getAmountsForPeriod(
         startDate: Long,
         endDate: Long
-    ): Flow<Double?>
+    ): Flow<List<String>>
 
     @Insert
     suspend fun insert(transaction: TransactionEntity): Long
