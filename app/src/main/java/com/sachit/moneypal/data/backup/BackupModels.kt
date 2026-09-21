@@ -2,11 +2,6 @@ package com.sachit.moneypal.data.backup
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import java.math.BigDecimal
-import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneOffset
 
 /**
  * Versioned, lossless local backup of all MoneyPal data (plan 010).
@@ -156,21 +151,3 @@ data class RestoreResult(
     val budgetSettingsRestored: Boolean,
     val settingsRestored: Boolean,
 )
-
-/** Converts ISO-8601 dates without pulling in kotlinx-datetime. */
-internal object BackupDates {
-    fun toEpochMillis(date: LocalDateTime): Long =
-        date.toEpochSecond(ZoneOffset.UTC) * 1000
-
-    fun fromEpochMillis(millis: Long): LocalDateTime =
-        LocalDateTime.ofEpochSecond(millis / 1000, 0, ZoneOffset.UTC)
-
-    fun localDateToMillis(date: LocalDate): Long = date.toEpochDay() * 86400000
-
-    fun localDateFromMillis(millis: Long): LocalDate = LocalDate.ofEpochDay(millis / 86400000)
-
-    fun nowEpochMs(): Long = Instant.now().toEpochMilli()
-}
-
-/** String form of a BigDecimal for backup storage. */
-internal fun BigDecimal?.backupString(): String? = this?.toPlainString()
