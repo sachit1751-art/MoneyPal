@@ -136,18 +136,22 @@ interface TransactionDao {
     suspend fun markTransactionAsPaid(transactionId: Long)
 
     /**
-     * Heuristic duplicate lookup: same numeric amount and comment within one
-     * day (day encoded the same way as stored dates — local wall-clock as
-     * UTC millis). Used to warn before saving a possible duplicate.
+     * Duplicate candidates: same comment within one day, newest first
+     * (day encoded the same way as stored dates — local wall-clock as
+     * UTC millis). Amount equality is decided by the caller with BigDecimal
+     * — TEXT-vs-REAL affinity float equality silently missed rows (plan 024).
      */
     @Query("""
         SELECT * FROM transactions
-        WHERE CAST(amount AS REAL) = :amount
-            AND comment = :comment
+        WHERE comment = :comment
             AND date >= :startOfDay AND date < :endOfDay
-        ORDER BY date DESC LIMIT 1
+        ORDER BY date DESC LIMIT 50
     """)
-    suspend fun findDuplicate(amount: Double, comment: String, startOfDay: Long, endOfDay: Long): TransactionEntity?
+    suspend fun findByCommentAndDay(
+        comment: String,
+        startOfDay: Long,
+        endOfDay: Long,
+    ): List<TransactionEntity>
 
     @Query("UPDATE transactions SET refundExpected = :expected, refundedAt = NULL WHERE id = :transactionId")
     suspend fun setRefundExpected(transactionId: Long, expected: Boolean)

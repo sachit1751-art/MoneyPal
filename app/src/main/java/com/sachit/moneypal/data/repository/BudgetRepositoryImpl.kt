@@ -39,6 +39,15 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
+ * Numeric amount equality against a stored TEXT amount: 50 matches 50.0 and
+ * 50.00 (compareTo, not equals), a corrupted row never throws (heuristic
+ * warning only), blank input never matches (plan 024).
+ */
+internal fun String?.matchesStoredAmount(amount: BigDecimal): Boolean =
+    !this.isNullOrBlank() &&
+        runCatching { BigDecimal(this) }.getOrNull()?.compareTo(amount) == 0
+
+/**
  * Sums raw stored amount strings exactly with BigDecimal. Throws on an
  * unparseable row on purpose: a bad amount is data corruption, and a loud
  * failure beats a silently wrong total (plan 027).
@@ -432,12 +441,8 @@ class BudgetRepositoryImpl @Inject constructor(
     ): Transaction? {
         val startOfDay = day.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
         val endOfDay = day.plusDays(1).atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
-        return transactionDao.findDuplicate(
-            amount = amount.toDouble(),
-            comment = comment,
-            startOfDay = startOfDay,
-            endOfDay = endOfDay,
-        )?.toDomain()
+        val candidates = transactionDao.findByCommentAndDay(comment, startOfDay, endOfDay)
+        return candidates.firstOrNull { entity -> entity.amount.matchesStoredAmount(amount) }?.toDomain()
     }
 
     override suspend fun setRefundExpected(transactionId: Long, expected: Boolean) {
