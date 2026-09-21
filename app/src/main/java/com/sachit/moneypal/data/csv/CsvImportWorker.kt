@@ -23,7 +23,7 @@ class CsvImportWorker @AssistedInject constructor(
             Data.Builder().putString(KEY_ERROR, "Missing input URI").build()
         )
 
-        return runCatching {
+        return try {
             applicationContext.contentResolver.openInputStream(uriString.toUri()).use { stream ->
                 if (stream == null) {
                     return Result.failure(
@@ -40,10 +40,13 @@ class CsvImportWorker @AssistedInject constructor(
                         .build()
                 )
             }
-        }.getOrElse {
-            errorLogRecorder.record("CsvImportWorker.doWork", it)
+        } catch (e: Exception) {
+            // Never swallow coroutine cancellation — WorkManager uses it to
+            // stop workers (plan 029 worker contract).
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            errorLogRecorder.record("CsvImportWorker.doWork", e)
             Result.failure(
-                Data.Builder().putString(KEY_ERROR, it.message ?: "Import failed").build()
+                Data.Builder().putString(KEY_ERROR, e.message ?: "Import failed").build()
             )
         }
     }

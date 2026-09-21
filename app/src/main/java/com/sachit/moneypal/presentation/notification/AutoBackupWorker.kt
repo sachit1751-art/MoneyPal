@@ -35,6 +35,19 @@ class AutoBackupWorker(
             applicationContext,
             AutoBackupEntryPoint::class.java,
         ).autoBackupScheduler()
-        return if (scheduler.runNow()) Result.success() else Result.retry()
+        return try {
+            when (scheduler.runNow()) {
+                // Not-due (disabled or cadence not elapsed) is a normal no-op,
+                // not a failure — retrying it spins backoff forever (plan 029).
+                AutoBackupScheduler.BackupOutcome.RAN,
+                AutoBackupScheduler.BackupOutcome.NOT_DUE,
+                -> Result.success()
+                AutoBackupScheduler.BackupOutcome.FAILED ->
+                    if (runAttemptCount < 3) Result.retry() else Result.failure()
+            }
+        } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            if (runAttemptCount < 3) Result.retry() else Result.failure()
+        }
     }
 }

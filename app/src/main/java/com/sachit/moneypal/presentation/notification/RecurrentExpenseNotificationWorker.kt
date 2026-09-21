@@ -103,8 +103,11 @@ class RecurrentExpenseNotificationWorker(
             Result.success()
 
         } catch (e: Exception) {
+            // Transient DB errors must not terminally kill this bill's reminder
+            // (plan 029): retry with backoff, fail only after repeated attempts.
+            if (e is kotlinx.coroutines.CancellationException) throw e
             logcat { "Error in RecurrentExpenseNotificationWorker\n${e.asLog()}" }
-            Result.failure()
+            if (runAttemptCount < 3) Result.retry() else Result.failure()
         }
     }
     private fun maybeSendCreditCutoffReminder(

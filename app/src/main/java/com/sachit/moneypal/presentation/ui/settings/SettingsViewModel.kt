@@ -246,7 +246,9 @@ class SettingsViewModel @Inject constructor(
     /** Manual "Back up now" via the same write path as the scheduled backup. */
     fun onAutoBackupNow() {
         viewModelScope.launch {
-            val ok = autoBackupScheduler.runNow()
+            // forceRun: a manual trigger must not be gated by the 15-day
+            // cadence (runNow is the scheduler-gated entry, plan 029).
+            val ok = autoBackupScheduler.forceRun()
             _effects.value = if (ok) {
                 SettingsUiEffect.NavigateBack
             } else {
