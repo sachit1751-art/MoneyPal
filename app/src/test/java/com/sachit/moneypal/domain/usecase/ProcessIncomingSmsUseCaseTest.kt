@@ -182,6 +182,18 @@ class ProcessIncomingSmsUseCaseTest {
     }
 
     @Test
+    fun `captured result carries the real inserted id`() = runTest {
+        // Plan 023: the undo notification needs the Room row id —
+        // Transaction.create always carries id 0, so it must come from the insert.
+        coEvery { budgetRepository.addTransaction(any()) } returns 123L
+
+        val result = useCase("HDFC-BANK", "Debited Rs 500 from account", ts)
+
+        val captured = result as ProcessIncomingSmsUseCase.Result.Captured
+        assertThat(captured.transactionId).isEqualTo(123L)
+    }
+
+    @Test
     fun `queues when past period end`() = runTest {
         val staleSettings = budgetSettings.copy(
             startDate = today.minusMonths(1).withDayOfMonth(1),
@@ -192,9 +204,13 @@ class ProcessIncomingSmsUseCaseTest {
         val result = useCase("HDFC-BANK", "Debited Rs 500 from account", ts)
 
         assertThat(result).isInstanceOf(ProcessIncomingSmsUseCase.Result.Captured::class.java)
+        val captured = result as ProcessIncomingSmsUseCase.Result.Captured
         val txSlot = slot<com.sachit.moneypal.domain.model.Transaction>()
         coVerify(exactly = 1) { budgetRepository.addQueuedTransaction(capture(txSlot)) }
         coVerify(exactly = 0) { budgetRepository.addTransaction(any()) }
         assertThat(txSlot.captured.periodId).isEqualTo(0L)
+        // Plan 023: queued rows have no transactions-table id yet — undo must
+        // stay a no-op for them (receiver already ignores ids <= 0).
+        assertThat(captured.transactionId).isEqualTo(0L)
     }
 }

@@ -84,6 +84,10 @@ class ProcessIncomingSmsUseCase @Inject constructor(
         )
 
         return try {
+            // Real row id of the captured insert; the undo notification extra
+            // needs it — Transaction.create always carries id 0 (plan 023).
+            // Queued rows keep 0: no transactions-table id exists yet.
+            var capturedId = 0L
             val budgetSettings = budgetRepository.getBudgetSettingsSync()
             val captureDate = Instant.ofEpochMilli(match.timestampMillis)
                 .atZone(ZoneId.systemDefault()).toLocalDate()
@@ -133,7 +137,7 @@ class ProcessIncomingSmsUseCase @Inject constructor(
                 budgetRepository.addQueuedTransaction(transaction)
                 logcat(TAG) { "Queued SMS ${match.sender} ${match.amount} for next period" }
             } else {
-                budgetRepository.addTransaction(transaction)
+                capturedId = budgetRepository.addTransaction(transaction)
                 logcat(TAG) { "Captured SMS ${match.sender} ${match.amount}" }
             }
 
@@ -149,7 +153,7 @@ class ProcessIncomingSmsUseCase @Inject constructor(
             }
 
             Result.Captured(
-                transactionId = transaction.id,
+                transactionId = capturedId,
                 amount = match.amount,
                 isCredit = match.isCredit,
                 sender = match.sender,

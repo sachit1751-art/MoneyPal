@@ -18,7 +18,8 @@ interface BudgetRepository {
 
     fun getTransactionsForPeriod(start: LocalDate, end: LocalDate): Flow<List<Transaction>>
 
-    suspend fun addTransaction(transaction: Transaction)
+    /** @return the Room row id of the inserted transaction. */
+    suspend fun addTransaction(transaction: Transaction): Long
 
     suspend fun addQueuedTransaction(transaction: Transaction)
 

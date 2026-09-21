@@ -34,6 +34,7 @@ class MinusCsvServiceTest {
     private val upsertedTransactions = slot<List<Transaction>>()
     private val addedTransactions = mutableListOf<Transaction>()
     private val upsertedArchives = slot<List<ArchivedBudget>>()
+    private var fakeTransactionId = 0L
 
     @Before
     fun setUp() {
@@ -44,7 +45,7 @@ class MinusCsvServiceTest {
             Category(id = CATEGORY_IDS[name] ?: 99L, name = name)
         }
         coEvery { repository.upsertTransactions(capture(upsertedTransactions)) } just Runs
-        coEvery { repository.addTransaction(capture(addedTransactions)) } just Runs
+        coEvery { repository.addTransaction(capture(addedTransactions)) } answers { ++fakeTransactionId }
         coEvery { repository.upsertArchivedBudgets(capture(upsertedArchives)) } just Runs
     }
 
