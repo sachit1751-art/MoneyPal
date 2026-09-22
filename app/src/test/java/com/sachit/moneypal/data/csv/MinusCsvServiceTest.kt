@@ -44,7 +44,9 @@ class MinusCsvServiceTest {
             val name = firstArg<String>()
             Category(id = CATEGORY_IDS[name] ?: 99L, name = name)
         }
-        coEvery { repository.upsertTransactions(capture(upsertedTransactions)) } just Runs
+        coEvery { repository.upsertTransactions(capture(upsertedTransactions)) } answers {
+            arg<List<Transaction>>(0).mapIndexed { index, _ -> 100L + index }
+        }
         coEvery { repository.addTransaction(capture(addedTransactions)) } answers { ++fakeTransactionId }
         coEvery { repository.upsertArchivedBudgets(capture(upsertedArchives)) } just Runs
     }

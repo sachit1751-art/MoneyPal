@@ -20,6 +20,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import kotlinx.coroutines.flow.first
+import logcat.logcat
 import javax.inject.Inject
 
 /**
@@ -36,6 +37,11 @@ class RestoreBackupUseCase @Inject constructor(
         var transactionsSkipped = 0
         var categoriesRestored = 0
         var paidOccurrencesRestored = 0
+        var paidOccurrencesSkipped = 0
+
+        // Plan 025: backup files carry the SOURCE device's autoincrement ids.
+        // After upsert, map each backup transaction id to the real local row
+        // id so paid-occurrence marks never dangle (or hit an unrelated row).
 
         // Categories first so restored transactions can link to real ids by name.
         val existingByName = budgetRepository.getAllCategories().first().associateBy { it.name }
@@ -72,27 +78,49 @@ class RestoreBackupUseCase @Inject constructor(
         val categoryNameToId = budgetRepository.getAllCategories().first().associate { it.name to it.id }
 
         val transactionsToUpsert = mutableListOf<Transaction>()
+        // backupTransaction.id -> local row id, for every entry with id > 0.
+        val backupIdToLocalId = mutableMapOf<Long, Long>()
+        // Backup ids of RESTORED rows, in upsert order (<= 0 kept as placeholder).
+        val restoredBackupIds = mutableListOf<Long>()
         for (backupTransaction in backup.transactions) {
             val clientGeneratedId = backupTransaction.clientGeneratedId
+            var matchedLocalId: Long? = null
             val exists = when {
-                !clientGeneratedId.isNullOrBlank() ->
-                    budgetRepository.existsTransactionByClientGeneratedId(clientGeneratedId)
+                !clientGeneratedId.isNullOrBlank() -> {
+                    val existsByCgid =
+                        budgetRepository.existsTransactionByClientGeneratedId(clientGeneratedId)
+                    if (existsByCgid) {
+                        // Deduped against a pre-existing local row: occurrences
+                        // must remap to THAT row's id (plan 025).
+                        matchedLocalId =
+                            budgetRepository.findTransactionIdByClientGeneratedId(clientGeneratedId)
+                    }
+                    existsByCgid
+                }
                 else -> {
                     val dateTime = LocalDateTime.ofEpochSecond(
                         backupTransaction.date / 1000, 0, ZoneOffset.UTC
                     )
-                    budgetRepository.getAllTransactionsIncludingDeleted().any {
-                        it.date == dateTime &&
-                            it.amount.compareTo(BigDecimal(backupTransaction.amount)) == 0 &&
-                            it.comment == backupTransaction.comment
-                    }
+                    val matched = budgetRepository.getAllTransactionsIncludingDeleted()
+                        .firstOrNull {
+                            it.date == dateTime &&
+                                it.amount.compareTo(BigDecimal(backupTransaction.amount)) == 0 &&
+                                it.comment == backupTransaction.comment
+                        }
+                    // Same predicate, but the matched row's id feeds the map.
+                    matchedLocalId = matched?.id
+                    matched != null
                 }
             }
             if (exists) {
                 transactionsSkipped++
+                matchedLocalId?.let { localId ->
+                    if (backupTransaction.id > 0) backupIdToLocalId[backupTransaction.id] = localId
+                }
                 continue
             }
             transactionsRestored++
+            restoredBackupIds.add(backupTransaction.id)
             transactionsToUpsert += Transaction(
                 id = 0L,
                 amount = BigDecimal(backupTransaction.amount),
@@ -118,8 +146,8 @@ class RestoreBackupUseCase @Inject constructor(
                 subscriptionDay = backupTransaction.subscriptionDay,
                 categoryId = backupTransaction.categoryId?.let { id ->
                     val name = backupTransaction.comment.takeIf { c -> c.isNotBlank() }
-                    name?.let { categoryNameToId[it] } ?: id
-                } ?: backupTransaction.categoryId,
+                    name?.let { categoryNameToId[it] } // stale ids are dropped, never passed through (plan 025)
+                },
                 isCredit = backupTransaction.isCredit,
                 isCreditPaid = backupTransaction.isCreditPaid,
                 isAdjustment = backupTransaction.isAdjustment,
@@ -138,7 +166,13 @@ class RestoreBackupUseCase @Inject constructor(
             )
         }
         if (transactionsToUpsert.isNotEmpty()) {
-            budgetRepository.upsertTransactions(transactionsToUpsert)
+            val insertedIds = budgetRepository.upsertTransactions(transactionsToUpsert)
+            // @Insert returns row ids aligned with the input list, so index i
+            // of insertedIds corresponds to restoredBackupIds[i].
+            insertedIds.forEachIndexed { index, localId ->
+                val backupId = restoredBackupIds.getOrNull(index) ?: return@forEachIndexed
+                if (backupId > 0) backupIdToLocalId[backupId] = localId
+            }
         }
 
         var archivedBudgetsRestored = 0
@@ -164,14 +198,22 @@ class RestoreBackupUseCase @Inject constructor(
         }
 
         for (occurrence in backup.paidOccurrences) {
+            // Plan 025: remap the source-device id to the restored local row.
+            // Marking a dangling id would suppress the wrong bill — or none.
+            val localId = backupIdToLocalId[occurrence.transactionId]
+            if (localId == null) {
+                paidOccurrencesSkipped++
+                logcat { "Restore: occurrence for backup tx ${occurrence.transactionId} unresolvable, skipped" }
+                continue
+            }
             if (occurrence.paidAt == SKIPPED_OCCURRENCE_MARKER) {
                 budgetRepository.markOccurrenceSkipped(
-                    occurrence.transactionId,
+                    localId,
                     LocalDate.ofEpochDay(occurrence.occurrenceDateEpochDay),
                 )
             } else {
                 budgetRepository.markRecurrentOccurrencePaid(
-                    occurrence.transactionId,
+                    localId,
                     LocalDate.ofEpochDay(occurrence.occurrenceDateEpochDay),
                 )
             }
@@ -277,6 +319,7 @@ class RestoreBackupUseCase @Inject constructor(
             categoriesRestored = categoriesRestored,
             archivedBudgetsRestored = archivedBudgetsRestored,
             paidOccurrencesRestored = paidOccurrencesRestored,
+            paidOccurrencesSkipped = paidOccurrencesSkipped,
             budgetSettingsRestored = budgetSettingsRestored,
             settingsRestored = settingsRestored,
         )

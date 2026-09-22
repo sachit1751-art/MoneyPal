@@ -148,6 +148,8 @@ data class RestoreResult(
     val categoriesRestored: Int,
     val archivedBudgetsRestored: Int,
     val paidOccurrencesRestored: Int,
+    /** Occurrences whose backup transaction id could not be remapped (plan 025). */
+    val paidOccurrencesSkipped: Int = 0,
     val budgetSettingsRestored: Boolean,
     val settingsRestored: Boolean,
 )

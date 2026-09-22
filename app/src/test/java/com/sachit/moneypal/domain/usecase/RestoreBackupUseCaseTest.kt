@@ -45,6 +45,7 @@ class RestoreBackupUseCaseTest {
 
     private val upsertedCategories = slot<List<Category>>()
     private val upsertedTransactions = slot<List<Transaction>>()
+    private var fakeRestoredIdCounter = 100L
     private val savedBudgetSettings = slot<BudgetSettings>()
     private val savedSavingsPreferences = slot<SavingsPreferences>()
 
@@ -58,7 +59,16 @@ class RestoreBackupUseCaseTest {
         coEvery { budgetRepository.getAllTransactionsIncludingDeleted() } returns localTransactions
         coEvery { budgetRepository.existsTransactionByClientGeneratedId(any()) } returns false
         coEvery { budgetRepository.upsertCategories(capture(upsertedCategories)) } returns Unit
-        coEvery { budgetRepository.upsertTransactions(capture(upsertedTransactions)) } returns Unit
+        coEvery { budgetRepository.upsertTransactions(capture(upsertedTransactions)) } answers {
+            // Fake Room: assigns a fresh row id per restored row (plan 025).
+            arg<List<Transaction>>(0).map { ++fakeRestoredIdCounter }
+        }
+        coEvery {
+            budgetRepository.findTransactionIdByClientGeneratedId(any())
+        } answers {
+            // Mirror of the fake DB: rows "exist" only if the test registered them.
+            localTransactions.firstOrNull { it.clientGeneratedId == firstArg<String>() }?.id
+        }
         coEvery {
             budgetRepository.saveBudgetSettings(capture(savedBudgetSettings))
         } returns Unit
@@ -177,8 +187,8 @@ class RestoreBackupUseCaseTest {
         assertThat(upsertedCategories.captured.single().id).isEqualTo(7) // existing id preserved
     }
 
-    @Test // PLAN-025: pinned-to-change (plan 025 remaps this to the restored row id)
-    fun `paid occurrences marked with backup transactionId`() = runTest {
+    @Test // plan 025: occurrence remapped to the restored row id
+    fun `occurrence remapped to the restored row id`() = runTest {
         val backup = MoneyPalBackup(
             exportedAtEpochMs = 0,
             transactions = listOf(backupTx(id = 42)),
@@ -189,16 +199,66 @@ class RestoreBackupUseCaseTest {
 
         val result = useCase(backup)
 
-        // Documents CURRENT dangling-id behavior: the backup's original id is
-        // passed through verbatim even though the restored row gets a new id.
+        // The mark must use the fake-upsert-assigned id (101), never the
+        // backup's source-device id 42.
         coVerify(exactly = 1) {
-            budgetRepository.markRecurrentOccurrencePaid(42L, LocalDate.ofEpochDay(20_000))
+            budgetRepository.markRecurrentOccurrencePaid(101L, LocalDate.ofEpochDay(20_000))
+        }
+        coVerify(exactly = 0) {
+            budgetRepository.markRecurrentOccurrencePaid(42L, any())
+        }
+        assertThat(result.paidOccurrencesRestored).isEqualTo(1)
+        assertThat(result.paidOccurrencesSkipped).isEqualTo(0)
+    }
+
+    @Test // plan 025: unresolvable occurrences are never marked
+    fun `unresolvable occurrence is skipped, not marked`() = runTest {
+        val backup = MoneyPalBackup(
+            exportedAtEpochMs = 0,
+            transactions = emptyList(), // tx 42 was never in the list
+            paidOccurrences = listOf(
+                BackupPaidOccurrence(transactionId = 42, occurrenceDateEpochDay = 20_000),
+            ),
+        )
+
+        val result = useCase(backup)
+
+        coVerify(exactly = 0) { budgetRepository.markRecurrentOccurrencePaid(any(), any()) }
+        coVerify(exactly = 0) { budgetRepository.markOccurrenceSkipped(any(), any()) }
+        assertThat(result.paidOccurrencesSkipped).isEqualTo(1)
+        assertThat(result.paidOccurrencesRestored).isEqualTo(0)
+    }
+
+    @Test // plan 025: deduped-by-cgid occurrences map to the pre-existing row
+    fun `occurrence maps to the pre-existing row when deduped by clientGeneratedId`() = runTest {
+        localTransactions += Transaction(
+            amount = BigDecimal("10.00"),
+            comment = "Coffee",
+            date = fixtureDate,
+            clientGeneratedId = "cg-existing",
+        ).copy(id = 55L)
+        // Dedupe is decided by existsTransactionByClientGeneratedId: this test
+        // needs the cgid branch to fire (setup stubs it to false for the
+        // triple-match tests).
+        coEvery { budgetRepository.existsTransactionByClientGeneratedId("cg-existing") } returns true
+        val backup = MoneyPalBackup(
+            exportedAtEpochMs = 0,
+            transactions = listOf(backupTx(id = 42, clientGeneratedId = "cg-existing")),
+            paidOccurrences = listOf(
+                BackupPaidOccurrence(transactionId = 42, occurrenceDateEpochDay = 20_000),
+            ),
+        )
+
+        val result = useCase(backup)
+
+        coVerify(exactly = 1) {
+            budgetRepository.markRecurrentOccurrencePaid(55L, LocalDate.ofEpochDay(20_000))
         }
         assertThat(result.paidOccurrencesRestored).isEqualTo(1)
     }
 
-    @Test // PLAN-025: pinned-to-change (plan 025 drops stale ids instead)
-    fun `transaction keeps raw categoryId when comment unmapped`() = runTest {
+    @Test // plan 025: unmapped comment drops the stale category id
+    fun `unmapped comment drops stale categoryId`() = runTest {
         val backup = MoneyPalBackup(
             exportedAtEpochMs = 0,
             transactions = listOf(backupTx(categoryId = 99, comment = "")),
@@ -206,9 +266,9 @@ class RestoreBackupUseCaseTest {
 
         useCase(backup)
 
-        // Documents CURRENT stale-id behavior: the backup's raw category id is
-        // kept when the comment-name heuristic can't resolve it.
-        assertThat(upsertedTransactions.captured.single().categoryId).isEqualTo(99)
+        // Losing a category link beats linking the WRONG category; the row is
+        // intact and recategorization is one tap.
+        assertThat(upsertedTransactions.captured.single().categoryId).isNull()
     }
 
     @Test

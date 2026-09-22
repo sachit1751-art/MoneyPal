@@ -66,7 +66,10 @@ interface TransactionDao {
     suspend fun insertIgnore(transaction: TransactionEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAllOrReplace(transactions: List<TransactionEntity>)
+    suspend fun insertAllOrReplace(transactions: List<TransactionEntity>): List<Long>
+
+    @Query("SELECT id FROM transactions WHERE clientGeneratedId = :clientGeneratedId LIMIT 1")
+    suspend fun findIdByClientGeneratedId(clientGeneratedId: String): Long?
 
     @Update
     suspend fun update(transaction: TransactionEntity)

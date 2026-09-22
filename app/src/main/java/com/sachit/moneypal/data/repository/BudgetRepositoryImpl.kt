@@ -314,10 +314,11 @@ class BudgetRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun upsertTransactions(transactions: List<Transaction>) {
-        val entities = transactions.map { it.toEntity() }
-        transactionDao.insertAllOrReplace(entities)
-    }
+    override suspend fun upsertTransactions(transactions: List<Transaction>): List<Long> =
+        transactionDao.insertAllOrReplace(transactions.map { it.toEntity() })
+
+    override suspend fun findTransactionIdByClientGeneratedId(clientGeneratedId: String): Long? =
+        transactionDao.findIdByClientGeneratedId(clientGeneratedId)
 
     override suspend fun existsTransactionByClientGeneratedId(clientGeneratedId: String): Boolean {
         return transactionDao.existsByClientGeneratedId(clientGeneratedId)

@@ -29,9 +29,13 @@ interface BudgetRepository {
 
     suspend fun assignQueuedTransactionsToPeriod(periodId: Long)
 
-    suspend fun upsertTransactions(transactions: List<Transaction>)
+    /** @return row ids aligned with the input list (post-upsert). */
+    suspend fun upsertTransactions(transactions: List<Transaction>): List<Long>
 
     suspend fun existsTransactionByClientGeneratedId(clientGeneratedId: String): Boolean
+
+    /** @return the local row id of the transaction with this clientGeneratedId, or null. */
+    suspend fun findTransactionIdByClientGeneratedId(clientGeneratedId: String): Long?
 
     suspend fun getRecentTransactions(limit: Int): List<Transaction>
 

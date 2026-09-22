@@ -115,7 +115,10 @@ class BackfillOrphanedPeriodsUseCaseOrchestrationTest {
         val archivedSlot = mutableListOf<List<ArchivedBudget>>()
         coEvery { budgetRepository.upsertArchivedBudgets(any()) } answers { archivedSlot.add(firstArg()) }
         val transactionsSlot = mutableListOf<List<Transaction>>()
-        coEvery { budgetRepository.upsertTransactions(any()) } answers { transactionsSlot.add(firstArg()) }
+        coEvery { budgetRepository.upsertTransactions(any()) } answers {
+            transactionsSlot.add(firstArg())
+            firstArg<List<Transaction>>().map { it.id.takeIf { v -> v != 0L } ?: 500L + it.hashCode() }
+        }
 
         useCase()
 
