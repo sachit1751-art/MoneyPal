@@ -43,6 +43,7 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import com.sachit.moneypal.R
+import com.sachit.moneypal.domain.calculator.MaskedAmountFormatter
 import com.sachit.moneypal.domain.calculator.SavingsGoalProgress
 import com.sachit.moneypal.presentation.util.font.format.formatCurrencySymbolOnly
 import java.time.format.DateTimeFormatter
@@ -59,21 +60,30 @@ class SavingsGoalWidgetReceiver : GlanceAppWidgetReceiver() {
 
 class SavingsGoalWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val hideAmounts = WidgetPrivacy.isHidden(context)
         provideContent {
             GlanceTheme {
-                WidgetContent(context)
+                WidgetContent(context, hideAmounts)
             }
         }
     }
 
     @Composable
-    private fun WidgetContent(context: Context) {
+    private fun WidgetContent(context: Context, hideAmounts: Boolean) {
         val prefs = currentState<Preferences>()
 
+        val hasGoal = (prefs[savingsGoalHasGoalKey] ?: 0) == 1
         SavingsGoalContent(
-            hasGoal = (prefs[savingsGoalHasGoalKey] ?: 0) == 1,
-            savedDisplay = prefs[savingsGoalSavedKey] ?: "",
-            targetDisplay = prefs[savingsGoalTargetKey] ?: "",
+            hasGoal = hasGoal,
+            savedDisplay = MaskedAmountFormatter.format(
+                formattedAmount = prefs[savingsGoalSavedKey] ?: "",
+                hide = hideAmounts,
+            ),
+            targetDisplay = when {
+                !hideAmounts -> prefs[savingsGoalTargetKey] ?: ""
+                hasGoal -> context.getString(R.string.widget_savings_goal_of, "•••")
+                else -> ""
+            },
             percentDisplay = prefs[savingsGoalPercentKey] ?: "",
             etaDisplay = prefs[savingsGoalEtaKey] ?: "",
             label = context.getString(R.string.widget_savings_goal_title),

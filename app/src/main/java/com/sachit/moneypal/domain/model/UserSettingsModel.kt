@@ -38,6 +38,8 @@ data class UserSettings(
     val appLockEnabled: Boolean = false,
     /** Re-lock delay after leaving the app (plan 041). */
     val autoLockTimeout: AutoLockTimeout = AutoLockTimeout.IMMEDIATELY,
+    /** Home-screen widgets show masked amounts instead of balances (plan 042). */
+    val widgetsHideAmounts: Boolean = false,
     /** Opt-in weekly digest notification (plan 003). */
     val weeklyDigestEnabled: Boolean = false,
     /** Opt-in weekly refund nudge (plan 017). */

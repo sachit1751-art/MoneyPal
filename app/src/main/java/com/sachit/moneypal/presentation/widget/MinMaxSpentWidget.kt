@@ -41,7 +41,9 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.sachit.moneypal.R
+import com.sachit.moneypal.domain.calculator.MaskedAmountFormatter
 import com.sachit.moneypal.domain.model.Transaction
+import com.sachit.moneypal.presentation.util.font.format.getCurrencySymbol
 import java.math.BigDecimal
 import java.text.SimpleDateFormat
 import java.time.ZoneId
@@ -72,15 +74,16 @@ class MinMaxSpentWidgetReceiver : GlanceAppWidgetReceiver() {
 
 class MinMaxSpentWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val hideAmounts = WidgetPrivacy.isHidden(context)
         provideContent {
             GlanceTheme {
-                WidgetContent(context)
+                WidgetContent(context, hideAmounts)
             }
         }
     }
 
     @Composable
-    private fun WidgetContent(context: Context) {
+    private fun WidgetContent(context: Context, hideAmounts: Boolean) {
         val prefs = currentState<Preferences>()
         val hasSpends = (prefs[hasSpendsKey] ?: 0) == 1
         val minChartRatios = (0 until MIN_MAX_CHART_BAR_COUNT).map { index ->
@@ -93,6 +96,7 @@ class MinMaxSpentWidget : GlanceAppWidget() {
         MinMaxSpentContent(
             hasSpends = hasSpends,
             currency = prefs[currencyKey] ?: "USD",
+            hideAmounts = hideAmounts,
             minAmount = prefs[minAmountKey] ?: 0,
             maxAmount = prefs[maxAmountKey] ?: 0,
             minDate = prefs[minDateKey] ?: "-",
@@ -113,6 +117,7 @@ class MinMaxSpentWidget : GlanceAppWidget() {
     internal fun MinMaxSpentContent(
         hasSpends: Boolean,
         currency: String,
+        hideAmounts: Boolean = false,
         minAmount: Int,
         maxAmount: Int,
         minDate: String,
@@ -137,7 +142,13 @@ class MinMaxSpentWidget : GlanceAppWidget() {
             ) {
                 MinMaxSpentStatPanel(
                     title = minimumSpentLabel,
-                    amount = if (hasSpends) formatWidgetCurrency(currency, minAmount) else "-",
+                    amount = if (hasSpends) {
+                        MaskedAmountFormatter.format(
+                            formattedAmount = formatWidgetCurrency(currency, minAmount),
+                            hide = hideAmounts,
+                            currencySymbol = getCurrencySymbol(currency),
+                        )
+                    } else "-",
                     date = if (hasSpends) minDate else noExpensesLabel,
                     comment = minComment,
                     isMin = true,
@@ -150,7 +161,13 @@ class MinMaxSpentWidget : GlanceAppWidget() {
 
                 MinMaxSpentStatPanel(
                     title = maximumSpentLabel,
-                    amount = if (hasSpends) formatWidgetCurrency(currency, maxAmount) else "-",
+                    amount = if (hasSpends) {
+                        MaskedAmountFormatter.format(
+                            formattedAmount = formatWidgetCurrency(currency, maxAmount),
+                            hide = hideAmounts,
+                            currencySymbol = getCurrencySymbol(currency),
+                        )
+                    } else "-",
                     date = if (hasSpends) maxDate else noExpensesLabel,
                     comment = maxComment,
                     isMin = false,

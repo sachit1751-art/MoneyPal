@@ -41,6 +41,7 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import com.sachit.moneypal.R
+import com.sachit.moneypal.domain.calculator.MaskedAmountFormatter
 import com.sachit.moneypal.domain.model.Transaction
 import com.sachit.moneypal.presentation.util.font.format.formatCurrencySymbolOnly
 import java.math.BigDecimal
@@ -63,22 +64,26 @@ class AverageSpendWidgetReceiver : GlanceAppWidgetReceiver() {
 
 class AverageSpendWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val hideAmounts = WidgetPrivacy.isHidden(context)
         provideContent {
             GlanceTheme {
-                WidgetContent(context)
+                WidgetContent(context, hideAmounts)
             }
         }
     }
 
     @Composable
-    private fun WidgetContent(context: Context) {
+    private fun WidgetContent(context: Context, hideAmounts: Boolean) {
         val prefs = currentState<Preferences>()
         val chartRatios = (0 until AVERAGE_CHART_BAR_COUNT).map { index ->
             prefs[averageChartRatioKey(index)] ?: 0f
         }
 
         AverageSpendContent(
-            averageValue = prefs[averageSpendValueKey] ?: context.getString(R.string.empty),
+            averageValue = MaskedAmountFormatter.format(
+                formattedAmount = prefs[averageSpendValueKey] ?: context.getString(R.string.empty),
+                hide = hideAmounts,
+            ),
             spendsCount = prefs[averageSpendCountKey] ?: 0,
             hasSpends = (prefs[averageSpendHasSpendsKey] ?: 0) == 1,
             label = context.getString(R.string.daily_average),

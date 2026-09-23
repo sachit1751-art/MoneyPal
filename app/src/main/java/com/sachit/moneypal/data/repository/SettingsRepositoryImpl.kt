@@ -50,6 +50,7 @@ const val ROUNDED_FONT_KEY_NAME = "rounded_font_enabled"
 const val AMOLED_KEY_NAME = "amoled_enabled"
 const val APP_LOCK_ENABLED_KEY_NAME = "app_lock_enabled"
 const val AUTO_LOCK_TIMEOUT_KEY_NAME = "auto_lock_timeout"
+const val WIDGETS_HIDE_AMOUNTS_KEY_NAME = "widgets_hide_amounts"
 const val WEEKLY_DIGEST_ENABLED_KEY_NAME = "weekly_digest_enabled"
 const val REFUND_NUDGE_ENABLED_KEY_NAME = "refund_nudge_enabled"
 const val AUTO_BACKUP_ENABLED_KEY_NAME = "auto_backup_enabled"
@@ -110,6 +111,8 @@ private val AMOLED =
     booleanPreferencesKey(AMOLED_KEY_NAME)
 private val APP_LOCK_ENABLED =
     booleanPreferencesKey(APP_LOCK_ENABLED_KEY_NAME)
+private val WIDGETS_HIDE_AMOUNTS =
+    booleanPreferencesKey(WIDGETS_HIDE_AMOUNTS_KEY_NAME)
 private val AUTO_LOCK_TIMEOUT =
     stringPreferencesKey(AUTO_LOCK_TIMEOUT_KEY_NAME)
 private val WEEKLY_DIGEST_ENABLED =
@@ -203,6 +206,7 @@ class SettingsRepositoryImpl @Inject constructor(
                 isRoundedFontEnabled = preferences[ROUNDED_FONT] ?: true,
                 isAmoledEnabled = preferences[AMOLED] ?: false,
                 appLockEnabled = preferences[APP_LOCK_ENABLED] ?: false,
+                widgetsHideAmounts = preferences[WIDGETS_HIDE_AMOUNTS] ?: false,
                 autoLockTimeout = preferences[AUTO_LOCK_TIMEOUT]?.toAutoLockTimeout()
                     ?: AutoLockTimeout.IMMEDIATELY,
                 weeklyDigestEnabled = preferences[WEEKLY_DIGEST_ENABLED] ?: false,
@@ -408,6 +412,13 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun setAutoLockTimeout(timeout: AutoLockTimeout) {
         dataStore.edit { preferences ->
             preferences[AUTO_LOCK_TIMEOUT] = timeout.name
+        }
+    }
+
+    /** Widget privacy redaction (plan 042). */
+    override suspend fun setWidgetsHideAmounts(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[WIDGETS_HIDE_AMOUNTS] = enabled
         }
     }
 

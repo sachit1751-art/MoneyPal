@@ -270,4 +270,15 @@ class SettingsRepositoryImplTest {
 
         assertThat(repo.getSettings().autoLockTimeout).isEqualTo(AutoLockTimeout.IMMEDIATELY)
     }
+
+    @Test
+    fun `widgets hide-amounts flag defaults off and round-trips`() = runTest {
+        assertThat(repo.getSettings().widgetsHideAmounts).isFalse()
+
+        repo.setWidgetsHideAmounts(true)
+        assertThat(repo.getSettings().widgetsHideAmounts).isTrue()
+
+        repo.setWidgetsHideAmounts(false)
+        assertThat(repo.getSettings().widgetsHideAmounts).isFalse()
+    }
 }

@@ -39,6 +39,8 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import com.sachit.moneypal.R
+import com.sachit.moneypal.domain.calculator.MaskedAmountFormatter
+import com.sachit.moneypal.presentation.util.font.format.getCurrencySymbol
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -50,15 +52,16 @@ class BudgetOverviewWidgetReceiver : GlanceAppWidgetReceiver() {
 class BudgetOverviewWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val hideAmounts = WidgetPrivacy.isHidden(context)
         provideContent {
             GlanceTheme {
-                WidgetContent(context)
+                WidgetContent(context, hideAmounts)
             }
         }
     }
 
     @Composable
-    private fun WidgetContent(context: Context) {
+    private fun WidgetContent(context: Context, hideAmounts: Boolean) {
         val prefs = currentState<Preferences>()
         val budgetAmount =
             prefs[androidx.datastore.preferences.core.intPreferencesKey("budget_amount")] ?: 0
@@ -71,6 +74,7 @@ class BudgetOverviewWidget : GlanceAppWidget() {
         BudgetOverviewContent(
             budgetAmount = budgetAmount,
             currency = currency,
+            hideAmounts = hideAmounts,
             startDate = startDate,
             endDate = endDate,
             daysCount = daysCount,
@@ -85,6 +89,7 @@ class BudgetOverviewWidget : GlanceAppWidget() {
     internal fun BudgetOverviewContent(
         budgetAmount: Int,
         currency: String,
+        hideAmounts: Boolean = false,
         startDate: String,
         endDate: String,
         daysCount: Int,
@@ -98,7 +103,11 @@ class BudgetOverviewWidget : GlanceAppWidget() {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = formatWidgetCurrency(currency, budgetAmount), style = TextStyle(
+                text = MaskedAmountFormatter.format(
+                    formattedAmount = formatWidgetCurrency(currency, budgetAmount),
+                    hide = hideAmounts,
+                    currencySymbol = getCurrencySymbol(currency),
+                ), style = TextStyle(
                     fontSize = MaterialTheme.typography.h4.fontSize,
                     fontWeight = FontWeight.Bold, color = GlanceTheme.colors.onSurface
                 )

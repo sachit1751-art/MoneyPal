@@ -405,6 +405,8 @@
     <string name="settings_auto_lock_option_immediately">Immédiatement</string>
     <string name="settings_auto_lock_option_one_minute">1 minute</string>
     <string name="settings_auto_lock_option_five_minutes">5 minutes</string>
+    <string name="settings_widgets_hide_amounts_title">Masquer les montants sur les widgets</string>
+    <string name="settings_widgets_hide_amounts_subtitle">Affiche des montants masqués sur les widgets de l\'écran d\'accueil. Les widgets restent visibles même lorsque l\'application est verrouillée.</string>
     <string name="settings_reset_tutorial_subtitle">Vous verrez à nouveau les indices de gestes, les infos et les actions dans l\'application.</string>
     <string name="settings_theme_dialog_title">Thème de l\'application</string>
     <string name="settings_theme_light_title">Clair</string>

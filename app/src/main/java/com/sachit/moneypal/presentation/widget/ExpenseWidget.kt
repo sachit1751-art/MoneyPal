@@ -49,6 +49,8 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.sachit.moneypal.R
+import com.sachit.moneypal.domain.calculator.MaskedAmountFormatter
+import com.sachit.moneypal.presentation.util.font.format.getCurrencySymbol
 import logcat.logcat
 
 class ExpenseWidget : GlanceAppWidget() {
@@ -63,15 +65,16 @@ class ExpenseWidget : GlanceAppWidget() {
     )
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val hideAmounts = WidgetPrivacy.isHidden(context)
         provideContent {
             GlanceTheme {
-                WidgetContent()
+                WidgetContent(context, hideAmounts)
             }
         }
     }
 
     @Composable
-    private fun WidgetContent() {
+    private fun WidgetContent(context: Context, hideAmounts: Boolean) {
         val prefs = currentState<Preferences>()
         val spend = prefs[intPreferencesKey("spend")] ?: 0
         val budget = prefs[intPreferencesKey("budget")] ?: 1
@@ -80,7 +83,8 @@ class ExpenseWidget : GlanceAppWidget() {
         ExpenseWidgetContent(
             spend = spend,
             budget = budget,
-            currency = currency
+            currency = currency,
+            hideAmounts = hideAmounts
         )
     }
 
@@ -89,6 +93,7 @@ class ExpenseWidget : GlanceAppWidget() {
         spend: Int,
         budget: Int,
         currency: String,
+        hideAmounts: Boolean = false,
         context: Context = LocalContext.current,
         totalSpentLabel: String = context.getString(R.string.total_spent),
         addExpenseContentDescription: String = context.getString(R.string.widget_add_expense_label)
@@ -140,7 +145,11 @@ class ExpenseWidget : GlanceAppWidget() {
             if (useHorizontal) {
                 HorizontalExpenseContent(
                     totalSpentLabel = totalSpentLabel,
-                    amount = formatWidgetCurrency(currency, spend),
+                    amount = MaskedAmountFormatter.format(
+                        formattedAmount = formatWidgetCurrency(currency, spend),
+                        hide = hideAmounts,
+                        currencySymbol = getCurrencySymbol(currency),
+                    ),
                     labelSize = labelSize,
                     amountSize = amountSize,
                     buttonSize = buttonSize,
@@ -149,7 +158,11 @@ class ExpenseWidget : GlanceAppWidget() {
             } else {
                 VerticalExpenseContent(
                     totalSpentLabel = totalSpentLabel,
-                    amount = formatWidgetCurrency(currency, spend),
+                    amount = MaskedAmountFormatter.format(
+                        formattedAmount = formatWidgetCurrency(currency, spend),
+                        hide = hideAmounts,
+                        currencySymbol = getCurrencySymbol(currency),
+                    ),
                     labelSize = labelSize,
                     amountSize = amountSize,
                     buttonSize = buttonSize,

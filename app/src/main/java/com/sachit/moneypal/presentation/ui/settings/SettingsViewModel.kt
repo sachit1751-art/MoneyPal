@@ -75,6 +75,7 @@ data class SettingsUiState(
     val smsPermissionGranted: Boolean = false,
     val appLockEnabled: Boolean = false,
     val autoLockTimeout: AutoLockTimeout = AutoLockTimeout.IMMEDIATELY,
+    val widgetsHideAmounts: Boolean = false,
     val thresholdAlertsEnabled: Boolean = false,
     val envelopeAlertsEnabled: Boolean = false,
     val weeklyDigestEnabled: Boolean = false,
@@ -154,6 +155,7 @@ class SettingsViewModel @Inject constructor(
             smsPermissionGranted = smsGranted,
             appLockEnabled = settings.appLockEnabled,
             autoLockTimeout = settings.autoLockTimeout,
+            widgetsHideAmounts = settings.widgetsHideAmounts,
             thresholdAlertsEnabled = settings.thresholdAlertsEnabled,
             weeklyDigestEnabled = settings.weeklyDigestEnabled,
             refundNudgeEnabled = settings.refundNudgeEnabled,
@@ -310,6 +312,30 @@ class SettingsViewModel @Inject constructor(
             settingsRepository.setAutoLockTimeout(timeout)
         }
     }
+
+    /**
+     * Widget privacy redaction (plan 042): persists the flag and re-renders
+     * every money widget so the change is visible immediately.
+     */
+    fun onWidgetsHideAmountsToggle() {
+        val newValue = !uiState.value.widgetsHideAmounts
+        viewModelScope.launch {
+            settingsRepository.setWidgetsHideAmounts(newValue)
+            widgetPrivacyRefresher.refreshAll(context)
+        }
+    }
+
+    @dagger.hilt.EntryPoint
+    @dagger.hilt.InstallIn(dagger.hilt.components.SingletonComponent::class)
+    interface WidgetPrivacyEntryPoint {
+        fun widgetPrivacyRefresher(): com.sachit.moneypal.presentation.widget.WidgetPrivacyRefresher
+    }
+
+    private val widgetPrivacyRefresher: com.sachit.moneypal.presentation.widget.WidgetPrivacyRefresher
+        get() = dagger.hilt.android.EntryPointAccessors.fromApplication(
+            context.applicationContext,
+            WidgetPrivacyEntryPoint::class.java,
+        ).widgetPrivacyRefresher()
 
     fun refreshNotificationPermission() {
         val granted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

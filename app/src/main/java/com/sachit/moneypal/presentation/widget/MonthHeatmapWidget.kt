@@ -40,6 +40,8 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import com.sachit.moneypal.R
+import com.sachit.moneypal.domain.calculator.MaskedAmountFormatter
+import com.sachit.moneypal.presentation.util.font.format.getCurrencySymbol
 import java.math.BigDecimal
 import java.time.DayOfWeek
 import java.time.YearMonth
@@ -168,6 +170,7 @@ internal fun MonthHeatmapContent(
     modifier: GlanceModifier = GlanceModifier,
     context: Context = LocalContext.current,
     currency: String = "USD",
+    hideAmounts: Boolean = false,
     totalSpentLabel: String = context.getString(R.string.total_spent),
 ) {
     val calendarCells = buildMonthWidgetCalendarCells(yearMonth, monthCells)
@@ -204,7 +207,11 @@ internal fun MonthHeatmapContent(
         }
 
         Text(
-            text = "$totalSpentLabel: ${formatWidgetCurrency(currency, totalSpent)}",
+            text = "$totalSpentLabel: " + MaskedAmountFormatter.format(
+                formattedAmount = formatWidgetCurrency(currency, totalSpent),
+                hide = hideAmounts,
+                currencySymbol = getCurrencySymbol(currency),
+            ),
             style =
                 TextStyle(
                     fontSize = 10.sp,
@@ -221,15 +228,16 @@ class MonthHeatmapWidget : GlanceAppWidget() {
         context: Context,
         id: GlanceId,
     ) {
+        val hideAmounts = WidgetPrivacy.isHidden(context)
         provideContent {
             GlanceTheme {
-                WidgetContent()
+                WidgetContent(hideAmounts)
             }
         }
     }
 
     @Composable
-    private fun WidgetContent() {
+    private fun WidgetContent(hideAmounts: Boolean) {
         val prefs = currentState<Preferences>()
         val now = YearMonth.now()
         val yearMonth =
@@ -261,6 +269,7 @@ class MonthHeatmapWidget : GlanceAppWidget() {
                 monthCells = monthCells,
                 totalSpent = totalSpent,
                 currency = currency,
+                hideAmounts = hideAmounts,
             )
         }
     }

@@ -194,6 +194,8 @@ fun Settings(
     onAppLockToggle: () -> Unit = {},
     autoLockTimeout: AutoLockTimeout = AutoLockTimeout.IMMEDIATELY,
     onAutoLockTimeoutSelected: (AutoLockTimeout) -> Unit = {},
+    widgetsHideAmounts: Boolean = false,
+    onWidgetsHideAmountsToggle: () -> Unit = {},
     thresholdAlertsEnabled: Boolean = false,
     onThresholdAlertsToggle: () -> Unit = {},
     envelopeAlertsEnabled: Boolean = false,
@@ -362,6 +364,28 @@ fun Settings(
                                 checked = isCensored, onCheckedChange = {
                                     onCensorModeToggle()
                                 }, modifier = Modifier.testTag("SettingsCensorModeSwitch")
+                            )
+                        }
+                    )
+
+                    SelectablePaddedItem(
+                        label = stringResource(R.string.settings_widgets_hide_amounts_title),
+                        subtitle = stringResource(R.string.settings_widgets_hide_amounts_subtitle),
+                        isActive = widgetsHideAmounts,
+                        onClick = onWidgetsHideAmountsToggle,
+                        position = PaddedListItemPosition.Last,
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Widgets,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        },
+                        trailingContent = {
+                            Switch(
+                                checked = widgetsHideAmounts,
+                                onCheckedChange = { onWidgetsHideAmountsToggle() },
+                                modifier = Modifier.testTag("SettingsWidgetsHideAmountsSwitch")
                             )
                         }
                     )

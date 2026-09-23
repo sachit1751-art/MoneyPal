@@ -63,6 +63,9 @@ interface SettingsRepository {
     /** Re-lock delay after leaving the app (plan 041). */
     suspend fun setAutoLockTimeout(timeout: AutoLockTimeout)
 
+    /** Hide amounts on home-screen widgets (plan 042). */
+    suspend fun setWidgetsHideAmounts(enabled: Boolean)
+
     /** Opt-in weekly digest notification (plan 003). */
     suspend fun setWeeklyDigestEnabled(enabled: Boolean)
 

@@ -404,6 +404,8 @@
     <string name="settings_auto_lock_option_immediately">Inmediatamente</string>
     <string name="settings_auto_lock_option_one_minute">1 minuto</string>
     <string name="settings_auto_lock_option_five_minutes">5 minutos</string>
+    <string name="settings_widgets_hide_amounts_title">Ocultar importes en los widgets</string>
+    <string name="settings_widgets_hide_amounts_subtitle">Muestra importes enmascarados en los widgets de la pantalla de inicio. Los widgets siguen visibles aunque la aplicación esté bloqueada.</string>
     <string name="settings_reset_tutorial_subtitle">Volverá a ver sugerencias de gestos, información y acciones en la aplicación.</string>
     <string name="settings_theme_dialog_title">Tema de la aplicación</string>
     <string name="settings_theme_light_title">Claro</string>

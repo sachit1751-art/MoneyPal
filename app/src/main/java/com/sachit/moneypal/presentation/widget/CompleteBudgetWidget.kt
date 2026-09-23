@@ -40,6 +40,8 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import com.sachit.moneypal.R
+import com.sachit.moneypal.domain.calculator.MaskedAmountFormatter
+import com.sachit.moneypal.presentation.util.font.format.getCurrencySymbol
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -51,15 +53,16 @@ class CompleteBudgetWidgetReceiver : GlanceAppWidgetReceiver() {
 class CompleteBudgetWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val hideAmounts = WidgetPrivacy.isHidden(context)
         provideContent {
             GlanceTheme {
-                WidgetContent(context)
+                WidgetContent(context, hideAmounts)
             }
         }
     }
 
     @Composable
-    private fun WidgetContent(context: Context) {
+    private fun WidgetContent(context: Context, hideAmounts: Boolean) {
         val prefs = currentState<Preferences>()
         val spendAmount = prefs[intPreferencesKey("spend_amount")] ?: 0
         val budgetAmount = prefs[intPreferencesKey("budget_amount")] ?: 0
@@ -72,6 +75,7 @@ class CompleteBudgetWidget : GlanceAppWidget() {
             spendAmount = spendAmount,
             budgetAmount = budgetAmount,
             currency = currency,
+            hideAmounts = hideAmounts,
             startDate = startDate,
             endDate = endDate,
             daysCount = daysCount,
@@ -89,6 +93,7 @@ class CompleteBudgetWidget : GlanceAppWidget() {
         spendAmount: Int,
         budgetAmount: Int,
         currency: String,
+        hideAmounts: Boolean = false,
         startDate: String,
         endDate: String,
         daysCount: Int,
@@ -107,6 +112,7 @@ class CompleteBudgetWidget : GlanceAppWidget() {
             SpentInsetBlock(
                 spendAmount = spendAmount,
                 currency = currency,
+                hideAmounts = hideAmounts,
                 totalSpentLabel = totalSpentLabel,
                 addExpenseContentDescription = addExpenseContentDescription,
             )
@@ -114,7 +120,11 @@ class CompleteBudgetWidget : GlanceAppWidget() {
             Spacer(modifier = GlanceModifier.height(14.dp))
 
             Text(
-                text = formatWidgetCurrency(currency, budgetAmount), style = TextStyle(
+                text = MaskedAmountFormatter.format(
+                    formattedAmount = formatWidgetCurrency(currency, budgetAmount),
+                    hide = hideAmounts,
+                    currencySymbol = getCurrencySymbol(currency),
+                ), style = TextStyle(
                     fontSize = MaterialTheme.typography.h4.fontSize,
                     fontWeight = FontWeight.Bold, color = GlanceTheme.colors.onSurface
                 )
@@ -137,6 +147,7 @@ class CompleteBudgetWidget : GlanceAppWidget() {
     private fun SpentInsetBlock(
         spendAmount: Int,
         currency: String,
+        hideAmounts: Boolean,
         totalSpentLabel: String,
         addExpenseContentDescription: String,
     ) {
@@ -159,7 +170,11 @@ class CompleteBudgetWidget : GlanceAppWidget() {
                         )
                     )
                     Text(
-                        text = formatWidgetCurrency(currency, spendAmount), style = TextStyle(
+                        text = MaskedAmountFormatter.format(
+                            formattedAmount = formatWidgetCurrency(currency, spendAmount),
+                            hide = hideAmounts,
+                            currencySymbol = getCurrencySymbol(currency),
+                        ), style = TextStyle(
                             color = GlanceTheme.colors.onPrimaryContainer,
                             fontSize = MaterialTheme.typography.h6.fontSize,
                             fontWeight = FontWeight.Bold,

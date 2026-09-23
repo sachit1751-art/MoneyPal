@@ -168,6 +168,8 @@ fun SettingsScreen(
         onAppLockToggle = viewModel::onAppLockToggle,
         autoLockTimeout = uiState.autoLockTimeout,
         onAutoLockTimeoutSelected = viewModel::onAutoLockTimeoutSelected,
+        widgetsHideAmounts = uiState.widgetsHideAmounts,
+        onWidgetsHideAmountsToggle = viewModel::onWidgetsHideAmountsToggle,
         thresholdAlertsEnabled = uiState.thresholdAlertsEnabled,
         onThresholdAlertsToggle = viewModel::onThresholdAlertsToggle,
         envelopeAlertsEnabled = uiState.envelopeAlertsEnabled,
