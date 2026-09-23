@@ -1,15 +1,10 @@
-# MoneyPal — Implementation Plans
+# MoneyPal — Implementation Plans (round 6)
 
-Two plan tracks live here:
-
-- **Round 4 (audit fixes)** — plans 023–029, written 2026-09-17 against
-  `675fce7`. Correctness/hardening for backup/restore, SMS capture, SQL
-  precision, and worker contracts. All TODO at time of writing.
-- **Round 5 (features)** — plans 030–041, written 2026-09-19 against
-  `467ce9d` by a `/improve next`-style direction audit. Twelve maintainer-
-  approved feature plans. **Round 5 plans assume round 4 has landed** where
-  noted (backup/restore-touching features depend on plan 028's
-  characterization tests landing first).
+> Written 2026-09-23 against `48bb35b` (round-4 fixes landed; plan 041 of the
+> retired round-5 set implemented, uncommitted at time of writing). Round 5
+> (030–041) was retired by maintainer decision on 2026-09-23; the ideas that
+> still had merit were re-audited and either re-planned (reduced) or parked in
+> [050](050-backlog-parked-ideas.md).
 
 Build prerequisites (every plan): JDK 21 for the Gradle daemon (pinned via
 `gradle/gradle-daemon-jvm.properties`; Gradle 9.5.0 + AGP 9.3.3), Android SDK
@@ -25,60 +20,42 @@ export JAVA_HOME="C:/Program Files/Android/Android Studio/jbr"
 Conventions for executors: user-facing strings in `values/strings.xml` (+ es
 and fr copies; other locales are Crowdin-managed), money = `BigDecimal`/plain
 strings never floats/`Double`, MVI contracts per screen, pure logic in
-`domain/` with JUnit4 + Truth tests, conventional commits, one commit per plan.
+`domain/` with JUnit4 + Truth tests, conventional commits, one commit per
+plan. Room schemas are exported (`app/schemas/`, database currently at
+**version 23**) — any schema-touching plan must bump the version, register an
+auto-migration, and commit both schema JSONs.
 
-## Status — round 5 (features)
+## Status — round 6
 
 | # | Plan | Type | Priority | Depends on | Status |
 |:--|:-----|:-----|:---------|:-----------|:-------|
-| [030](030-csv-import-foreign-formats.md) | CSV import: foreign formats + column mapping | feature (medium) | 2 | 029 preferred | TODO |
-| [031](031-spending-calendar-heatmap.md) | Spending calendar heatmap in History | feature (medium) | 3 | — | TODO |
-| [032](032-year-in-review.md) | Year in review summary screen | feature (delight) | 4 | 027 preferred | TODO |
-| [033](033-recurring-payment-detection.md) | Recurring-pattern detection + one-tap template | feature (medium) | 2 | — | TODO |
-| [034](034-upcoming-payments-timeline.md) | Upcoming payments timeline + committed total | feature (S–M) | 1 | — | TODO |
-| [035](035-smart-insight-cards.md) | Smart insight cards (rule-based anomaly detection) | feature (medium) | 2 | 027 preferred | TODO |
-| [036](036-multiple-accounts-wallets.md) | Multiple accounts/wallets + transfers | feature (L) | 5 | **028, 025** | TODO |
-| [037](037-bulk-edit-history.md) | Bulk edit (multi-select) in History | feature (S–M) | 1 | — | TODO |
-| [038](038-custom-budget-periods.md) | Custom & payday-aligned budget periods | feature (medium) | 3 | 028 preferred | TODO |
-| [039](039-monthly-report-pdf-export.md) | Monthly report PDF export/share | feature (medium) | 3 | 027 preferred | TODO |
-| [040](040-notification-actions-mark-paid-snooze.md) | Notification actions: mark paid / snooze | feature (S–M) | 2 | 029 preferred | TODO |
-| [041](041-privacy-auto-lock-timeout-flag-secure.md) | Auto-lock timeout + screenshot blocking | feature (S) | 1 | — | TODO |
+| [042](042-widget-privacy-redaction.md) | Widget privacy redaction (hide amounts) | feature (S) | 1 | 041 | TODO |
+| [043](043-cash-wallet-balance.md) | Cash + wallet balance tracker (Room 23→24) | feature (M) | 2 | — | TODO |
+| [044](044-monthly-report-pdf.md) | Monthly spending report (shareable PDF) | feature (M) | 2 | 027 ✓ | TODO |
+| [045](045-notification-actions.md) | Notification actions: mark paid / snooze | feature (S–M) | 2 | 029 ✓ | TODO |
+| [046](046-income-analytics.md) | Income vs spend analytics card | feature (M) | 3 | 027 ✓ | TODO |
+| [047](047-subscription-price-history.md) | Subscription price-change detection | feature (S) | 3 | — | TODO |
+| [048](048-sms-capture-opt-in-keyword.md) | SMS capture per-sender mute list | feature (S–M) | 3 | 014 ✓ | TODO |
+| [049](049-data-dashboard.md) | Data health dashboard | feature (S–M) | 4 | 024/025/028 ✓ | TODO |
+| [050](050-backlog-parked-ideas.md) | Parked ideas backlog | ideas | — | — | — |
+
+✓ = dependency already landed (round 4).
 
 ## Recommended execution order
 
-Within round 5 (after the round-4 fixes, or interleaved where independent):
+1. **042** (widget redaction) — smallest, completes the 041 privacy story;
+   commit the uncommitted 041 work first.
+2. **045** (notification actions) and **044** (PDF report) — independent,
+   high user visibility.
+3. **043** (cash balance) — lands Room 23→24; execute before any other
+   schema-touching idea to avoid parallel migration conflicts.
+4. **046 → 047 → 048 → 049** — analytics and quality-of-life tail.
 
-1. **Quick wins first:** 041 (auto-lock/FLAG_SECURE), 037 (bulk edit),
-   034 (timeline) — small, independent, immediately visible.
-2. **Pure-domain features (parallelizable):** 033 (recurring detection),
-   035 (insights), 031 (heatmap).
-3. **Data-in/data-out:** 030 (foreign CSV) after 029 (it touches
-   `CsvImportWorker`), then 032 (year review), 039 (PDF report — reuses 032's
-   aggregation shape).
-4. **Structural, last:** 038 (periods) after 028; then 036 (accounts) — the
-   only L-effort plan, gated on 028 + 025 landing first.
-5. **040 (notification actions)** anytime after 029.
+## Round-6 themes
 
-Dependency rules: 036 → {028, 025} (hard). Soft preferences (merge friction /
-exactness only): 030 → 029; 032, 035, 039 → 027. Everything else independent.
-Only plan 036 adds a Room migration (23→24) this round; 038 explicitly avoids
-one. No plan touches the watch module (`:wear`); `:sync-contract` is unchanged.
-
-## Considered and rejected (do not re-audit)
-
-Carried from round 4 (see git history for the full prior list): watch-side
-features (maintainer exclusion), per-bank SMS templates, `androidx.security-
-crypto` migration, `BackupEncryption` scheme changes, `https_proxy` handling.
-
-New this round:
-
-- **Scheduled encrypted backup to SAF/WebDAV** — already implemented (plan
-  004: `AutoBackupScheduler`/`AutoBackupWorker`, SAF tree URI, 15-day
-  cadence; settings rows exist in `Settings.kt`). Replaced in the slate by
-  plan 037 (bulk edit).
-- **Tags on transactions** — the codebase's "tags" are numpad comment chips
-  (`Editor.kt` `onDeleteTag`), not a tagging system; a real tag system was
-  judged lower-leverage than the twelve selected features and cut during
-  slate selection.
-- **Quick-tile / shortcuts additions** — shortcuts (plan 003) and a quick-
-  settings tile already exist.
+- **Finish stories instead of starting them**: 042 completes 041; 044/045
+  complete the reporting and reminder loops; 043 completes `PaymentMethod`.
+- **Reuse landed round-4 machinery**: BigDecimal SQL (027), occurrence
+  remapping (025), worker contracts (029), characterization tests (028).
+- **Respect standing decisions**: single generic SMS parser (no per-bank
+  templates), `:wear` excluded, no multi-account schema without a proven need.
