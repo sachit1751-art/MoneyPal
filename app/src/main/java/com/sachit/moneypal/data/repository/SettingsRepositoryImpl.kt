@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
+import com.sachit.moneypal.domain.lock.AutoLockTimeout
 import com.sachit.moneypal.domain.model.BudgetPeriod
 import com.sachit.moneypal.domain.model.ContrastMode
 import com.sachit.moneypal.domain.usecase.BudgetThreshold
@@ -48,6 +49,7 @@ const val SHOW_PAST_TRANSACTIONS_KEY_NAME = "show_past_transactions"
 const val ROUNDED_FONT_KEY_NAME = "rounded_font_enabled"
 const val AMOLED_KEY_NAME = "amoled_enabled"
 const val APP_LOCK_ENABLED_KEY_NAME = "app_lock_enabled"
+const val AUTO_LOCK_TIMEOUT_KEY_NAME = "auto_lock_timeout"
 const val WEEKLY_DIGEST_ENABLED_KEY_NAME = "weekly_digest_enabled"
 const val REFUND_NUDGE_ENABLED_KEY_NAME = "refund_nudge_enabled"
 const val AUTO_BACKUP_ENABLED_KEY_NAME = "auto_backup_enabled"
@@ -108,6 +110,8 @@ private val AMOLED =
     booleanPreferencesKey(AMOLED_KEY_NAME)
 private val APP_LOCK_ENABLED =
     booleanPreferencesKey(APP_LOCK_ENABLED_KEY_NAME)
+private val AUTO_LOCK_TIMEOUT =
+    stringPreferencesKey(AUTO_LOCK_TIMEOUT_KEY_NAME)
 private val WEEKLY_DIGEST_ENABLED =
     booleanPreferencesKey(WEEKLY_DIGEST_ENABLED_KEY_NAME)
 private val REFUND_NUDGE_ENABLED =
@@ -199,6 +203,8 @@ class SettingsRepositoryImpl @Inject constructor(
                 isRoundedFontEnabled = preferences[ROUNDED_FONT] ?: true,
                 isAmoledEnabled = preferences[AMOLED] ?: false,
                 appLockEnabled = preferences[APP_LOCK_ENABLED] ?: false,
+                autoLockTimeout = preferences[AUTO_LOCK_TIMEOUT]?.toAutoLockTimeout()
+                    ?: AutoLockTimeout.IMMEDIATELY,
                 weeklyDigestEnabled = preferences[WEEKLY_DIGEST_ENABLED] ?: false,
                 refundNudgeEnabled = preferences[REFUND_NUDGE_ENABLED] ?: false,
                 autoBackupEnabled = preferences[AUTO_BACKUP_ENABLED] ?: false,
@@ -396,6 +402,12 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun setAppLockEnabled(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[APP_LOCK_ENABLED] = enabled
+        }
+    }
+
+    override suspend fun setAutoLockTimeout(timeout: AutoLockTimeout) {
+        dataStore.edit { preferences ->
+            preferences[AUTO_LOCK_TIMEOUT] = timeout.name
         }
     }
 
@@ -717,6 +729,14 @@ class SettingsRepositoryImpl @Inject constructor(
             ThemeMode.valueOf(this)
         } catch (_: Exception) {
             ThemeMode.SYSTEM
+        }
+    }
+
+    private fun String.toAutoLockTimeout(): AutoLockTimeout {
+        return try {
+            AutoLockTimeout.valueOf(this)
+        } catch (_: Exception) {
+            AutoLockTimeout.IMMEDIATELY
         }
     }
 

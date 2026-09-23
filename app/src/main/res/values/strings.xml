@@ -168,7 +168,12 @@
     <string name="history_filter_more">More filters</string>
     <string name="history_filter_amount_invalid">Enter valid amounts</string>
     <string name="settings_app_lock_title">App lock</string>
-    <string name="settings_app_lock_subtitle">Require fingerprint or screen lock to open MoneyPal</string>
+    <string name="settings_app_lock_subtitle">Require fingerprint or screen lock to open MoneyPal. While enabled, screenshots and the recents preview are blocked.</string>
+    <string name="settings_auto_lock_timeout_title">Auto-lock after</string>
+    <string name="settings_auto_lock_timeout_subtitle">How long MoneyPal waits before locking again after you leave the app</string>
+    <string name="settings_auto_lock_option_immediately">Immediately</string>
+    <string name="settings_auto_lock_option_one_minute">1 minute</string>
+    <string name="settings_auto_lock_option_five_minutes">5 minutes</string>
     <string name="app_lock_prompt_title">Unlock MoneyPal</string>
     <string name="app_lock_prompt_subtitle">Authenticate to access your budget</string>
     <string name="app_lock_overlay_title">MoneyPal is locked</string>

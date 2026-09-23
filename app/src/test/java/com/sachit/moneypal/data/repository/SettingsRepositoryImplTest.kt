@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.emptyPreferences
 import com.google.common.truth.Truth.assertThat
+import com.sachit.moneypal.domain.lock.AutoLockTimeout
 import com.sachit.moneypal.domain.model.BudgetPeriod
 import com.sachit.moneypal.domain.model.RemainingBudgetStrategy
 import com.sachit.moneypal.domain.model.SavingsPreferences
@@ -250,5 +251,23 @@ class SettingsRepositoryImplTest {
         repo.setOnboardingCompleted(true)
 
         assertThat(repo.observeSettings().first().onboardingCompleted).isTrue()
+    }
+
+    @Test
+    fun `auto-lock timeout round-trips`() = runTest {
+        assertThat(repo.getSettings().autoLockTimeout).isEqualTo(AutoLockTimeout.IMMEDIATELY)
+
+        repo.setAutoLockTimeout(AutoLockTimeout.FIVE_MINUTES)
+        assertThat(repo.getSettings().autoLockTimeout).isEqualTo(AutoLockTimeout.FIVE_MINUTES)
+
+        repo.setAutoLockTimeout(AutoLockTimeout.ONE_MINUTE)
+        assertThat(repo.getSettings().autoLockTimeout).isEqualTo(AutoLockTimeout.ONE_MINUTE)
+    }
+
+    @Test
+    fun `a corrupt stored auto-lock timeout falls back to IMMEDIATELY`() = runTest {
+        repo.setString(AUTO_LOCK_TIMEOUT_KEY_NAME, "NOT_A_REAL_MODE")
+
+        assertThat(repo.getSettings().autoLockTimeout).isEqualTo(AutoLockTimeout.IMMEDIATELY)
     }
 }

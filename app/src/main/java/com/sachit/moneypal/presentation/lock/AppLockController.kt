@@ -7,6 +7,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import com.sachit.moneypal.R
 import com.sachit.moneypal.data.repository.SettingsRepository
+import com.sachit.moneypal.domain.lock.AutoLockPolicy
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,13 +36,28 @@ class AppLockController @Inject constructor(
     /** True while the UI must be obscured behind the auth gate. */
     val isLocked: StateFlow<Boolean> = _isLocked.asStateFlow()
 
+    /** When the host activity last paused (plan 041). Null until first pause. */
+    @Volatile
+    private var lastPausedAtEpochMs: Long? = null
+
+    /** Host records its backgrounding so the timeout clock can run. */
+    fun onHostPaused() {
+        lastPausedAtEpochMs = System.currentTimeMillis()
+    }
+
     /**
-     * Re-evaluates the lock: engages the gate when the user has the toggle
-     * enabled. Called at activity start; call again from ON_START to re-lock
-     * after returning from the background (future enhancement, not wired yet).
+     * Re-evaluates the lock: engages the gate when the toggle is enabled AND
+     * the configured re-lock delay has elapsed since the host last paused
+     * (plan 041). Called at activity start and on every resume.
      */
     suspend fun refreshLock() {
-        _isLocked.value = settingsRepository.getSettings().appLockEnabled
+        val settings = settingsRepository.getSettings()
+        _isLocked.value = AutoLockPolicy.shouldLock(
+            enabled = settings.appLockEnabled,
+            timeout = settings.autoLockTimeout,
+            lastPausedAtEpochMs = lastPausedAtEpochMs,
+            nowEpochMs = System.currentTimeMillis(),
+        )
     }
 
     /** Whether the device has a biometric or credential authenticator enrolled. */

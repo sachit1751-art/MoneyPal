@@ -1,5 +1,6 @@
 package com.sachit.moneypal.data.repository
 
+import com.sachit.moneypal.domain.lock.AutoLockTimeout
 import com.sachit.moneypal.domain.model.BudgetPeriod
 import com.sachit.moneypal.domain.model.ContrastMode
 import com.sachit.moneypal.domain.model.RemainingBudgetStrategy
@@ -58,6 +59,9 @@ interface SettingsRepository {
     suspend fun setAmoledEnabled(enabled: Boolean)
 
     suspend fun setAppLockEnabled(enabled: Boolean)
+
+    /** Re-lock delay after leaving the app (plan 041). */
+    suspend fun setAutoLockTimeout(timeout: AutoLockTimeout)
 
     /** Opt-in weekly digest notification (plan 003). */
     suspend fun setWeeklyDigestEnabled(enabled: Boolean)

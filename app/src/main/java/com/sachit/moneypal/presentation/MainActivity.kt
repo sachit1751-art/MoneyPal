@@ -2,6 +2,7 @@ package com.sachit.moneypal.presentation
 
 import android.content.Context
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -128,11 +129,14 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         censorManager.start()
+        // Plan 041: re-evaluate the lock against the configured timeout.
+        lifecycleScope.launch { appLockController.refreshLock() }
     }
 
     override fun onPause() {
         super.onPause()
         censorManager.stop()
+        appLockController.onHostPaused()
     }
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
@@ -161,6 +165,16 @@ class MainActivity : AppCompatActivity() {
                 earlyFinishPending.value = userSettings.earlyFinishActive
                 themeManager.applyUserSettings(applicationContext, userSettings)
                 appLockController.refreshLock()
+
+                // Plan 041: block screenshots + recents preview while the lock
+                // is enabled. Read once at creation; toggling the setting
+                // applies on next launch (documented in the settings subtitle).
+                if (userSettings.appLockEnabled) {
+                    window.setFlags(
+                        WindowManager.LayoutParams.FLAG_SECURE,
+                        WindowManager.LayoutParams.FLAG_SECURE,
+                    )
+                }
 
                 dataStoreLoaded.value = true
                 isDone.value = true

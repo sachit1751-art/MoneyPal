@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sachit.moneypal.data.repository.BudgetRepository
 import com.sachit.moneypal.data.repository.SettingsRepository
+import com.sachit.moneypal.domain.lock.AutoLockTimeout
 import com.sachit.moneypal.domain.model.AppColorScheme
 import com.sachit.moneypal.domain.model.ContrastMode
 import com.sachit.moneypal.domain.model.PeriodMappingMode
@@ -73,6 +74,7 @@ data class SettingsUiState(
     val smsCaptureEnabled: Boolean = false,
     val smsPermissionGranted: Boolean = false,
     val appLockEnabled: Boolean = false,
+    val autoLockTimeout: AutoLockTimeout = AutoLockTimeout.IMMEDIATELY,
     val thresholdAlertsEnabled: Boolean = false,
     val envelopeAlertsEnabled: Boolean = false,
     val weeklyDigestEnabled: Boolean = false,
@@ -151,6 +153,7 @@ class SettingsViewModel @Inject constructor(
             smsCaptureEnabled = settings.smsCaptureEnabled,
             smsPermissionGranted = smsGranted,
             appLockEnabled = settings.appLockEnabled,
+            autoLockTimeout = settings.autoLockTimeout,
             thresholdAlertsEnabled = settings.thresholdAlertsEnabled,
             weeklyDigestEnabled = settings.weeklyDigestEnabled,
             refundNudgeEnabled = settings.refundNudgeEnabled,
@@ -298,6 +301,13 @@ class SettingsViewModel @Inject constructor(
         }
         viewModelScope.launch {
             settingsRepository.setAppLockEnabled(newValue)
+        }
+    }
+
+    /** Re-lock delay after leaving the app (plan 041). */
+    fun onAutoLockTimeoutSelected(timeout: AutoLockTimeout) {
+        viewModelScope.launch {
+            settingsRepository.setAutoLockTimeout(timeout)
         }
     }
 

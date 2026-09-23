@@ -1,5 +1,6 @@
 package com.sachit.moneypal.domain.model
 
+import com.sachit.moneypal.domain.lock.AutoLockTimeout
 import com.sachit.moneypal.presentation.ui.history.RecurrentPaymentsViewMode
 
 data class UserSettings(
@@ -35,6 +36,8 @@ data class UserSettings(
     val isRoundedFontEnabled: Boolean = true,
     val isAmoledEnabled: Boolean = false,
     val appLockEnabled: Boolean = false,
+    /** Re-lock delay after leaving the app (plan 041). */
+    val autoLockTimeout: AutoLockTimeout = AutoLockTimeout.IMMEDIATELY,
     /** Opt-in weekly digest notification (plan 003). */
     val weeklyDigestEnabled: Boolean = false,
     /** Opt-in weekly refund nudge (plan 017). */

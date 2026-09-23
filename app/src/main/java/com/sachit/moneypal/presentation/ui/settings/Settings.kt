@@ -118,6 +118,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.sachit.moneypal.BuildConfig
 import com.sachit.moneypal.R
+import com.sachit.moneypal.domain.lock.AutoLockTimeout
 import com.sachit.moneypal.domain.model.PeriodMappingMode
 import com.sachit.moneypal.domain.model.SavingsPreferences
 import com.sachit.moneypal.presentation.ui.history.RecurrentPaymentsViewMode
@@ -191,6 +192,8 @@ fun Settings(
     onOpenSmsAppSettings: () -> Unit = {},
     appLockEnabled: Boolean = false,
     onAppLockToggle: () -> Unit = {},
+    autoLockTimeout: AutoLockTimeout = AutoLockTimeout.IMMEDIATELY,
+    onAutoLockTimeoutSelected: (AutoLockTimeout) -> Unit = {},
     thresholdAlertsEnabled: Boolean = false,
     onThresholdAlertsToggle: () -> Unit = {},
     envelopeAlertsEnabled: Boolean = false,
@@ -208,6 +211,7 @@ fun Settings(
     onBack: () -> Unit = {},
 ) {
     var showRecurrentPaymentsViewModeDialog by remember { mutableStateOf(false) }
+    var showAutoLockTimeoutDialog by remember { mutableStateOf(false) }
     var showNotificationTimePicker by remember { mutableStateOf(false) }
     var showRecurrentNotificationTimePicker by remember { mutableStateOf(false) }
     var showWidgetsSheet by remember { mutableStateOf(false) }
@@ -495,6 +499,35 @@ fun Settings(
                                 checked = appLockEnabled,
                                 onCheckedChange = { onAppLockToggle() },
                                 modifier = Modifier.testTag("SettingsAppLockSwitch")
+                            )
+                        }
+                    )
+
+                    SelectablePaddedItem(
+                        label = stringResource(R.string.settings_auto_lock_timeout_title),
+                        subtitle = stringResource(R.string.settings_auto_lock_timeout_subtitle),
+                        isActive = autoLockTimeout != AutoLockTimeout.IMMEDIATELY,
+                        onClick = { showAutoLockTimeoutDialog = true },
+                        position = PaddedListItemPosition.Middle,
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Filled.AccessTime,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        },
+                        trailingContent = {
+                            Text(
+                                text = when (autoLockTimeout) {
+                                    AutoLockTimeout.IMMEDIATELY ->
+                                        stringResource(R.string.settings_auto_lock_option_immediately)
+                                    AutoLockTimeout.ONE_MINUTE ->
+                                        stringResource(R.string.settings_auto_lock_option_one_minute)
+                                    AutoLockTimeout.FIVE_MINUTES ->
+                                        stringResource(R.string.settings_auto_lock_option_five_minutes)
+                                },
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                     )
@@ -1315,6 +1348,14 @@ fun Settings(
             )
         }
 
+        if (showAutoLockTimeoutDialog) {
+            AutoLockTimeoutPickerDialog(
+                currentTimeout = autoLockTimeout,
+                onTimeoutSelected = onAutoLockTimeoutSelected,
+                onDismiss = { showAutoLockTimeoutDialog = false },
+            )
+        }
+
         if (showNotificationTimePicker) {
             NotificationTimePickerDialog(
                 initialHour = notificationHour,
@@ -1525,6 +1566,61 @@ fun RecurrentPaymentsViewModePickerDialog(
             }
         }
     }
+}
+
+@Composable
+private fun AutoLockTimeoutPickerDialog(
+    currentTimeout: AutoLockTimeout,
+    onTimeoutSelected: (AutoLockTimeout) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val options = listOf(
+        AutoLockTimeout.IMMEDIATELY to R.string.settings_auto_lock_option_immediately,
+        AutoLockTimeout.ONE_MINUTE to R.string.settings_auto_lock_option_one_minute,
+        AutoLockTimeout.FIVE_MINUTES to R.string.settings_auto_lock_option_five_minutes,
+    )
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(text = stringResource(R.string.settings_auto_lock_timeout_title))
+        },
+        text = {
+            Column {
+                options.forEach { (timeout, labelRes) ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable(onClick = {
+                                onTimeoutSelected(timeout)
+                                onDismiss()
+                            })
+                            .padding(vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(
+                            selected = currentTimeout == timeout,
+                            onClick = null,
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = MaterialTheme.colorScheme.primary
+                            ),
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(labelRes),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = stringResource(android.R.string.cancel))
+            }
+        },
+    )
 }
 
 @Composable

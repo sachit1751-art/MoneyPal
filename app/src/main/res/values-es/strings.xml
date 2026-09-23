@@ -397,6 +397,13 @@
     <string name="settings_sms_capture_subtitle">Lee los mensajes de tu banco en este dispositivo y registra gastos y abonos automáticamente. Se procesa en el dispositivo, nunca se sube.</string>
     <string name="settings_sms_permission_title">Falta el permiso de SMS</string>
     <string name="settings_sms_permission_subtitle">Concede los permisos de SMS en los ajustes del sistema para que MoneyPal pueda leer los mensajes de tu banco.</string>
+    <string name="settings_app_lock_title">Bloqueo de la aplicación</string>
+    <string name="settings_app_lock_subtitle">Requiere huella o bloqueo de pantalla para abrir MoneyPal. Mientras esté activo, las capturas de pantalla y la vista previa de recientes quedan bloqueadas.</string>
+    <string name="settings_auto_lock_timeout_title">Bloquear automáticamente tras</string>
+    <string name="settings_auto_lock_timeout_subtitle">Cuánto espera MoneyPal antes de volver a bloquearse después de salir de la aplicación</string>
+    <string name="settings_auto_lock_option_immediately">Inmediatamente</string>
+    <string name="settings_auto_lock_option_one_minute">1 minuto</string>
+    <string name="settings_auto_lock_option_five_minutes">5 minutos</string>
     <string name="settings_reset_tutorial_subtitle">Volverá a ver sugerencias de gestos, información y acciones en la aplicación.</string>
     <string name="settings_theme_dialog_title">Tema de la aplicación</string>
     <string name="settings_theme_light_title">Claro</string>
