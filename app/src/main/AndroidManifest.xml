@@ -93,6 +93,10 @@
             android:name=".presentation.notification.QuickAddReceiver"
             android:exported="false" />
 
+        <receiver
+            android:name=".presentation.notification.NotificationActionReceiver"
+            android:exported="false" />
+
         <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
             android:enabled="false"

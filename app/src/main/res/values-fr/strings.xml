@@ -465,6 +465,12 @@
     <string name="refund_nudge_body">Vous avez %1$d dépenses en attente de remboursement</string>
     <string name="settings_refund_nudge">Rappels de remboursement</string>
     <string name="settings_refund_nudge_summary">Rappel hebdomadaire quand vos dépenses marquées attendent toujours leur remboursement</string>
+
+    <!-- Plan 045: notification quick actions -->
+    <string name="settings_notification_quick_actions">Actions rapides sur les rappels de paiement</string>
+    <string name="settings_notification_quick_actions_summary">Affiche les boutons « Marquer comme payé » et « Reporter » sur les rappels de paiements récurrents</string>
+    <string name="notification_action_mark_paid">Marquer comme payé</string>
+    <string name="notification_action_snooze">Reporter</string>
     <string name="forecast_title">Prévision de dépenses</string>
     <string name="forecast_on_pace_line">Dans le rythme — dépenses à %1$d%% de votre budget quotidien</string>
     <string name="forecast_over_pace_line">Dépassement de %1$s d\'ici le %2$s</string>

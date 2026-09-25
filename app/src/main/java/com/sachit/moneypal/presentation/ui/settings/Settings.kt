@@ -44,6 +44,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Savings
 import androidx.compose.material.icons.filled.Sell
+import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material.icons.filled.TipsAndUpdates
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material.icons.outlined.RemoveRedEye
@@ -200,6 +201,8 @@ fun Settings(
     onThresholdAlertsToggle: () -> Unit = {},
     envelopeAlertsEnabled: Boolean = false,
     onEnvelopeAlertsToggle: () -> Unit = {},
+    notificationQuickActions: Boolean = true,
+    onNotificationQuickActionsToggle: () -> Unit = {},
     weeklyDigestEnabled: Boolean = false,
     onWeeklyDigestToggle: () -> Unit = {},
     refundNudgeEnabled: Boolean = false,
@@ -596,6 +599,28 @@ fun Settings(
                                 checked = envelopeAlertsEnabled,
                                 onCheckedChange = { onEnvelopeAlertsToggle() },
                                 modifier = Modifier.testTag("SettingsEnvelopeAlertsSwitch")
+                            )
+                        }
+                    )
+
+                    SelectablePaddedItem(
+                        label = stringResource(R.string.settings_notification_quick_actions),
+                        subtitle = stringResource(R.string.settings_notification_quick_actions_summary),
+                        isActive = notificationQuickActions,
+                        onClick = onNotificationQuickActionsToggle,
+                        position = PaddedListItemPosition.Middle,
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Filled.TouchApp,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        },
+                        trailingContent = {
+                            Switch(
+                                checked = notificationQuickActions,
+                                onCheckedChange = { onNotificationQuickActionsToggle() },
+                                modifier = Modifier.testTag("SettingsNotificationQuickActionsSwitch")
                             )
                         }
                     )

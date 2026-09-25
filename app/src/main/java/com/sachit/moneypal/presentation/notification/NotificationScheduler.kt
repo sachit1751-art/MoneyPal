@@ -53,6 +53,7 @@ class NotificationScheduler @Inject constructor(
         const val ACTION_MIDNIGHT_PERIOD_CHECK =
             "com.sachit.moneypal.action.MIDNIGHT_PERIOD_CHECK"
         private const val MAX_OCCURRENCE_LOOKUP_ITERATIONS = 500
+        private const val SNOOZE_WORK_NAME_PREFIX = "recurrent_expense_snooze_"
     }
 
     private val workManager by lazy { WorkManager.getInstance(context) }
@@ -232,6 +233,35 @@ class NotificationScheduler @Inject constructor(
         val workName = recurrentWorkName(transaction)
         workManager.cancelUniqueWork(workName)
         logcat { "Cancelled recurrent notification work: workName=$workName transactionId=${transaction.id}" }
+    }
+
+    /**
+     * Snooze path for the plan-045 notification action: fires the reminder
+     * again for this bill after [delayDays]. A dedicated unique work name —
+     * not [scheduleRecurrentExpenseNotification], whose occurrence math would
+     * jump to the next cycle — keeps the normal schedule untouched.
+     */
+    fun snoozeRecurrentExpenseNotification(transaction: Transaction, delayDays: Long = 1L) {
+        val stableId = transaction.sourceTransactionId ?: transaction.id
+        val snoozeName = "$SNOOZE_WORK_NAME_PREFIX$stableId"
+        val delay = java.time.Duration.ofDays(delayDays).toMillis().coerceAtLeast(0L)
+        val workRequest = OneTimeWorkRequestBuilder<RecurrentExpenseNotificationWorker>()
+            .setInputData(
+                workDataOf(
+                    RecurrentExpenseNotificationWorker.KEY_TRANSACTION_ID to transaction.id,
+                    RecurrentExpenseNotificationWorker.KEY_SNOOZED to true,
+                )
+            )
+            .setInitialDelay(delay, TimeUnit.MILLISECONDS)
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
+                    .build()
+            )
+            .addTag(RecurrentExpenseNotificationWorker.TAG_RECURRENT_NOTIFICATION)
+            .build()
+        workManager.enqueueUniqueWork(snoozeName, ExistingWorkPolicy.REPLACE, workRequest)
+        logcat { "Snoozed recurrent reminder: transactionId=${transaction.id} delayMs=$delay" }
     }
 
     private suspend fun scheduleRecurrentExpenseNotification(

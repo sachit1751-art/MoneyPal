@@ -465,6 +465,12 @@
     <string name="refund_nudge_body">Tienes %1$d gastos esperando su reembolso</string>
     <string name="settings_refund_nudge">Recordatorios de reembolso</string>
     <string name="settings_refund_nudge_summary">Aviso semanal cuando tus gastos marcados siguen esperando su reembolso</string>
+
+    <!-- Plan 045: notification quick actions -->
+    <string name="settings_notification_quick_actions">Acciones rápidas en los recordatorios de pago</string>
+    <string name="settings_notification_quick_actions_summary">Muestra los botones “Marcar como pagado” y “Posponer” en los recordatorios de pagos recurrentes</string>
+    <string name="notification_action_mark_paid">Marcar como pagado</string>
+    <string name="notification_action_snooze">Posponer</string>
     <string name="forecast_title">Previsión de gasto</string>
     <string name="forecast_on_pace_line">En ritmo — gastando al %1$d%% de tu presupuesto diario</string>
     <string name="forecast_over_pace_line">Excederás %1$s para el %2$s</string>

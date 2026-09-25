@@ -40,6 +40,8 @@ data class UserSettings(
     val autoLockTimeout: AutoLockTimeout = AutoLockTimeout.IMMEDIATELY,
     /** Home-screen widgets show masked amounts instead of balances (plan 042). */
     val widgetsHideAmounts: Boolean = false,
+    /** Mark-paid/snooze action buttons on recurring-payment reminders (plan 045). */
+    val notificationQuickActions: Boolean = true,
     /** Opt-in weekly digest notification (plan 003). */
     val weeklyDigestEnabled: Boolean = false,
     /** Opt-in weekly refund nudge (plan 017). */

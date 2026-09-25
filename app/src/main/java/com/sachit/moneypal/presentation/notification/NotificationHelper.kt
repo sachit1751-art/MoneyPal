@@ -46,6 +46,10 @@ class NotificationHelper @Inject constructor(
         private const val NOTIFICATION_ID_DIGEST = 1009
         private const val NOTIFICATION_ID_REFUND_NUDGE = 1010
         const val CHANNEL_ENVELOPE = "envelope_alerts"
+
+        // Plan-045 action pending-intent request codes (unique per action).
+        private const val REQUEST_CODE_MARK_OCCURRENCE_PAID = 2100
+        private const val REQUEST_CODE_SNOOZE_OCCURRENCE = 2101
     }
 
     init {
@@ -314,7 +318,21 @@ class NotificationHelper @Inject constructor(
         return symbolOnlyCurrencyFormat(currency).format(decimalValue)
     }
 
-    fun showRecurrentExpenseNotification(amount: String, comment: String, currency: String) {
+    /**
+     * Due-today reminder for a recurring expense (plan 045): when
+     * [quickActionsEnabled], two action buttons let the user settle or snooze
+     * the occurrence in place. [transactionId] is the occurrence's stable id
+     * (`sourceTransactionId ?: id`) and [occurrenceDateEpochDay] the due date,
+     * both carried through the action pending intents.
+     */
+    fun showRecurrentExpenseNotification(
+        amount: String,
+        comment: String,
+        currency: String,
+        transactionId: Long = -1L,
+        occurrenceDateEpochDay: Long = -1L,
+        quickActionsEnabled: Boolean = false,
+    ) {
         val hasPermission = checkNotificationPermission()
         if (!hasPermission) {
             logcat { "Cannot show notification - permission not granted" }
@@ -347,7 +365,7 @@ class NotificationHelper @Inject constructor(
             )
         }
 
-        val notification = NotificationCompat.Builder(context, CHANNEL_RECURRENT)
+        val builder = NotificationCompat.Builder(context, CHANNEL_RECURRENT)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(message)
@@ -357,9 +375,72 @@ class NotificationHelper @Inject constructor(
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
-            .build()
 
-        NotificationManagerCompat.from(context).notify(NOTIFICATION_ID_RECURRENT, notification)
+        if (quickActionsEnabled && transactionId > 0L && occurrenceDateEpochDay >= 0L) {
+            builder.addOccurrenceActionButtons(transactionId, occurrenceDateEpochDay)
+        }
+
+        NotificationManagerCompat.from(context)
+            .notify(NOTIFICATION_ID_RECURRENT, builder.build())
+    }
+
+    /**
+     * Attaches the plan-045 mark-paid / snooze actions. Unique request codes
+     * keep the two pending intents distinct; per-occurrence extras make each
+     * tap settle the exact due date.
+     */
+    private fun NotificationCompat.Builder.addOccurrenceActionButtons(
+        transactionId: Long,
+        occurrenceDateEpochDay: Long,
+    ) {
+        val markPaidIntent = Intent(context, NotificationActionReceiver::class.java).apply {
+            action = NotificationActionReceiver.ACTION_MARK_OCCURRENCE_PAID
+            putExtra(NotificationActionReceiver.EXTRA_TRANSACTION_ID, transactionId)
+            putExtra(
+                NotificationActionReceiver.EXTRA_OCCURRENCE_DATE_EPOCH_DAY,
+                occurrenceDateEpochDay,
+            )
+            putExtra(
+                NotificationActionReceiver.EXTRA_NOTIFICATION_ID,
+                NOTIFICATION_ID_RECURRENT,
+            )
+        }
+        val markPaidPending = PendingIntent.getBroadcast(
+            context,
+            REQUEST_CODE_MARK_OCCURRENCE_PAID,
+            markPaidIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+
+        val snoozeIntent = Intent(context, NotificationActionReceiver::class.java).apply {
+            action = NotificationActionReceiver.ACTION_SNOOZE_OCCURRENCE
+            putExtra(NotificationActionReceiver.EXTRA_TRANSACTION_ID, transactionId)
+            putExtra(
+                NotificationActionReceiver.EXTRA_OCCURRENCE_DATE_EPOCH_DAY,
+                occurrenceDateEpochDay,
+            )
+            putExtra(
+                NotificationActionReceiver.EXTRA_NOTIFICATION_ID,
+                NOTIFICATION_ID_RECURRENT,
+            )
+        }
+        val snoozePending = PendingIntent.getBroadcast(
+            context,
+            REQUEST_CODE_SNOOZE_OCCURRENCE,
+            snoozeIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+
+        addAction(
+            R.drawable.ic_notification,
+            context.getString(R.string.notification_action_mark_paid),
+            markPaidPending,
+        )
+        addAction(
+            R.drawable.ic_notification,
+            context.getString(R.string.notification_action_snooze),
+            snoozePending,
+        )
     }
 
     fun showUpcomingSubscriptionNotification(

@@ -38,6 +38,9 @@ class RecurrentExpenseNotificationWorker(
     companion object {
         const val WORK_NAME = "recurrent_expense_notification"
         const val KEY_TRANSACTION_ID = "transaction_id"
+
+        /** True when this run is a plan-045 snooze re-fire, not the cycle reminder. */
+        const val KEY_SNOOZED = "snoozed"
         const val TAG_RECURRENT_NOTIFICATION = "recurrent_expense_notification_tag"
         private const val LAST_RECURRENT_NOTIFICATION_PREFIX = "last_recurrent_notification_"
     }
@@ -87,6 +90,7 @@ class RecurrentExpenseNotificationWorker(
                     notificationHelper = notificationHelper,
                     settingsRepository = settingsRepository,
                     budgetRepository = budgetRepository,
+                    snoozed = inputData.getBoolean(KEY_SNOOZED, false),
                 )
                 notificationScheduler.scheduleRecurrentExpenseNotification(transaction)
                 return Result.success()
@@ -162,8 +166,12 @@ class RecurrentExpenseNotificationWorker(
         notificationHelper: NotificationHelper,
         settingsRepository: SettingsRepository,
         budgetRepository: BudgetRepository,
+        snoozed: Boolean = false,
     ) {
-        if (!RecurringExpenseCalculator().isRecurringDueToday(transaction, today)) {
+        // Snoozed re-fires (plan 045) intentionally skip the due-today gate:
+        // they run the day after the occurrence, when the bill is no longer
+        // "due today" but the reminder must still show.
+        if (!snoozed && !RecurringExpenseCalculator().isRecurringDueToday(transaction, today)) {
             logcat { "Recurrent notification worker fired but transaction is not due today: transactionId=${transaction.id} today=$today" }
             return
         }
@@ -192,10 +200,13 @@ class RecurrentExpenseNotificationWorker(
         notificationHelper.showRecurrentExpenseNotification(
             amount = transaction.amount.toPlainString(),
             comment = transaction.comment,
-            currency = settings.currencyCode
+            currency = settings.currencyCode,
+            transactionId = stableId,
+            occurrenceDateEpochDay = today.toEpochDay(),
+            quickActionsEnabled = settingsRepository.getSettings().notificationQuickActions,
         )
         settingsRepository.setString(dedupeKey, today.toString())
-        logcat { "Recurrent expense notification shown for transactionId=${transaction.id} date=$today" }
+        logcat { "Recurrent expense notification shown for transactionId=${transaction.id} date=$today snoozed=$snoozed" }
     }
 
     private fun recurrentNotificationDedupeKey(transaction: Transaction, date: LocalDate) =

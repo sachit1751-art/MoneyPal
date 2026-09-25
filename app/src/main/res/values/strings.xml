@@ -756,6 +756,12 @@
     <string name="settings_weekly_digest">Weekly summary notification</string>
     <string name="settings_weekly_digest_summary">Every Monday morning, get a recap of last week\'s spending</string>
 
+    <!-- Plan 045: notification quick actions -->
+    <string name="settings_notification_quick_actions">Quick actions on payment reminders</string>
+    <string name="settings_notification_quick_actions_summary">Show “Mark paid” and “Snooze” buttons on recurring payment reminders</string>
+    <string name="notification_action_mark_paid">Mark paid</string>
+    <string name="notification_action_snooze">Snooze</string>
+
     <!-- Shortcut -->
     <string name="shortcut_add_expense_short_label">Add expense</string>
     <string name="shortcut_add_expense_long_label">Log a new expense</string>

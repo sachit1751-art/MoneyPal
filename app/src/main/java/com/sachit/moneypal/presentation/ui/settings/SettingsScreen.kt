@@ -174,6 +174,8 @@ fun SettingsScreen(
         onThresholdAlertsToggle = viewModel::onThresholdAlertsToggle,
         envelopeAlertsEnabled = uiState.envelopeAlertsEnabled,
         onEnvelopeAlertsToggle = viewModel::onEnvelopeAlertsToggle,
+        notificationQuickActions = uiState.notificationQuickActions,
+        onNotificationQuickActionsToggle = viewModel::onNotificationQuickActionsToggle,
         weeklyDigestEnabled = uiState.weeklyDigestEnabled,
         onWeeklyDigestToggle = viewModel::onWeeklyDigestToggle,
         refundNudgeEnabled = uiState.refundNudgeEnabled,

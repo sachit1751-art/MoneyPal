@@ -281,4 +281,15 @@ class SettingsRepositoryImplTest {
         repo.setWidgetsHideAmounts(false)
         assertThat(repo.getSettings().widgetsHideAmounts).isFalse()
     }
+
+    @Test
+    fun `notification quick actions default on and round-trip`() = runTest {
+        assertThat(repo.getSettings().notificationQuickActions).isTrue()
+
+        repo.setNotificationQuickActions(false)
+        assertThat(repo.getSettings().notificationQuickActions).isFalse()
+
+        repo.setNotificationQuickActions(true)
+        assertThat(repo.getSettings().notificationQuickActions).isTrue()
+    }
 }

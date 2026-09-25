@@ -66,6 +66,9 @@ interface SettingsRepository {
     /** Hide amounts on home-screen widgets (plan 042). */
     suspend fun setWidgetsHideAmounts(enabled: Boolean)
 
+    /** Mark-paid/snooze action buttons on recurring-payment reminders (plan 045). */
+    suspend fun setNotificationQuickActions(enabled: Boolean)
+
     /** Opt-in weekly digest notification (plan 003). */
     suspend fun setWeeklyDigestEnabled(enabled: Boolean)
 

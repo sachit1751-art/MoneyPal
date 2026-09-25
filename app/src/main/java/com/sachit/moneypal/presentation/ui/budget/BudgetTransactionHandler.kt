@@ -243,10 +243,20 @@ class BudgetTransactionHandler @Inject constructor(
         }.onFailure { errorLogRecorder.record("BudgetTransactionHandler.deleteTransaction id=${transaction.id}", it) }
     }
 
-    suspend fun markRecurrentOccurrencePaid(transaction: Transaction, activePeriodId: Long): Result<Unit> {
+    /**
+     * Marks a recurring occurrence paid (plan 008/045): records the occurrence,
+     * books the expense into [activePeriodId], and reschedules the reminder.
+     * [occurrenceDate] lets the notification action settle the due occurrence
+     * rather than the template's start date; it defaults to the in-app path's
+     * behavior.
+     */
+    suspend fun markRecurrentOccurrencePaid(
+        transaction: Transaction,
+        activePeriodId: Long,
+        occurrenceDate: LocalDate = transaction.date?.toLocalDate() ?: LocalDate.now(),
+    ): Result<Unit> {
         return runCatching {
             val realId = transaction.sourceTransactionId ?: transaction.id
-            val occurrenceDate = transaction.date?.toLocalDate() ?: LocalDate.now()
             budgetRepository.markRecurrentOccurrencePaid(realId, occurrenceDate)
             val template = budgetRepository.getTransactionById(realId) ?: return@runCatching
 

@@ -78,6 +78,7 @@ data class SettingsUiState(
     val widgetsHideAmounts: Boolean = false,
     val thresholdAlertsEnabled: Boolean = false,
     val envelopeAlertsEnabled: Boolean = false,
+    val notificationQuickActions: Boolean = true,
     val weeklyDigestEnabled: Boolean = false,
     val refundNudgeEnabled: Boolean = false,
     val autoBackupEnabled: Boolean = false,
@@ -157,6 +158,7 @@ class SettingsViewModel @Inject constructor(
             autoLockTimeout = settings.autoLockTimeout,
             widgetsHideAmounts = settings.widgetsHideAmounts,
             thresholdAlertsEnabled = settings.thresholdAlertsEnabled,
+            notificationQuickActions = settings.notificationQuickActions,
             weeklyDigestEnabled = settings.weeklyDigestEnabled,
             refundNudgeEnabled = settings.refundNudgeEnabled,
             autoBackupEnabled = settings.autoBackupEnabled,
@@ -212,6 +214,14 @@ class SettingsViewModel @Inject constructor(
         val newValue = !uiState.value.envelopeAlertsEnabled
         viewModelScope.launch {
             settingsRepository.setEnvelopeAlertsEnabled(newValue)
+        }
+    }
+
+    /** Mark-paid/snooze buttons on recurring reminders (plan 045). */
+    fun onNotificationQuickActionsToggle() {
+        val newValue = !uiState.value.notificationQuickActions
+        viewModelScope.launch {
+            settingsRepository.setNotificationQuickActions(newValue)
         }
     }
 
