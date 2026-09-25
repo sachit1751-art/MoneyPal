@@ -29,14 +29,14 @@ auto-migration, and commit both schema JSONs.
 
 | # | Plan | Type | Priority | Depends on | Status |
 |:--|:-----|:-----|:---------|:-----------|:-------|
-| [042](042-widget-privacy-redaction.md) | Widget privacy redaction (hide amounts) | feature (S) | 1 | 041 | TODO |
-| [043](043-cash-wallet-balance.md) | Cash + wallet balance tracker (Room 23→24) | feature (M) | 2 | — | TODO |
-| [044](044-monthly-report-pdf.md) | Monthly spending report (shareable PDF) | feature (M) | 2 | 027 ✓ | TODO |
-| [045](045-notification-actions.md) | Notification actions: mark paid / snooze | feature (S–M) | 2 | 029 ✓ | TODO |
-| [046](046-income-analytics.md) | Income vs spend analytics card | feature (M) | 3 | 027 ✓ | TODO |
-| [047](047-subscription-price-history.md) | Subscription price-change detection | feature (S) | 3 | — | TODO |
-| [048](048-sms-capture-opt-in-keyword.md) | SMS capture per-sender mute list | feature (S–M) | 3 | 014 ✓ | TODO |
-| [049](049-data-dashboard.md) | Data health dashboard | feature (S–M) | 4 | 024/025/028 ✓ | TODO |
+| [042](042-widget-privacy-redaction.md) | Widget privacy redaction (hide amounts) | feature (S) | 1 | 041 | DONE (`e1be988`) |
+| [043](043-cash-wallet-balance.md) | Cash + wallet balance tracker (Room 23→24) | feature (M) | 2 | — | DONE (`7eca5b9`) |
+| [044](044-monthly-report-pdf.md) | Monthly spending report (shareable PDF) | feature (M) | 2 | 027 ✓ | DONE (`fe42de1`) |
+| [045](045-notification-actions.md) | Notification actions: mark paid / snooze | feature (S–M) | 2 | 029 ✓ | DONE (`68949cc`) |
+| [046](046-income-analytics.md) | Income vs spend analytics card | feature (M) | 3 | 027 ✓ | DONE (`e68c1ce`) |
+| [047](047-subscription-price-history.md) | Subscription price-change detection | feature (S) | 3 | — | DONE (`9781613`) |
+| [048](048-sms-capture-opt-in-keyword.md) | SMS capture per-sender mute list | feature (S–M) | 3 | 014 ✓ | DONE (`c7bc024`) |
+| [049](049-data-dashboard.md) | Data health dashboard | feature (S–M) | 4 | 024/025/028 ✓ | DONE (`aab9688`) |
 | [050](050-backlog-parked-ideas.md) | Parked ideas backlog | ideas | — | — | — |
 
 ✓ = dependency already landed (round 4).
