@@ -32,6 +32,10 @@ import com.sachit.moneypal.presentation.dynamicColorEnabled
 import com.sachit.moneypal.presentation.isAmoledEnabled
 import com.sachit.moneypal.presentation.lock.AppLockController
 import com.sachit.moneypal.presentation.ui.history.RecurrentPaymentsViewMode
+import com.sachit.moneypal.domain.report.MonthlyReportBuilder
+import com.sachit.moneypal.presentation.report.MonthlyReportPdfWriter
+import com.sachit.moneypal.presentation.report.MonthlyReportShareManager
+import com.sachit.moneypal.presentation.ui.settings.csv.CsvTransferEntryPoint
 import com.sachit.moneypal.presentation.ui.settings.csv.CsvTransferManager
 import com.sachit.moneypal.presentation.util.CensorManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -41,6 +45,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import logcat.logcat
@@ -181,6 +186,11 @@ class SettingsViewModel @Inject constructor(
 
     private var csvTransferManager: CsvTransferManager? = null
     private var importLauncher: ActivityResultLauncher<Array<String>>? = null
+
+    /** Plan 044: monthly report pipeline (pure builder + PDF writer + share). */
+    private val monthlyReportBuilder = MonthlyReportBuilder()
+    private var monthlyReportPdfWriter: MonthlyReportPdfWriter? = null
+    private var monthlyReportShareManager: MonthlyReportShareManager? = null
 
     init {
         refreshNotificationPermission()
@@ -542,6 +552,58 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             csvTransferManager?.exportAndShareCsv()
         }
+    }
+
+    /** Called by the screen to inject the Hilt entry-point managers (plan 044). */
+    fun setMonthlyReportManagers(writer: MonthlyReportPdfWriter, shareManager: MonthlyReportShareManager) {
+        monthlyReportPdfWriter = writer
+        monthlyReportShareManager = shareManager
+    }
+
+    /**
+     * Plan 044: builds the current-period report from live state, renders the
+     * PDF off the main thread, and fires the share sheet. Failures surface as
+     * a toast via the share manager; nothing is written when state is absent.
+     */
+    fun onExportReportPdf() {
+        viewModelScope.launch {
+            val writer = monthlyReportPdfWriter
+            val shareManager = monthlyReportShareManager
+            if (writer == null || shareManager == null) {
+                _reportPdfReady.value = false
+                return@launch
+            }
+            runCatching {
+                val settings = budgetRepository.getBudgetSettings().first()
+                if (settings == null) {
+                    _reportPdfReady.value = false
+                    return@launch
+                }
+                val data = monthlyReportBuilder.build(
+                    transactions = budgetRepository.getTransactions().first(),
+                    periodStart = settings.startDate,
+                    periodEnd = settings.getPeriodEndDate(),
+                    currencyCode = settings.currencyCode,
+                    budget = settings.totalBudget,
+                )
+                val file = writer.write(data)
+                shareManager.share(file)
+            }.onFailure { error ->
+                logcat { "Monthly report export failed: $error" }
+                _reportPdfReady.value = false
+            }.onSuccess { shared ->
+                _reportPdfReady.value = shared
+            }
+        }
+    }
+
+    private val _reportPdfReady = MutableStateFlow<Boolean?>(null)
+
+    /** One-shot report export outcome: true = shared, false = failed, null = idle. */
+    val reportPdfReady: StateFlow<Boolean?> = _reportPdfReady.asStateFlow()
+
+    fun consumeReportPdfReady() {
+        _reportPdfReady.value = null
     }
 
     fun onImportCsv() {

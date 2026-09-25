@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Publish
@@ -178,6 +179,7 @@ fun Settings(
     savingsPreferences: SavingsPreferences = SavingsPreferences.DEFAULT,
     onSavingsPreferencesChange: (SavingsPreferences) -> Unit = {},
     onExportCsv: () -> Unit = {},
+    onExportReportPdf: () -> Unit = {},
     onImportCsv: () -> Unit = {},
     onCreateBackup: (CharArray?) -> Unit = {},
     onRestorePasswordEntered: (CharArray) -> Unit = {},
@@ -1129,9 +1131,35 @@ fun Settings(
                 ) {
                     CustomPaddedListItem(
                         onClick = {
-                            onExportCsv()
+                            onExportReportPdf()
                             view.toggleFeedback()
                         }, position = PaddedListItemPosition.First
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.PictureAsPdf,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.settings_report_pdf_title),
+                                style = MaterialTheme.typography.bodyMediumEmphasized,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = stringResource(R.string.settings_report_pdf_subtitle),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    CustomPaddedListItem(
+                        onClick = {
+                            onExportCsv()
+                            view.toggleFeedback()
+                        }, position = PaddedListItemPosition.Middle
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.Backup,
@@ -1157,7 +1185,7 @@ fun Settings(
                         onClick = {
                             showEncryptBackupDialog = true
                             view.toggleFeedback()
-                        }, position = PaddedListItemPosition.Middle
+                        },                        position = PaddedListItemPosition.Middle
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.SaveAlt,

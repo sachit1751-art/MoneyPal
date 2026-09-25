@@ -59,6 +59,20 @@ fun SettingsScreen(
         viewModel.setCsvTransferManager(manager)
         viewModel.setImportLauncher(importLauncher)
 
+        val reportWriter = EntryPointAccessors
+            .fromApplication(
+                context.applicationContext,
+                com.sachit.moneypal.presentation.report.MonthlyReportEntryPoint::class.java,
+            )
+            .monthlyReportPdfWriter()
+        val reportShareManager = EntryPointAccessors
+            .fromApplication(
+                context.applicationContext,
+                com.sachit.moneypal.presentation.report.MonthlyReportEntryPoint::class.java,
+            )
+            .monthlyReportShareManager()
+        viewModel.setMonthlyReportManagers(reportWriter, reportShareManager)
+
         val backupManager = EntryPointAccessors
             .fromApplication(
                 context.applicationContext,
@@ -79,6 +93,27 @@ fun SettingsScreen(
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.reportPdfReady.collect { result ->
+            if (result != null) {
+                viewModel.consumeReportPdfReady()
+                if (result) {
+                    android.widget.Toast.makeText(
+                        context,
+                        com.sachit.moneypal.R.string.report_export_success,
+                        android.widget.Toast.LENGTH_SHORT,
+                    ).show()
+                } else {
+                    android.widget.Toast.makeText(
+                        context,
+                        com.sachit.moneypal.R.string.report_export_failed,
+                        android.widget.Toast.LENGTH_SHORT,
+                    ).show()
+                }
+            }
         }
     }
 
@@ -141,6 +176,7 @@ fun SettingsScreen(
         savingsPreferences = uiState.savingsPreferences,
         onSavingsPreferencesChange = viewModel::onSavingsPreferencesChange,
         onExportCsv = viewModel::onExportCsv,
+        onExportReportPdf = viewModel::onExportReportPdf,
         onImportCsv = viewModel::onImportCsv,
         onCreateBackup = viewModel::onCreateBackup,
         onRestorePasswordEntered = viewModel::onRestorePasswordEntered,

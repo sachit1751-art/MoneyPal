@@ -762,6 +762,13 @@
     <string name="notification_action_mark_paid">Mark paid</string>
     <string name="notification_action_snooze">Snooze</string>
 
+    <!-- Plan 044: monthly report PDF -->
+    <string name="settings_report_pdf_title">Export period report (PDF)</string>
+    <string name="settings_report_pdf_subtitle">Share a one-page summary of the current period as a PDF</string>
+    <string name="report_export_subject">MoneyPal report — %1$s</string>
+    <string name="report_export_success">Report PDF ready to share</string>
+    <string name="report_export_failed">Could not generate the report</string>
+
     <!-- Shortcut -->
     <string name="shortcut_add_expense_short_label">Add expense</string>
     <string name="shortcut_add_expense_long_label">Log a new expense</string>

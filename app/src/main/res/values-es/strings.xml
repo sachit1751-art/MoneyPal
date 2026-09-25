@@ -471,6 +471,13 @@
     <string name="settings_notification_quick_actions_summary">Muestra los botones “Marcar como pagado” y “Posponer” en los recordatorios de pagos recurrentes</string>
     <string name="notification_action_mark_paid">Marcar como pagado</string>
     <string name="notification_action_snooze">Posponer</string>
+
+    <!-- Plan 044: monthly report PDF -->
+    <string name="settings_report_pdf_title">Exportar informe del periodo (PDF)</string>
+    <string name="settings_report_pdf_subtitle">Comparte un resumen de una página del periodo actual en PDF</string>
+    <string name="report_export_subject">Informe de MoneyPal — %1$s</string>
+    <string name="report_export_success">Informe PDF listo para compartir</string>
+    <string name="report_export_failed">No se pudo generar el informe</string>
     <string name="forecast_title">Previsión de gasto</string>
     <string name="forecast_on_pace_line">En ritmo — gastando al %1$d%% de tu presupuesto diario</string>
     <string name="forecast_over_pace_line">Excederás %1$s para el %2$s</string>

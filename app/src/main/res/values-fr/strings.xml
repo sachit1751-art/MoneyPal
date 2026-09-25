@@ -471,6 +471,13 @@
     <string name="settings_notification_quick_actions_summary">Affiche les boutons « Marquer comme payé » et « Reporter » sur les rappels de paiements récurrents</string>
     <string name="notification_action_mark_paid">Marquer comme payé</string>
     <string name="notification_action_snooze">Reporter</string>
+
+    <!-- Plan 044: monthly report PDF -->
+    <string name="settings_report_pdf_title">Exporter le rapport de la période (PDF)</string>
+    <string name="settings_report_pdf_subtitle">Partage un résumé d\'une page de la période actuelle en PDF</string>
+    <string name="report_export_subject">Rapport MoneyPal — %1$s</string>
+    <string name="report_export_success">Rapport PDF prêt à partager</string>
+    <string name="report_export_failed">Impossible de générer le rapport</string>
     <string name="forecast_title">Prévision de dépenses</string>
     <string name="forecast_on_pace_line">Dans le rythme — dépenses à %1$d%% de votre budget quotidien</string>
     <string name="forecast_over_pace_line">Dépassement de %1$s d\'ici le %2$s</string>

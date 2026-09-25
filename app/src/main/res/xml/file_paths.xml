@@ -6,4 +6,8 @@
     <cache-path
         name="bug_report_cache"
         path="bug_reports/" />
+    <!-- Plan 044: monthly report PDFs. -->
+    <cache-path
+        name="report_cache"
+        path="reports/" />
 </paths>
