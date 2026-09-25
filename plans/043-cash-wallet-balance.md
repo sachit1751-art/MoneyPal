@@ -1,6 +1,6 @@
 # Plan 043 — Cash + wallet balance tracker
 
-**Status:** TODO
+**Status:** DONE — `7eca5b9` (Room 23→24 with AutoMigration, schemas committed)
 **Written against commit:** `48bb35b` (2026-09-23)
 **Category:** feature (medium)
 **Depends on:** — (no schema collision with 044; if both land, 044 lands first)

@@ -1,6 +1,6 @@
 # Plan 048 — SMS capture: per-sender mute list
 
-**Status:** TODO
+**Status:** DONE — `c7bc024`
 **Written against commit:** `48bb35b` (2026-09-23)
 **Category:** feature (S–M)
 **Depends on:** plan 014 (SMS capture metadata, landed)

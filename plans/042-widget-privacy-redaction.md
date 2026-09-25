@@ -1,6 +1,6 @@
 # Plan 042 — Widget privacy redaction
 
-**Status:** TODO
+**Status:** DONE — `e1be988`
 **Written against commit:** `48bb35b` (2026-09-23) + uncommitted plan-041 work
 **Category:** feature (privacy, small)
 **Depends on:** plan 041 (its maintenance note motivates this plan)

@@ -1,6 +1,6 @@
 # Plan 047 — Subscription price-change detection
 
-**Status:** TODO
+**Status:** DONE — `9781613`
 **Written against commit:** `48bb35b` (2026-09-23)
 **Category:** feature (S)
 **Depends on:** —

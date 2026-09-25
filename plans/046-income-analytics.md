@@ -1,6 +1,6 @@
 # Plan 046 — Income vs spend analytics
 
-**Status:** TODO
+**Status:** DONE — `e68c1ce`
 **Written against commit:** `48bb35b` (2026-09-23)
 **Category:** feature (medium)
 **Depends on:** plan 027 (landed)

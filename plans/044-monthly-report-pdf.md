@@ -1,6 +1,6 @@
 # Plan 044 — Monthly spending report (shareable PDF)
 
-**Status:** TODO
+**Status:** DONE — `fe42de1`
 **Written against commit:** `48bb35b` (2026-09-23)
 **Category:** feature (medium)
 **Depends on:** plan 027 (BigDecimal totals in SQL, landed)

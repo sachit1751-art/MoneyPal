@@ -1,6 +1,6 @@
 # Plan 045 — Notification actions: mark paid / snooze recurring reminders
 
-**Status:** TODO
+**Status:** DONE — `68949cc` (mark-paid + snooze actions, quick-actions settings toggle)
 **Written against commit:** `48bb35b` (2026-09-23)
 **Category:** feature (S–M)
 **Depends on:** plan 029 (worker error contract, landed)

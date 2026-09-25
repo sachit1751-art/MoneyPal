@@ -1,6 +1,6 @@
 # Plan 049 — Data health dashboard
 
-**Status:** TODO
+**Status:** DONE — `aab9688`
 **Written against commit:** `48bb35b` (2026-09-23)
 **Category:** feature (quality-of-life, S–M)
 **Depends on:** plans 024/025/028 (landed — they built the integrity machinery)
