@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.sachit.moneypal.data.repository.BudgetRepository
 import com.sachit.moneypal.data.repository.SettingsRepository
+import com.sachit.moneypal.data.repository.WalletBalanceRepository
 import com.sachit.moneypal.domain.model.ArchivedBudget
 import com.sachit.moneypal.domain.model.BudgetPeriod
 import com.sachit.moneypal.domain.model.BudgetSettings
@@ -43,6 +44,7 @@ class AnalyticsViewModelTest {
     private val observeCurrentPeriodBoundaryUseCase: ObserveCurrentPeriodBoundaryUseCase = mockk()
     private val clearEarlyFinishStateUseCase: ClearEarlyFinishStateUseCase = mockk(relaxed = true)
     private val persistBudgetSettingsUseCase: PersistBudgetSettingsUseCase = mockk(relaxed = true)
+    private val walletBalanceRepository: WalletBalanceRepository = mockk(relaxed = true)
     private val errorLogRecorder: ErrorLogRecorder = mockk(relaxed = true)
 
     private val settingsFlow = MutableStateFlow<BudgetSettings?>(null)
@@ -67,6 +69,7 @@ class AnalyticsViewModelTest {
         every { observeCurrentPeriodBoundaryUseCase() } returns boundaryFlow
         every { settingsRepository.observeSettings() } returns userSettingsFlow
         every { settingsRepository.observeCurrentPeriodRollover() } returns rolloverFlow
+        every { walletBalanceRepository.observeStartingBalance() } returns flowOf(null)
     }
 
     @After
@@ -81,6 +84,7 @@ class AnalyticsViewModelTest {
         observeCurrentPeriodBoundaryUseCase,
         clearEarlyFinishStateUseCase,
         persistBudgetSettingsUseCase,
+        walletBalanceRepository,
         errorLogRecorder,
         application = mockk(relaxed = true),
     )

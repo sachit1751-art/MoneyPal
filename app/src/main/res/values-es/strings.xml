@@ -478,6 +478,14 @@
     <string name="report_export_subject">Informe de MoneyPal — %1$s</string>
     <string name="report_export_success">Informe PDF listo para compartir</string>
     <string name="report_export_failed">No se pudo generar el informe</string>
+
+    <!-- Plan 043: cash on hand -->
+    <string name="cash_on_hand_title">Efectivo en mano</string>
+    <string name="cash_on_hand_edit_hint">Toca para definir el saldo inicial</string>
+    <string name="cash_balance_dialog_title">Saldo de efectivo</string>
+    <string name="cash_balance_dialog_message">Introduce lo que realmente hay en tu cartera — esto resincroniza el saldo. Si lo borras, se desactiva el seguimiento de efectivo.</string>
+    <string name="cash_balance_dialog_save">Guardar</string>
+    <string name="cash_balance_dialog_clear">Desactivar</string>
     <string name="forecast_title">Previsión de gasto</string>
     <string name="forecast_on_pace_line">En ritmo — gastando al %1$d%% de tu presupuesto diario</string>
     <string name="forecast_over_pace_line">Excederás %1$s para el %2$s</string>

@@ -9,12 +9,14 @@ import com.sachit.moneypal.data.local.dao.CategoryDao
 import com.sachit.moneypal.data.local.dao.PaidRecurrentOccurrenceDao
 import com.sachit.moneypal.data.local.dao.QueuedTransactionDao
 import com.sachit.moneypal.data.local.dao.TransactionDao
+import com.sachit.moneypal.data.local.dao.WalletBalanceDao
 import com.sachit.moneypal.data.local.entity.ArchivedBudgetEntity
 import com.sachit.moneypal.data.local.entity.BudgetSettingsEntity
 import com.sachit.moneypal.data.local.entity.CategoryEntity
 import com.sachit.moneypal.data.local.entity.PaidRecurrentOccurrenceEntity
 import com.sachit.moneypal.data.local.entity.QueuedTransactionEntity
 import com.sachit.moneypal.data.local.entity.TransactionEntity
+import com.sachit.moneypal.data.local.entity.WalletBalanceEntity
 
 @Database(
     entities = [
@@ -23,9 +25,10 @@ import com.sachit.moneypal.data.local.entity.TransactionEntity
         CategoryEntity::class,
         QueuedTransactionEntity::class,
         ArchivedBudgetEntity::class,
-        PaidRecurrentOccurrenceEntity::class
+        PaidRecurrentOccurrenceEntity::class,
+        WalletBalanceEntity::class
     ],
-    version = 23,
+    version = 24,
     autoMigrations = [
         AutoMigration(from = 16, to = 17),
         AutoMigration(from = 17, to = 18),
@@ -33,7 +36,8 @@ import com.sachit.moneypal.data.local.entity.TransactionEntity
         AutoMigration(from = 19, to = 20),
         AutoMigration(from = 20, to = 21),
         AutoMigration(from = 21, to = 22),
-        AutoMigration(from = 22, to = 23)
+        AutoMigration(from = 22, to = 23),
+        AutoMigration(from = 23, to = 24)
     ],
     exportSchema = true
 )
@@ -50,6 +54,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun queuedTransactionDao(): QueuedTransactionDao
 
     abstract fun paidRecurrentOccurrenceDao(): PaidRecurrentOccurrenceDao
+
+    abstract fun walletBalanceDao(): WalletBalanceDao
 
     companion object {
         const val DATABASE_NAME = "minus_budget.db"

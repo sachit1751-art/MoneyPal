@@ -478,6 +478,14 @@
     <string name="report_export_subject">Rapport MoneyPal — %1$s</string>
     <string name="report_export_success">Rapport PDF prêt à partager</string>
     <string name="report_export_failed">Impossible de générer le rapport</string>
+
+    <!-- Plan 043: cash on hand -->
+    <string name="cash_on_hand_title">Espèces en main</string>
+    <string name="cash_on_hand_edit_hint">Toucher pour définir le solde de départ</string>
+    <string name="cash_balance_dialog_title">Solde en espèces</string>
+    <string name="cash_balance_dialog_message">Saisis ce que ton portefeuille contient réellement — cela resynchronise le solde. Le effacer désactive le suivi des espèces.</string>
+    <string name="cash_balance_dialog_save">Enregistrer</string>
+    <string name="cash_balance_dialog_clear">Désactiver</string>
     <string name="forecast_title">Prévision de dépenses</string>
     <string name="forecast_on_pace_line">Dans le rythme — dépenses à %1$d%% de votre budget quotidien</string>
     <string name="forecast_over_pace_line">Dépassement de %1$s d\'ici le %2$s</string>

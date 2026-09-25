@@ -161,12 +161,16 @@ data class AnalyticsState(
     val savingsGoalProgress: com.sachit.moneypal.domain.calculator.SavingsGoalProgress? = null,
     /** Burn-rate forecast card input (plan 018); null = hide the card. */
     val burnRateForecast: com.sachit.moneypal.presentation.ui.analytics.util.BurnRateForecastUiModel? = null,
+    /** Cash/wallet balance (plan 043); null when the feature is not configured. */
+    val cashOnHand: java.math.BigDecimal? = null,
 )
 
 data class AnalyticsActions(
     val onCreateNewPeriod: () -> Unit = {},
     val onClose: () -> Unit = {},
     val onExportCSV: () -> Unit = {},
+    val onSetCashStartingBalance: (java.math.BigDecimal) -> Unit = {},
+    val onClearCashStartingBalance: () -> Unit = {},
     val onMarkCreditPaid: () -> Unit = {},
     val onPayTransactionClick: (Long) -> Unit = {},
     val onCutoffDayChanged: (Int) -> Unit = {},
@@ -471,6 +475,17 @@ fun Analytics(
                             SavingsGoalProgressSection(
                                 progress = goal,
                                 currency = state.currencyCode,
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                            )
+                        }
+
+                        state.cashOnHand?.let { cash ->
+                            Spacer(modifier = Modifier.height(12.dp))
+                            CashOnHandCard(
+                                balance = cash,
+                                currency = state.currencyCode,
+                                onSetStartingBalance = actions.onSetCashStartingBalance,
+                                onClearStartingBalance = actions.onClearCashStartingBalance,
                                 modifier = Modifier.padding(horizontal = 16.dp),
                             )
                         }

@@ -49,6 +49,8 @@ data class AnalyticsUiState(
     val rolloverAmount: BigDecimal = BigDecimal.ZERO,
     val rolloverCarryForward: Boolean = false,
     val graphGranularity: GraphGranularity = GraphGranularity.DAYS,
+    /** Derived wallet balance (plan 043); null when cash tracking is off. */
+    val cashOnHand: java.math.BigDecimal? = null,
 )
 
 sealed interface AnalyticsUiEffect {
@@ -64,6 +66,7 @@ class AnalyticsViewModel @Inject constructor(
     private val observeCurrentPeriodBoundaryUseCase: ObserveCurrentPeriodBoundaryUseCase,
     private val clearEarlyFinishStateUseCase: ClearEarlyFinishStateUseCase,
     private val persistBudgetSettingsUseCase: PersistBudgetSettingsUseCase,
+    private val walletBalanceRepository: com.sachit.moneypal.data.repository.WalletBalanceRepository,
     private val errorLogRecorder: ErrorLogRecorder,
     private val application: dagger.Lazy<android.app.Application>,
 ) : ViewModel() {
@@ -73,6 +76,7 @@ class AnalyticsViewModel @Inject constructor(
 
     private val noSpendStreakCalculator = com.sachit.moneypal.domain.calculator.NoSpendStreakCalculator()
     private val envelopeCalculator = com.sachit.moneypal.domain.calculator.EnvelopeCalculator()
+    private val cashBalanceCalculator = com.sachit.moneypal.domain.calculator.CashBalanceCalculator()
 
     val uiState: StateFlow<AnalyticsUiState> = combine(
         budgetRepository.getBudgetSettings().distinctUntilChanged(),
@@ -86,6 +90,7 @@ class AnalyticsViewModel @Inject constructor(
         _selectedPeriodId,
         budgetRepository.getAllCategories().distinctUntilChanged(),
         budgetRepository.getPaidRecurrentOccurrences().distinctUntilChanged(),
+        walletBalanceRepository.observeStartingBalance().distinctUntilChanged(),
     ) { args: Array<Any?> ->
         try {
             val settings = args[0] as BudgetSettings?
@@ -99,6 +104,7 @@ class AnalyticsViewModel @Inject constructor(
             val selectedPeriodId = args[8] as Long?
             val allCategories = args[9] as List<Category>
             val paidOccurrences = args[10] as Set<PaidRecurrentOccurrence>
+            val cashStartingBalance = args[11] as java.math.BigDecimal?
 
             val currentPeriodId = periodBoundary.second
             val reconstructedArchives = reconstructHistory(transactions, archives, settings, paidOccurrences)
@@ -142,7 +148,10 @@ class AnalyticsViewModel @Inject constructor(
                 rolloverAmount = rollover.first,
                 rolloverCarryForward = rollover.second,
                 graphGranularity = granularity,
-                displayState = displayState
+                displayState = displayState,
+                cashOnHand = cashStartingBalance?.let {
+                    cashBalanceCalculator.currentBalance(it, transactions)
+                },
             )
         } catch (e: CancellationException) {
             throw e
@@ -617,6 +626,20 @@ class AnalyticsViewModel @Inject constructor(
 
     fun onGranularityChanged(granularity: GraphGranularity) {
         _granularity.value = granularity
+    }
+
+    /** Plan 043: set/re-sync the wallet starting balance from the cash card. */
+    fun onSetCashStartingBalance(value: java.math.BigDecimal) {
+        viewModelScope.launch {
+            walletBalanceRepository.setStartingBalance(value)
+        }
+    }
+
+    /** Plan 043: turn cash tracking off. */
+    fun onClearCashStartingBalance() {
+        viewModelScope.launch {
+            walletBalanceRepository.clearStartingBalance()
+        }
     }
 
     /**

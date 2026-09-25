@@ -87,6 +87,12 @@ fun AnalyticsScreen(
             onShareReport = {
                 viewModel.onShareReport(com.sachit.moneypal.domain.report.ReportScope.MONTHLY)
             },
+            onSetCashStartingBalance = { value ->
+                viewModel.onSetCashStartingBalance(value)
+            },
+            onClearCashStartingBalance = {
+                viewModel.onClearCashStartingBalance()
+            },
         ),
         activityResultRegistryOwner = activityResultRegistryOwner,
     )

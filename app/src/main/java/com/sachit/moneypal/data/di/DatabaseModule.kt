@@ -10,6 +10,7 @@ import com.sachit.moneypal.data.local.dao.CategoryDao
 import com.sachit.moneypal.data.local.dao.PaidRecurrentOccurrenceDao
 import com.sachit.moneypal.data.local.dao.QueuedTransactionDao
 import com.sachit.moneypal.data.local.dao.TransactionDao
+import com.sachit.moneypal.data.local.dao.WalletBalanceDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -71,5 +72,10 @@ object DatabaseModule {
     @Provides
     fun providePaidRecurrentOccurrenceDao(database: AppDatabase): PaidRecurrentOccurrenceDao {
         return database.paidRecurrentOccurrenceDao()
+    }
+
+    @Provides
+    fun provideWalletBalanceDao(database: AppDatabase): WalletBalanceDao {
+        return database.walletBalanceDao()
     }
 }

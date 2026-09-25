@@ -769,6 +769,14 @@
     <string name="report_export_success">Report PDF ready to share</string>
     <string name="report_export_failed">Could not generate the report</string>
 
+    <!-- Plan 043: cash on hand -->
+    <string name="cash_on_hand_title">Cash on hand</string>
+    <string name="cash_on_hand_edit_hint">Tap to set starting balance</string>
+    <string name="cash_balance_dialog_title">Cash balance</string>
+    <string name="cash_balance_dialog_message">Enter what your wallet actually holds — this re-syncs the balance. Clearing it turns cash tracking off.</string>
+    <string name="cash_balance_dialog_save">Save</string>
+    <string name="cash_balance_dialog_clear">Turn off</string>
+
     <!-- Shortcut -->
     <string name="shortcut_add_expense_short_label">Add expense</string>
     <string name="shortcut_add_expense_long_label">Log a new expense</string>
