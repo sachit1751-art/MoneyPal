@@ -29,6 +29,7 @@ import com.sachit.moneypal.presentation.ui.settings.SettingsScreen
 import com.sachit.moneypal.presentation.ui.settings.SettingsViewModel
 import com.sachit.moneypal.presentation.ui.settings.appearance.AppearanceOptionsScreen
 import com.sachit.moneypal.presentation.ui.settings.bugreport.BugReportScreen
+import com.sachit.moneypal.presentation.ui.settings.datahealth.DataHealthScreen
 import logcat.logcat
 
 private const val TAG = "SACHIT:AppNavGraph"
@@ -152,6 +153,9 @@ fun AppNavGraph(
                 onNavigateToAppearance = {
                     navController.navigate(Screen.Appearance.route)
                 },
+                onNavigateToDataHealth = {
+                    navController.navigate(Screen.DataHealth.route)
+                },
                 onNavigateBack = {
                     navController.popBackStack()
                 },
@@ -185,6 +189,16 @@ fun AppNavGraph(
             ChangelogHistoryScreen(
                 releases = releases,
                 onBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(Screen.DataHealth.route) {
+            logcat(tag) { "Navigating to DataHealth" }
+
+            DataHealthScreen(
+                onBack = {
+                    navController.popBackStack()
+                },
             )
         }
 

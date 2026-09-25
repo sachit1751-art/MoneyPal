@@ -705,4 +705,24 @@
     <string name="widget_min_max_spent_title">Gasto mín/máx</string>
     <string name="widget_month_heatmap_title">Mapa de calor mensual</string>
     <string name="widget_complete_budget_description">Rastrea gastos, presupuesto total y días restantes — con adición rápida para un nuevo gasto</string>
+
+    <!-- Panel de salud de datos (plan 049) -->
+    <string name="data_health_title">Salud de los datos</string>
+    <string name="data_health_back_cd">Atrás</string>
+    <string name="data_health_issues_found">Problemas encontrados</string>
+    <string name="data_health_issue_missing_attachments">%1$d recibos ya no están en este dispositivo</string>
+    <string name="data_health_issue_duplicate_ids">%1$d transacciones comparten un id duplicado</string>
+    <string name="data_health_overview_title">Resumen</string>
+    <string name="data_health_total_transactions">Transacciones totales</string>
+    <string name="data_health_income_count">Entradas de ingresos</string>
+    <string name="data_health_expense_count">Entradas de gastos</string>
+    <string name="data_health_sms_captured">Capturados por SMS bancario</string>
+    <string name="data_health_median_confidence">Confianza mediana de SMS</string>
+    <string name="data_health_no_sms_value">—</string>
+    <string name="data_health_attachments">Adjuntos de recibos</string>
+    <string name="data_health_oldest_entry">Entrada más antigua</string>
+    <string name="data_health_no_entries">—</string>
+    <string name="data_health_load_failed">No se pudo cargar el informe de salud de datos</string>
+    <string name="settings_data_health_title">Salud de los datos</string>
+    <string name="settings_data_health_subtitle">Resumen de tu registro: marca recibos faltantes e ids duplicados</string>
 </resources>

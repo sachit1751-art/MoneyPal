@@ -986,4 +986,24 @@
 
     <!-- Share report -->
     <string name="share_report_cd">Share spending report</string>
+
+    <!-- Data health dashboard (plan 049) -->
+    <string name="data_health_title">Data health</string>
+    <string name="data_health_back_cd">Back</string>
+    <string name="data_health_issues_found">Issues found</string>
+    <string name="data_health_issue_missing_attachments">%1$d receipts no longer on this device</string>
+    <string name="data_health_issue_duplicate_ids">%1$d transactions share a duplicate id</string>
+    <string name="data_health_overview_title">Overview</string>
+    <string name="data_health_total_transactions">Total transactions</string>
+    <string name="data_health_income_count">Income entries</string>
+    <string name="data_health_expense_count">Expense entries</string>
+    <string name="data_health_sms_captured">Captured from bank SMS</string>
+    <string name="data_health_median_confidence">Median SMS confidence</string>
+    <string name="data_health_no_sms_value">—</string>
+    <string name="data_health_attachments">Receipt attachments</string>
+    <string name="data_health_oldest_entry">Oldest entry</string>
+    <string name="data_health_no_entries">—</string>
+    <string name="data_health_load_failed">Couldn\'t load the data health report</string>
+    <string name="settings_data_health_title">Data health</string>
+    <string name="settings_data_health_subtitle">Overview of your ledger — flags missing receipts and duplicate ids</string>
 </resources>

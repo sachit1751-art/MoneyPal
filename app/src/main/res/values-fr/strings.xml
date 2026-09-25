@@ -705,4 +705,24 @@
     <string name="widget_month_heatmap_title">Carte thermique mensuelle</string>
     <string name="widget_complete_budget_description">Suivez vos dépenses, le budget total et les jours restants — avec une fonction d\'ajout rapide pour une nouvelle dépense.</string>
     <string name="budget_graph_view_mode_cumulative">Tendance</string>
+
+    <!-- Tableau de bord de santé des données (plan 049) -->
+    <string name="data_health_title">Santé des données</string>
+    <string name="data_health_back_cd">Retour</string>
+    <string name="data_health_issues_found">Problèmes détectés</string>
+    <string name="data_health_issue_missing_attachments">%1$d reçus ne sont plus sur cet appareil</string>
+    <string name="data_health_issue_duplicate_ids">%1$d transactions partagent un identifiant dupliqué</string>
+    <string name="data_health_overview_title">Aperçu</string>
+    <string name="data_health_total_transactions">Transactions totales</string>
+    <string name="data_health_income_count">Entrées de revenus</string>
+    <string name="data_health_expense_count">Entrées de dépenses</string>
+    <string name="data_health_sms_captured">Capturés par SMS bancaire</string>
+    <string name="data_health_median_confidence">Confiance SMS médiane</string>
+    <string name="data_health_no_sms_value">—</string>
+    <string name="data_health_attachments">Pièces jointes de reçus</string>
+    <string name="data_health_oldest_entry">Entrée la plus ancienne</string>
+    <string name="data_health_no_entries">—</string>
+    <string name="data_health_load_failed">Impossible de charger le rapport de santé des données</string>
+    <string name="settings_data_health_title">Santé des données</string>
+    <string name="settings_data_health_subtitle">Aperçu de votre registre : signale les reçus manquants et les identifiants dupliqués</string>
 </resources>

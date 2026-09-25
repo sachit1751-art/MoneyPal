@@ -20,6 +20,7 @@ fun SettingsScreen(
     onNavigateToBugReport: () -> Unit,
     onNavigateToChangelog: () -> Unit = {},
     onNavigateToAppearance: () -> Unit = {},
+    onNavigateToDataHealth: () -> Unit = {},
     onNavigateBack: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
@@ -224,6 +225,7 @@ fun SettingsScreen(
         onBugReportClick = viewModel::onBugReportClick,
         onNavigateToChangelog = onNavigateToChangelog,
         onNavigateToAppearance = onNavigateToAppearance,
+        onNavigateToDataHealth = onNavigateToDataHealth,
         onBack = viewModel::onBack,
     )
 }

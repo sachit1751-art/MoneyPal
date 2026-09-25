@@ -38,6 +38,7 @@ import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.HealthAndSafety
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Publish
 import androidx.compose.material.icons.filled.QuestionMark
@@ -218,6 +219,7 @@ fun Settings(
     onBugReportClick: () -> Unit = {},
     onNavigateToChangelog: () -> Unit = {},
     onNavigateToAppearance: () -> Unit = {},
+    onNavigateToDataHealth: () -> Unit = {},
     onBack: () -> Unit = {},
 ) {
     var showRecurrentPaymentsViewModeDialog by remember { mutableStateOf(false) }
@@ -316,6 +318,44 @@ fun Settings(
                     }
                 }
             }
+            item(key = "settings_data_health_section") {
+                PaddedListGroup(
+                    title = stringResource(R.string.settings_data_health_title)
+                ) {
+                    CustomPaddedListItem(
+                        onClick = {
+                            onNavigateToDataHealth()
+                            view.weakHapticFeedback()
+                        },
+                        position = PaddedListItemPosition.First,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.HealthAndSafety,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.settings_data_health_title),
+                                style = MaterialTheme.typography.bodyMediumEmphasized,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = stringResource(R.string.settings_data_health_subtitle),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+
             item {
                 PaddedListGroup(
                     title = stringResource(R.string.settings_section_appearance)

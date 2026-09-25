@@ -165,4 +165,38 @@ interface TransactionDao {
     /** Pauses (stamps the time) or resumes (clears) a recurring expense — plan 008. */
     @Query("UPDATE transactions SET pausedAtEpochMs = :pausedAt WHERE id = :transactionId")
     suspend fun setPaused(transactionId: Long, pausedAt: Long?)
+
+    // ---- Data health dashboard (plan 049): count-only scans.
+    // No isDeleted column exists — deletions are hard deletes, so every
+    // stored row is live.
+
+    @Query("SELECT COUNT(*) FROM transactions")
+    suspend fun countActive(): Int
+
+    @Query("SELECT COUNT(*) FROM transactions WHERE isIncome = 1")
+    suspend fun countIncome(): Int
+
+    @Query("SELECT COUNT(*) FROM transactions WHERE source = 'sms'")
+    suspend fun countSmsCaptured(): Int
+
+    @Query("SELECT captureConfidence FROM transactions WHERE source = 'sms' AND captureConfidence IS NOT NULL")
+    suspend fun smsConfidences(): List<Int>
+
+    @Query("SELECT COUNT(*) FROM transactions WHERE attachmentUri IS NOT NULL")
+    suspend fun countWithAttachment(): Int
+
+    @Query("SELECT attachmentUri FROM transactions WHERE attachmentUri IS NOT NULL")
+    suspend fun attachmentUris(): List<String>
+
+    @Query("SELECT MIN(date) FROM transactions")
+    suspend fun oldestDateMillis(): Long?
+
+    @Query("""
+        SELECT COUNT(*) FROM (
+            SELECT clientGeneratedId FROM transactions
+            WHERE clientGeneratedId IS NOT NULL
+            GROUP BY clientGeneratedId HAVING COUNT(*) > 1
+        )
+    """)
+    suspend fun countDuplicateClientGeneratedIds(): Int
 }
