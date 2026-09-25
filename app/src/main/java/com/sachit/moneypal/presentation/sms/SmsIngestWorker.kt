@@ -47,6 +47,10 @@ class SmsIngestWorker @AssistedInject constructor(
                 }
 
                 ProcessIncomingSmsUseCase.Result.Ignored -> Result.success()
+                is ProcessIncomingSmsUseCase.Result.Muted -> {
+                    // Muted sender (plan 048): completed skip, never retried.
+                    Result.success()
+                }
                 is ProcessIncomingSmsUseCase.Result.Error -> {
                     logcat(TAG) { "Ingest error: ${result.reason}" }
                     // Only insert failures are safe to retry (nothing was inserted).

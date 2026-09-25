@@ -787,6 +787,9 @@
     <!-- Plan 047: subscription price change -->
     <string name="price_change_badge">Price changed %1$s → %2$s</string>
 
+    <!-- Plan 048: muted SMS senders -->
+    <string name="settings_muted_sender_subtitle">Muted — tap to receive captures from this sender again</string>
+
     <!-- Shortcut -->
     <string name="shortcut_add_expense_short_label">Add expense</string>
     <string name="shortcut_add_expense_long_label">Log a new expense</string>

@@ -54,6 +54,13 @@ class ProcessIncomingSmsUseCase @Inject constructor(
         /** Not a money SMS, duplicate, or feature disabled. */
         data object Ignored : Result
 
+        /**
+         * Sender is on the user's mute list (plan 048) — deliberately distinct
+         * from [Ignored] so workers report a *completed* skip (not a retryable
+         * error) while logs stay attributable. No parse, no insert.
+         */
+        data class Muted(val sender: String) : Result
+
         data class Error(val reason: String) : Result
     }
 
@@ -65,6 +72,12 @@ class ProcessIncomingSmsUseCase @Inject constructor(
         val settings = settingsRepository.getSettings()
         if (!settings.smsCaptureEnabled) {
             return Result.Ignored
+        }
+
+        // Plan 048: per-sender mute gate — before parsing, case-insensitively.
+        if (settings.mutedSmsSenders.any { it.equals(sender, ignoreCase = true) }) {
+            logcat(TAG) { "SMS from muted sender skipped: $sender" }
+            return Result.Muted(sender)
         }
 
         val match: BankSmsMatch = BankSmsParser.parse(sender, body, timestampMillis)

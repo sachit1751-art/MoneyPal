@@ -188,6 +188,8 @@ fun SettingsScreen(
         smsCaptureEnabled = uiState.smsCaptureEnabled,
         smsPermissionGranted = uiState.smsPermissionGranted,
         onSmsCaptureToggle = viewModel::onSmsCaptureToggle,
+        mutedSmsSenders = uiState.mutedSmsSenders,
+        onUnmuteSmsSender = viewModel::onUnmuteSmsSender,
         onRequestSmsPermission = {
             smsPermissionLauncher.launch(
                 arrayOf(

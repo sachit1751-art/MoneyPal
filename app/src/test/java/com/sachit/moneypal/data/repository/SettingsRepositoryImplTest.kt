@@ -292,4 +292,15 @@ class SettingsRepositoryImplTest {
         repo.setNotificationQuickActions(true)
         assertThat(repo.getSettings().notificationQuickActions).isTrue()
     }
+
+    @Test
+    fun `muted sms senders default empty and round-trip`() = runTest {
+        assertThat(repo.getSettings().mutedSmsSenders).isEmpty()
+
+        repo.setMutedSmsSenders(setOf("JD-SHAM", "HDFC-BANK"))
+        assertThat(repo.getSettings().mutedSmsSenders).containsExactly("JD-SHAM", "HDFC-BANK")
+
+        repo.setMutedSmsSenders(emptySet())
+        assertThat(repo.getSettings().mutedSmsSenders).isEmpty()
+    }
 }

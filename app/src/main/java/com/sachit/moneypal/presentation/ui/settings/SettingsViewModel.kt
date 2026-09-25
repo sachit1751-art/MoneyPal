@@ -78,6 +78,7 @@ data class SettingsUiState(
     val creditCardCutoffDay: Int? = null,
     val smsCaptureEnabled: Boolean = false,
     val smsPermissionGranted: Boolean = false,
+    val mutedSmsSenders: Set<String> = emptySet(),
     val appLockEnabled: Boolean = false,
     val autoLockTimeout: AutoLockTimeout = AutoLockTimeout.IMMEDIATELY,
     val widgetsHideAmounts: Boolean = false,
@@ -159,6 +160,7 @@ class SettingsViewModel @Inject constructor(
             creditCardCutoffDay = budgetSettings?.creditCardCutoffDay,
             smsCaptureEnabled = settings.smsCaptureEnabled,
             smsPermissionGranted = smsGranted,
+            mutedSmsSenders = settings.mutedSmsSenders,
             appLockEnabled = settings.appLockEnabled,
             autoLockTimeout = settings.autoLockTimeout,
             widgetsHideAmounts = settings.widgetsHideAmounts,
@@ -209,6 +211,24 @@ class SettingsViewModel @Inject constructor(
         val newValue = !uiState.value.smsCaptureEnabled
         viewModelScope.launch {
             settingsRepository.setSmsCaptureEnabled(newValue)
+        }
+    }
+
+    /** Plan 048: un-mute a sender (remove from the mute set). */
+    fun onUnmuteSmsSender(sender: String) {
+        viewModelScope.launch {
+            settingsRepository.setMutedSmsSenders(
+                uiState.value.mutedSmsSenders - sender,
+            )
+        }
+    }
+
+    /** Plan 048: mute a sender from the review inbox / undo notification. */
+    fun onMuteSmsSender(sender: String) {
+        viewModelScope.launch {
+            settingsRepository.setMutedSmsSenders(
+                uiState.value.mutedSmsSenders + sender,
+            )
         }
     }
 

@@ -496,6 +496,9 @@
 
     <!-- Plan 047: subscription price change -->
     <string name="price_change_badge">Prix modifié %1$s → %2$s</string>
+
+    <!-- Plan 048: muted SMS senders -->
+    <string name="settings_muted_sender_subtitle">En sourdine — toucher pour recevoir à nouveau les captures de cet expéditeur</string>
     <string name="forecast_title">Prévision de dépenses</string>
     <string name="forecast_on_pace_line">Dans le rythme — dépenses à %1$d%% de votre budget quotidien</string>
     <string name="forecast_over_pace_line">Dépassement de %1$s d\'ici le %2$s</string>

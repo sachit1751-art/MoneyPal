@@ -68,6 +68,7 @@ import androidx.compose.material.icons.rounded.QuestionMark
 import androidx.compose.material.icons.rounded.Repeat
 import androidx.compose.material.icons.rounded.Savings
 import androidx.compose.material.icons.rounded.Sms
+import androidx.compose.material.icons.rounded.SmsFailed
 import androidx.compose.material.icons.rounded.Sell
 import androidx.compose.material.icons.rounded.TipsAndUpdates
 import androidx.compose.material.icons.rounded.YoutubeSearchedFor
@@ -191,6 +192,8 @@ fun Settings(
     smsCaptureEnabled: Boolean = false,
     smsPermissionGranted: Boolean = false,
     onSmsCaptureToggle: () -> Unit = {},
+    mutedSmsSenders: Set<String> = emptySet(),
+    onUnmuteSmsSender: (String) -> Unit = {},
     onRequestSmsPermission: () -> Unit = {},
     onOpenSmsAppSettings: () -> Unit = {},
     appLockEnabled: Boolean = false,
@@ -919,7 +922,7 @@ fun Settings(
                     if (smsCaptureEnabled && !smsPermissionGranted) {
                         CustomPaddedListItem(
                             onClick = onOpenSmsAppSettings,
-                            position = PaddedListItemPosition.Last,
+                            position = if (mutedSmsSenders.isEmpty()) PaddedListItemPosition.Last else PaddedListItemPosition.Middle,
                             modifier = Modifier.testTag("SettingsSmsPermissionItem")
                         ) {
                             Icon(
@@ -936,6 +939,40 @@ fun Settings(
                                 )
                                 Text(
                                     text = stringResource(R.string.settings_sms_permission_subtitle),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                    mutedSmsSenders.sorted().forEachIndexed { index, sender ->
+                        val position = when {
+                            index < mutedSmsSenders.size - 1 || (smsCaptureEnabled && !smsPermissionGranted) ->
+                                PaddedListItemPosition.Middle
+
+                            mutedSmsSenders.size == 1 && !(smsCaptureEnabled && !smsPermissionGranted) ->
+                                PaddedListItemPosition.Single
+
+                            else -> PaddedListItemPosition.Last
+                        }
+                        CustomPaddedListItem(
+                            onClick = { onUnmuteSmsSender(sender) },
+                            position = position,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.SmsFailed,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = sender,
+                                    style = MaterialTheme.typography.bodyMediumEmphasized,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = stringResource(R.string.settings_muted_sender_subtitle),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )

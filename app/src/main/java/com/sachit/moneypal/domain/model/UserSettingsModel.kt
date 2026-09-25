@@ -42,6 +42,8 @@ data class UserSettings(
     val widgetsHideAmounts: Boolean = false,
     /** Mark-paid/snooze action buttons on recurring-payment reminders (plan 045). */
     val notificationQuickActions: Boolean = true,
+    /** Senders whose SMS never get parsed (plan 048); compared case-insensitively. */
+    val mutedSmsSenders: Set<String> = emptySet(),
     /** Opt-in weekly digest notification (plan 003). */
     val weeklyDigestEnabled: Boolean = false,
     /** Opt-in weekly refund nudge (plan 017). */

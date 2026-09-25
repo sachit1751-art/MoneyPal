@@ -65,6 +65,32 @@ class ProcessIncomingSmsUseCaseTest {
     }
 
     @Test
+    fun `muted sender short-circuits before parsing`() = runTest {
+        coEvery { settingsRepository.getSettings() } returns UserSettings(
+            smsCaptureEnabled = true,
+            mutedSmsSenders = setOf("JD-SHAM"),
+        )
+
+        val result = useCase("JD-SHAM", "Your a/c XX1234 is debited for Rs 500", ts)
+
+        assertThat(result).isInstanceOf(ProcessIncomingSmsUseCase.Result.Muted::class.java)
+        coVerify(exactly = 0) { budgetRepository.addTransaction(any()) }
+    }
+
+    @Test
+    fun `muted sender match is case-insensitive`() = runTest {
+        coEvery { settingsRepository.getSettings() } returns UserSettings(
+            smsCaptureEnabled = true,
+            mutedSmsSenders = setOf("hdfc-bank"),
+        )
+
+        val result = useCase("HDFC-BANK", "Your a/c XX1234 is debited for Rs 500", ts)
+
+        assertThat(result).isInstanceOf(ProcessIncomingSmsUseCase.Result.Muted::class.java)
+        coVerify(exactly = 0) { budgetRepository.addTransaction(any()) }
+    }
+
+    @Test
     fun `debit inserts expense with sender as comment`() = runTest {
         val result = useCase("HDFC-BANK", "Your a/c XX1234 is debited for Rs 500", ts)
 

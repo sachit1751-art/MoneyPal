@@ -69,6 +69,9 @@ interface SettingsRepository {
     /** Mark-paid/snooze action buttons on recurring-payment reminders (plan 045). */
     suspend fun setNotificationQuickActions(enabled: Boolean)
 
+    /** Per-sender SMS capture mute list (plan 048). */
+    suspend fun setMutedSmsSenders(senders: Set<String>)
+
     /** Opt-in weekly digest notification (plan 003). */
     suspend fun setWeeklyDigestEnabled(enabled: Boolean)
 
