@@ -163,6 +163,8 @@ data class AnalyticsState(
     val burnRateForecast: com.sachit.moneypal.presentation.ui.analytics.util.BurnRateForecastUiModel? = null,
     /** Cash/wallet balance (plan 043); null when the feature is not configured. */
     val cashOnHand: java.math.BigDecimal? = null,
+    /** Income vs spend comparison (plan 046); null when the period had neither. */
+    val incomeSpendComparison: com.sachit.moneypal.domain.calculator.IncomeSpendComparison? = null,
 )
 
 data class AnalyticsActions(
@@ -486,6 +488,15 @@ fun Analytics(
                                 currency = state.currencyCode,
                                 onSetStartingBalance = actions.onSetCashStartingBalance,
                                 onClearStartingBalance = actions.onClearCashStartingBalance,
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                            )
+                        }
+
+                        state.incomeSpendComparison?.let { comparison ->
+                            Spacer(modifier = Modifier.height(12.dp))
+                            IncomeSpendCard(
+                                comparison = comparison,
+                                currency = state.currencyCode,
                                 modifier = Modifier.padding(horizontal = 16.dp),
                             )
                         }

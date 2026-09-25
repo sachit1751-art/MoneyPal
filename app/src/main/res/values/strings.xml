@@ -777,6 +777,13 @@
     <string name="cash_balance_dialog_save">Save</string>
     <string name="cash_balance_dialog_clear">Turn off</string>
 
+    <!-- Plan 046: income vs spend -->
+    <string name="income_spend_card_title">Income vs spend</string>
+    <string name="income_spend_card_spent">Spent</string>
+    <string name="income_spend_card_income">Income</string>
+    <string name="income_spend_card_savings_rate">Savings rate: %1$s%%</string>
+    <string name="income_spend_card_delta">%1$s %2$s%% vs last period</string>
+
     <!-- Shortcut -->
     <string name="shortcut_add_expense_short_label">Add expense</string>
     <string name="shortcut_add_expense_long_label">Log a new expense</string>

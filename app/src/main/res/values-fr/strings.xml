@@ -486,6 +486,13 @@
     <string name="cash_balance_dialog_message">Saisis ce que ton portefeuille contient réellement — cela resynchronise le solde. Le effacer désactive le suivi des espèces.</string>
     <string name="cash_balance_dialog_save">Enregistrer</string>
     <string name="cash_balance_dialog_clear">Désactiver</string>
+
+    <!-- Plan 046: income vs spend -->
+    <string name="income_spend_card_title">Revenus vs dépenses</string>
+    <string name="income_spend_card_spent">Dépensé</string>
+    <string name="income_spend_card_income">Revenus</string>
+    <string name="income_spend_card_savings_rate">Taux d\'épargne : %1$s%%</string>
+    <string name="income_spend_card_delta">%1$s %2$s%% par rapport à la période précédente</string>
     <string name="forecast_title">Prévision de dépenses</string>
     <string name="forecast_on_pace_line">Dans le rythme — dépenses à %1$d%% de votre budget quotidien</string>
     <string name="forecast_over_pace_line">Dépassement de %1$s d\'ici le %2$s</string>

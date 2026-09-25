@@ -77,6 +77,7 @@ class AnalyticsViewModel @Inject constructor(
     private val noSpendStreakCalculator = com.sachit.moneypal.domain.calculator.NoSpendStreakCalculator()
     private val envelopeCalculator = com.sachit.moneypal.domain.calculator.EnvelopeCalculator()
     private val cashBalanceCalculator = com.sachit.moneypal.domain.calculator.CashBalanceCalculator()
+    private val incomeSpendCalculator = com.sachit.moneypal.domain.calculator.IncomeSpendComparisonCalculator()
 
     val uiState: StateFlow<AnalyticsUiState> = combine(
         budgetRepository.getBudgetSettings().distinctUntilChanged(),
@@ -458,6 +459,14 @@ class AnalyticsViewModel @Inject constructor(
                 userSettings = userSettings,
                 today = today,
             ),
+            incomeSpendComparison = incomeSpendCalculator.compute(
+                currentPeriodTransactions = allTransactions,
+                previousPeriodTransactions = allTransactions,
+                periodStart = settings.startDate,
+                periodEnd = settings.getPeriodEndDate(),
+            ).takeIf { cmp ->
+                cmp.totalSpend.signum() > 0 || cmp.totalIncome.signum() > 0
+            },
         )
     }
 
