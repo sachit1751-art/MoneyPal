@@ -784,6 +784,9 @@
     <string name="income_spend_card_savings_rate">Savings rate: %1$s%%</string>
     <string name="income_spend_card_delta">%1$s %2$s%% vs last period</string>
 
+    <!-- Plan 047: subscription price change -->
+    <string name="price_change_badge">Price changed %1$s → %2$s</string>
+
     <!-- Shortcut -->
     <string name="shortcut_add_expense_short_label">Add expense</string>
     <string name="shortcut_add_expense_long_label">Log a new expense</string>

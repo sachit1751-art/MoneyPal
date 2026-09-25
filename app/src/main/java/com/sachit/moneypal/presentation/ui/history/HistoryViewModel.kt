@@ -442,6 +442,7 @@ class HistoryViewModel @Inject constructor(
             today = today,
             paidOccurrences = paidOccurrences,
             linkedTemplateIds = linkedTemplateIds,
+            occurrenceCharges = displayTx.filter { it.sourceTransactionId != null },
         ).let { (inPeriod, outOfPeriod) -> withPaidCycles(inPeriod) to withPaidCycles(outOfPeriod) }
 
         val categoryNames = categories.associate { it.id to it.name }

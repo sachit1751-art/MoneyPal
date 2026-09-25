@@ -55,8 +55,16 @@ internal fun buildUpcomingRecurrentItems(
     paidOccurrences: Set<PaidRecurrentOccurrence> = emptySet(),
     /** Template ids with ≥1 linked ad-hoc row inside that cycle's window (plan 016). */
     linkedTemplateIds: Set<Long> = emptySet(),
+    /** Settled occurrence charges used for price-change detection (plan 047). */
+    occurrenceCharges: List<Transaction> = emptyList(),
 ): Pair<List<UpcomingRecurrentItem>, List<UpcomingRecurrentItem>> {
     val recurrentTransactions = transactions.filter { it.isRecurrent }
+
+    // Plan 047: detect price changes per template from its occurrence charges.
+    val priceChangeDetector = com.sachit.moneypal.domain.calculator.PriceChangeDetector()
+    val priceChangesById = recurrentTransactions.mapNotNull { template ->
+        priceChangeDetector.detect(template, occurrenceCharges)?.let { template.id to it }
+    }.toMap()
 
     val upcomingInPeriod = recurrentTransactions.mapNotNull { transaction ->
         val savedDate = transaction.date?.toLocalDate()
@@ -72,6 +80,7 @@ internal fun buildUpcomingRecurrentItems(
                     transaction = transaction,
                     nextChargeDate = date,
                     isInCurrentPeriod = true,
+                    priceChange = priceChangesById[transaction.id],
                 )
             } else {
                 null
@@ -88,6 +97,7 @@ internal fun buildUpcomingRecurrentItems(
                     transaction = transaction,
                     nextChargeDate = nextDate,
                     isInCurrentPeriod = false,
+                    priceChange = priceChangesById[transaction.id],
                 )
             } else {
                 null

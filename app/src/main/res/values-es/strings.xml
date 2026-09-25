@@ -493,6 +493,9 @@
     <string name="income_spend_card_income">Ingresos</string>
     <string name="income_spend_card_savings_rate">Tasa de ahorro: %1$s%%</string>
     <string name="income_spend_card_delta">%1$s %2$s%% frente al periodo anterior</string>
+
+    <!-- Plan 047: subscription price change -->
+    <string name="price_change_badge">Precio cambiado %1$s → %2$s</string>
     <string name="forecast_title">Previsión de gasto</string>
     <string name="forecast_on_pace_line">En ritmo — gastando al %1$d%% de tu presupuesto diario</string>
     <string name="forecast_over_pace_line">Excederás %1$s para el %2$s</string>

@@ -51,6 +51,8 @@ data class UpcomingRecurrentItem(
     val isInCurrentPeriod: Boolean,
     /** Ad-hoc payments linked to this subscription this year (plan 016). */
     val paidCyclesThisYear: Int? = null,
+    /** Detected price change on this subscription (plan 047); null = none. */
+    val priceChange: com.sachit.moneypal.domain.calculator.PriceChange? = null,
 )
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalSharedTransitionApi::class)
@@ -190,6 +192,17 @@ fun UpcomingRecurrentItemRow(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f * alpha)
                             )
+                            item.priceChange?.let { change ->
+                                Text(
+                                    text = stringResource(
+                                        R.string.price_change_badge,
+                                        currencyFormat.format(change.previousAmount),
+                                        currencyFormat.format(change.newAmount),
+                                    ),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.error,
+                                )
+                            }
                             if (paidCyclesThisYear != null && paidCyclesThisYear > 0) {
                                 Text(
                                     text = stringResource(R.string.recurrent_paid_cycles, paidCyclesThisYear),

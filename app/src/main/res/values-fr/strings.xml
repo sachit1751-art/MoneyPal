@@ -493,6 +493,9 @@
     <string name="income_spend_card_income">Revenus</string>
     <string name="income_spend_card_savings_rate">Taux d\'épargne : %1$s%%</string>
     <string name="income_spend_card_delta">%1$s %2$s%% par rapport à la période précédente</string>
+
+    <!-- Plan 047: subscription price change -->
+    <string name="price_change_badge">Prix modifié %1$s → %2$s</string>
     <string name="forecast_title">Prévision de dépenses</string>
     <string name="forecast_on_pace_line">Dans le rythme — dépenses à %1$d%% de votre budget quotidien</string>
     <string name="forecast_over_pace_line">Dépassement de %1$s d\'ici le %2$s</string>
