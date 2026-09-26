@@ -30,6 +30,25 @@ val versionProps = Properties().apply {
 val appVersionName = versionProps.getProperty("VERSION_NAME") ?: "0.0.0-dev"
 val appVersionCode = versionProps.getProperty("VERSION_CODE")?.toIntOrNull() ?: 1
 
+// Release signing from keystore.properties (same contract as :app): present
+// -> signed release APKs; absent -> build still succeeds, unsigned output.
+val keystorePropsFile = rootProject.file("keystore.properties")
+val keystoreProps = Properties().apply {
+    if (keystorePropsFile.exists()) {
+        keystorePropsFile.inputStream().use { stream -> load(stream) }
+    }
+}
+val releaseStoreFile = keystoreProps.getProperty("storeFile")?.takeIf { it.isNotBlank() }
+val releaseStorePassword = keystoreProps.getProperty("storePassword")
+val releaseKeyAlias = keystoreProps.getProperty("keyAlias")
+val releaseKeyPassword = keystoreProps.getProperty("keyPassword")
+val hasReleaseSigningConfig = listOf(
+    releaseStoreFile,
+    releaseStorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword,
+).all { v -> !v.isNullOrBlank() }
+
 android {
 	namespace = "com.sachit.moneypal.wear"
 	compileSdk {
@@ -44,6 +63,17 @@ android {
 		versionName = appVersionName
 	}
 
+	signingConfigs {
+		if (hasReleaseSigningConfig) {
+			create("release") {
+				storeFile = File(releaseStoreFile!!)
+				storePassword = releaseStorePassword
+				keyAlias = releaseKeyAlias
+				keyPassword = releaseKeyPassword
+			}
+		}
+	}
+
 	buildTypes {
 		release {
 			isMinifyEnabled = false
@@ -51,6 +81,9 @@ android {
 				getDefaultProguardFile("proguard-android-optimize.txt"),
 				"proguard-rules.pro"
 			)
+			if (hasReleaseSigningConfig) {
+				signingConfig = signingConfigs.getByName("release")
+			}
 		}
 	}
 	compileOptions {
