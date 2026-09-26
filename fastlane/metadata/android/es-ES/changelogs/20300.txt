@@ -1,0 +1,16 @@
+- Nuevo: gastos capturados automáticamente desde SMS bancarios, con comercio y categoría
+- Nuevo: bandeja de revisión para capturas dudosas
+- Nuevo: silencia remitentes ruidosos desde la propia notificación
+- Nuevo: seguimiento de reembolsos con cobro en un toque y recordatorios
+- Nuevo: registro de ingresos con tarjeta de ingresos vs gastos
+- Nuevo: control del efectivo disponible
+- Nuevo: informe del periodo compartible en una página
+- Nuevo: previsión de gasto y rachas sin gastos
+- Nuevo: panel de salud de datos para revisar recibos y duplicados
+- Nuevo: marca pagadas o pospone pagos recurrentes desde la notificación
+- Nuevo: avisos de cambio de precio en suscripciones
+- Nuevo: oculta los importes en los widgets
+- Nuevo: opciones de bloqueo automático y refuerzo de privacidad
+- Nuevo: copias de seguridad cifradas, widget de meta de ahorro y montos rápidos
+- Corregido: cálculo decimal exacto del dinero, sin desvíos de redondeo
+- Corregido: copias de seguridad/restauración y notificaciones más fiables

@@ -1,0 +1,16 @@
+- New: expenses captured automatically from bank SMS, with merchant and category
+- New: review inbox for captures the app isn't sure about
+- New: mute noisy SMS senders, right from the capture notification
+- New: refund tracker with one-tap settle and weekly nudges
+- New: income tracking with an income vs spend card in Analytics
+- New: cash on hand balance tracker
+- New: shareable one-page period report
+- New: burn-rate forecast and no-spend streak insights
+- New: data health dashboard to review missing receipts and duplicates
+- New: mark paid or snooze recurring payments from the notification
+- New: price-change badges on subscriptions
+- New: hide amounts on home-screen widgets
+- New: auto-lock timeout options and privacy screen hardening
+- New: encrypted backups, savings goal widget and quick-amount presets
+- Fixed: exact decimal money math, no rounding drift
+- Fixed: more reliable backup/restore and notifications
