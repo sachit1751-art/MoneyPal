@@ -28,12 +28,10 @@
       </a>
     </td>
   </tr>
-</table>
-
-<p align="center">
-  Google Play Store and IzzyOnDroid listings are coming soon — APKs are published with each
-  release on GitHub.
-</p>
+</table>      <p align="center">
+        APKs are published signed with every release on GitHub. Google Play and IzzyOnDroid
+        listings are planned.
+      </p>
 
 <p align="center">
   <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/Android/android2.svg">
@@ -73,20 +71,19 @@
 ## Contributing
 
 Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTING.md) for more
-information.
-
-## Building from source
+information.      ## Building from source
 
 One command builds every distributable APK (foss, phone-wear flavor, watch app)
-into `dist/<version>-<sha>/` with unambiguous names:
+into `dist/<version>-<sha>/` with unambiguous, **signed** names when a
+`keystore.properties` is present (unsigned otherwise):
 
 ```bash
 scripts/build-apks.sh              # all three APKs
 scripts/build-apks.sh --with-tests # run the unit suite first, abort on failure
 ```
 
-Requires JDK 17–21 and the Android SDK (platform 36). Full prerequisites and
-manual steps: [BUILD_LOCALLY.md](BUILD_LOCALLY.md).
+Requires JDK 17–21 and the Android SDK (platform 36). Full prerequisites,
+signing setup and manual steps: [BUILD_LOCALLY.md](BUILD_LOCALLY.md).
 
 ## Translations
 

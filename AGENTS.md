@@ -67,15 +67,19 @@ scripts/build-apks.sh --with-tests # gate on the unit suite first
 
 # Instrumented E2E tests (needs a device/emulator) + Paparazzi snapshot verification
 ./gradlew :app:connectedFossDebugAndroidTest :app:verifyPaparazziFossDebug --continue
-```
+```Notes:
 
-Notes:
-
-- **Room schema renames**: exported schemas live in `app/schemas/<package>.data.local.AppDatabase/`.
-  The database is at **version 23** (plan 014 added SMS capture metadata columns).
-  If the database class package ever changes, move the `*.json` files to the new
-  folder too, or Room auto-migration generation fails with
-  `Schema 'N.json' required for migration was not found`.
+- **Room schema changes** — the database is at **version 25** (24: `wallet_balance`;
+  25: `transactions.smsSender` for the plan-048 mute actions). Bumping the
+  version requires ALL of: entity field (`@ColumnInfo(defaultValue = ...)`) →
+  domain model + repo mappers → `autoMigrations` entry in `AppDatabase` →
+  exported `app/schemas/.../<N>.json` → a `Migration` object when the
+  auto-migration needs back-fill (e.g. `MIGRATION_24_25`) **registered in
+  `DatabaseModule.addMigrations`** (a shipped-but-unregistered migration broke
+  the build once) → migration test in `AppDatabaseMigrationTest`.
+  If the database class package ever changes, move the `*.json` files to the
+  new folder too, or Room fails with `Schema 'N.json' required for migration
+  was not found`.
 - `preBuild` runs `:app:generateChangelogKotlin`, which regenerates
   `app/build/generated/source/changelog/GeneratedChangelog.kt` from
   `fastlane/metadata/android/*/changelogs/*.txt`. Commit `.txt` changelogs for
@@ -96,19 +100,45 @@ Notes:
   (`domain/sms/BankSmsParser`, generic-patterns design decided 2026-09-08 —
   do NOT switch to per-bank templates). Merchant extraction, confidence
   scoring and dedupe live in `domain/sms/`; ingestion goes through
-  `ProcessIncomingSmsUseCase` → `SmsIngestWorker`.
+  `ProcessIncomingSmsUseCase` → `SmsIngestWorker`. Per-sender muting
+  (`mutedSmsSenders` in DataStore) gates parsing; the sender is persisted on
+  the transaction (`smsSender` column) so review-inbox rows and the capture
+  notification can offer "Mute sender".
+- **Feature planning docs**: `plans/` (rounds 4–6) was removed 2026-09-26 after
+  every plan landed and its round-6 review gaps closed. Historical specs live
+  in git history; review reports in `docs/reviews/`. New planning docs may
+  recreate the directory as needed.
 
-## Releases (fastlane)
+## Releases (fastlane + local)
 
-- Version lives in `version.properties` (`VERSION_NAME`, `VERSION_CODE`).
-- `bundle exec fastlane android prep_release version_tag:v1.2.3` generates the
-  changelog `.txt` and updates version files — commit **before** tagging.
-- `publish_github` builds and publishes APKs; `deploy_play_store` uploads the
-  AAB. Play credentials are local/gitignored (`fastlane/*.json`), so a new
-  owner must supply their own before running Play lanes.
+- Version lives in `version.properties` (`VERSION_NAME`, `VERSION_CODE`);
+  versionCode = major*10000 + minor*100 + patch (2.3.0 → 20300).
+- Changelog `.txt` for the new versionCode must be committed in
+  `fastlane/metadata/android/en-US/changelogs/` (+ `es-ES`) **before** the tag
+  is pushed — the `publish_github` lane hard-fails without it (deliberate:
+  CI never regenerates changelogs).
+- Tagging `vX.Y.Z` triggers `release.yml`, which needs 4 GitHub secrets
+  (`MONEYPAL_RELEASE_KEYSTORE_BASE64`, `..._STORE_PASSWORD`, `..._KEY_ALIAS`,
+  `..._KEY_PASSWORD`). **These are currently unset** — every tagged release
+  since v2.2.0 failed at the secret-validation step; v2.1.0 was the last
+  CI-signed release.
+- Local signed releases work instead: put `keystore.properties` (gitignored)
+  in the project root and run `scripts/build-apks.sh`. Both `:app` **and**
+  `:wear` read it (the watch module gained signing in 2026-09-26; before that
+  its release APK was silently unsigned).
+- **Signing key history**: the original keystore is unavailable. v2.3.0 is
+  signed with a NEW keystore created 2026-09-26 (RSA-4096, alias `moneypal`).
+  Users on ≤ v2.1.0 must uninstall before installing (signature mismatch).
+  A backup of the keystore + `keystore.properties` is kept off-repo in the
+  maintainer's `Documents/MoneyPal-release-keystore-backup/`; the password is
+  in the maintainer's password manager. Losing both = no more updatable
+  releases on this signature.
 
 ## CI
 
 `.github/workflows/`: `pr-check.yml` (build + checks), `release.yml`
-(tagged releases), `play-store.yml` (Play upload). Play store metadata and
-listing text live under `fastlane/metadata/`.
+(tagged releases — currently failing on missing signing secrets, see
+Releases), `play-store.yml` (Play upload — also needs credentials).
+Play store metadata and listing text live under `fastlane/metadata/`.
+Until the secrets are restored, cut releases locally with
+`scripts/build-apks.sh` and attach the APKs to the GitHub Release manually.
