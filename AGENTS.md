@@ -119,9 +119,12 @@ scripts/build-apks.sh --with-tests # gate on the unit suite first
   CI never regenerates changelogs).
 - Tagging `vX.Y.Z` triggers `release.yml`, which needs 4 GitHub secrets
   (`MONEYPAL_RELEASE_KEYSTORE_BASE64`, `..._STORE_PASSWORD`, `..._KEY_ALIAS`,
-  `..._KEY_PASSWORD`). **These are currently unset** — every tagged release
-  since v2.2.0 failed at the secret-validation step; v2.1.0 was the last
-  CI-signed release.
+  `..._KEY_PASSWORD`). Set as of 2026-09-26 via
+  `scripts/set_release_secrets.py`. History: the secrets were originally
+  created under the old `MINUS_RELEASE_*` names; commit `4e2b547` renamed the
+  workflow to the `MONEYPAL_*` names without renaming the secrets, so every
+  tagged release from v2.2.0 to v2.3.0 failed validation (v2.1.0 was the last
+  release signed with the original key).
 - Local signed releases work instead: put `keystore.properties` (gitignored)
   in the project root and run `scripts/build-apks.sh`. Both `:app` **and**
   `:wear` read it (the watch module gained signing in 2026-09-26; before that
@@ -137,8 +140,6 @@ scripts/build-apks.sh --with-tests # gate on the unit suite first
 ## CI
 
 `.github/workflows/`: `pr-check.yml` (build + checks), `release.yml`
-(tagged releases — currently failing on missing signing secrets, see
-Releases), `play-store.yml` (Play upload — also needs credentials).
+(tagged releases — signing secrets restored 2026-09-26, see Releases),
+`play-store.yml` (Play upload — still needs Play credentials).
 Play store metadata and listing text live under `fastlane/metadata/`.
-Until the secrets are restored, cut releases locally with
-`scripts/build-apks.sh` and attach the APKs to the GitHub Release manually.
