@@ -87,6 +87,7 @@ import androidx.wear.compose.material.ExperimentalWearMaterialApi
 import androidx.wear.compose.material.SwipeableState
 import androidx.wear.compose.material.rememberSwipeableState
 import com.sachit.moneypal.R
+import com.sachit.moneypal.domain.datahealth.DataHealthIssue
 import com.sachit.moneypal.domain.model.BudgetPeriod
 import com.sachit.moneypal.domain.model.BudgetSettings
 import com.sachit.moneypal.domain.model.BudgetState
@@ -136,6 +137,7 @@ fun MainScreenContent(
     budgetUiState: BudgetUiState,
     actions: MainScreenActions,
     openWalletOnStart: Boolean,
+    openHistoryIssue: DataHealthIssue? = null,
     tutorialBoxState: TutorialBoxState? = null,
 ) {
     val onboardingCompleted = mainScreenState.onboardingCompleted
@@ -150,6 +152,14 @@ fun MainScreenContent(
     val topSheetState = rememberSwipeableState(TopSheetValue.HalfExpanded)
     var nightMode by remember { mutableStateOf(false) }
     var showCategoryGrid by remember { mutableStateOf(false) }
+
+    // Plan 049: arriving from the data health dashboard opens the History sheet
+    // and pre-filters it to the affected rows (one-shot via LaunchedEffect).
+    LaunchedEffect(openHistoryIssue) {
+        if (openHistoryIssue != null) {
+            runCatching { topSheetState.animateTo(TopSheetValue.Expanded) }
+        }
+    }
 
     LaunchedEffect(budgetUiState.numpadInput) {
         if (budgetUiState.numpadInput.isEmpty() && showCategoryGrid) {
@@ -332,6 +342,7 @@ fun MainScreenContent(
                     onShowCategoryGrid = { showCategoryGrid = true },
                     onHideCategoryGrid = { showCategoryGrid = false },
                     openWalletOnStart = openWalletOnStart,
+                    openHistoryIssue = openHistoryIssue,
                     quickLogSwipeModifier = quickLogSwipeModifier,
                     queueDeleteWithUndo = ::queueDeleteWithUndo,
                     cancelPendingDelete = ::cancelPendingDelete,
@@ -396,6 +407,7 @@ fun MainScreenContent(
                     onShowCategoryGrid = { showCategoryGrid = true },
                     onHideCategoryGrid = { showCategoryGrid = false },
                     openWalletOnStart = openWalletOnStart,
+                    openHistoryIssue = openHistoryIssue,
                     quickLogSwipeModifier = quickLogSwipeModifier,
                     queueDeleteWithUndo = ::queueDeleteWithUndo,
                     cancelPendingDelete = ::cancelPendingDelete,
@@ -490,6 +502,7 @@ private fun PhoneLayout(
     onShowCategoryGrid: () -> Unit,
     onHideCategoryGrid: () -> Unit,
     openWalletOnStart: Boolean,
+    openHistoryIssue: DataHealthIssue? = null,
     quickLogSwipeModifier: Modifier,
     queueDeleteWithUndo: (Transaction, String) -> Unit,
     cancelPendingDelete: () -> Unit,
@@ -957,6 +970,7 @@ private fun PhoneLayout(
                                 .fillMaxSize()
                                 .background(colorButton)
                                 .then(quickLogSwipeModifier),
+                        issueFilter = openHistoryIssue,
                         onCollapseDragDelta = { delta ->
                             externalSheetDragOffset += delta
                             collapseDragEndJob.value?.cancel()
@@ -1032,6 +1046,7 @@ private fun TabletLayout(
     onShowCategoryGrid: () -> Unit,
     onHideCategoryGrid: () -> Unit,
     openWalletOnStart: Boolean,
+    openHistoryIssue: DataHealthIssue? = null,
     quickLogSwipeModifier: Modifier,
     queueDeleteWithUndo: (Transaction, String) -> Unit,
     cancelPendingDelete: () -> Unit,
@@ -1104,6 +1119,7 @@ private fun TabletLayout(
                         .fillMaxSize()
                         .background(colorButton)
                         .then(quickLogSwipeModifier),
+                issueFilter = openHistoryIssue,
                 onQueueDeleteWithUndo = { tx, msg, _ -> queueDeleteWithUndo(tx, msg) },
                 onCancelPendingDelete = { cancelPendingDelete() },
                 onShowInfoSnackbar = { msg -> showInfoSnackbar(msg) },

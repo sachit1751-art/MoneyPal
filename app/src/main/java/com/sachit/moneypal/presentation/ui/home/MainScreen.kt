@@ -10,6 +10,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sachit.moneypal.R
+import com.sachit.moneypal.domain.datahealth.DataHealthIssue
 import com.sachit.moneypal.domain.model.BudgetPeriod
 import com.sachit.moneypal.presentation.ui.budget.BudgetViewModel
 import com.sachit.moneypal.presentation.ui.budget.mvi.intent.BudgetNumpadIntent
@@ -27,6 +28,7 @@ fun MainScreen(
     onNavigateToAnalytics: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
     openWalletOnStart: Boolean = false,
+    openHistoryIssue: DataHealthIssue? = null,
     onRequestNotificationPermission: () -> Unit = {},
     budgetViewModel: BudgetViewModel = hiltViewModel(),
     mainScreenViewModel: MainScreenViewModel = hiltViewModel(),
@@ -209,6 +211,7 @@ fun MainScreen(
                         },
                     ),
                 openWalletOnStart = openWalletOnStart,
+                openHistoryIssue = openHistoryIssue,
                 tutorialBoxState = tutorialBoxState,
             )
         }

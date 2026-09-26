@@ -31,6 +31,7 @@ import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -45,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sachit.moneypal.R
+import com.sachit.moneypal.domain.datahealth.DataHealthIssue
 import com.sachit.moneypal.domain.datahealth.DataHealthReport
 import com.sachit.moneypal.presentation.ui.theme.MinusTheme
 import java.time.LocalDate
@@ -58,6 +60,7 @@ import java.time.LocalDate
 @Composable
 fun DataHealthScreen(
     onBack: () -> Unit,
+    onReviewIssue: (DataHealthIssue) -> Unit = {},
     viewModel: DataHealthViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -119,14 +122,14 @@ fun DataHealthScreen(
                 }
             }
 
-            else -> {
-                val report = uiState.report ?: return@Scaffold
-                DataHealthContent(
-                    report = report,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                )
+            else -> {                  val report = uiState.report ?: return@Scaffold
+                      DataHealthContent(
+                          report = report,
+                          onReviewIssue = onReviewIssue,
+                          modifier = Modifier
+                              .fillMaxSize()
+                              .padding(paddingValues),
+                      )
             }
         }
     }
@@ -135,6 +138,7 @@ fun DataHealthScreen(
 @Composable
 private fun DataHealthContent(
     report: DataHealthReport,
+    onReviewIssue: (DataHealthIssue) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -164,27 +168,29 @@ private fun DataHealthContent(
                 }
             }
             if (report.missingAttachmentCount > 0) {
-                item(key = "issue_missing_attachments") {
-                    IssueRow(
-                        icon = Icons.Filled.LinkOff,
-                        text = stringResource(
-                            R.string.data_health_issue_missing_attachments,
-                            report.missingAttachmentCount,
-                        ),
-                    )
-                }
-            }
-            if (report.duplicateClientGeneratedIdCount > 0) {
-                item(key = "issue_duplicates") {
-                    IssueRow(
-                        icon = Icons.Filled.SdCardAlert,
-                        text = stringResource(
-                            R.string.data_health_issue_duplicate_ids,
-                            report.duplicateClientGeneratedIdCount,
-                        ),
-                    )
-                }
-            }
+                      item(key = "issue_missing_attachments") {
+                          IssueRow(
+                              icon = Icons.Filled.LinkOff,
+                              text = stringResource(
+                                  R.string.data_health_issue_missing_attachments,
+                                  report.missingAttachmentCount,
+                              ),
+                              onReview = { onReviewIssue(DataHealthIssue.MISSING_RECEIPTS) },
+                          )
+                      }
+                  }
+                  if (report.duplicateClientGeneratedIdCount > 0) {
+                      item(key = "issue_duplicates") {
+                          IssueRow(
+                              icon = Icons.Filled.SdCardAlert,
+                              text = stringResource(
+                                  R.string.data_health_issue_duplicate_ids,
+                                  report.duplicateClientGeneratedIdCount,
+                              ),
+                              onReview = { onReviewIssue(DataHealthIssue.DUPLICATE_IDS) },
+                          )
+                      }
+                  }
         }
 
         item(key = "stats_header") {
@@ -290,6 +296,7 @@ private fun IssueRow(
     icon: ImageVector,
     text: String,
     modifier: Modifier = Modifier,
+    onReview: () -> Unit = {},
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
@@ -310,6 +317,9 @@ private fun IssueRow(
                 style = MaterialTheme.typography.bodyMediumEmphasized,
                 modifier = Modifier.weight(1f),
             )
+            TextButton(onClick = onReview) {
+                Text(stringResource(R.string.data_health_review_action))
+            }
         }
     }
 }
@@ -319,6 +329,7 @@ private fun IssueRow(
 private fun DataHealthScreenPreview() {
     MinusTheme {
         DataHealthContent(
+            onReviewIssue = {},
             report = DataHealthReport(
                 totalTransactions = 128,
                 incomeCount = 12,

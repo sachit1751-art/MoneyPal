@@ -1,5 +1,6 @@
 package com.sachit.moneypal.presentation.ui.history
 
+import com.sachit.moneypal.domain.datahealth.DataHealthIssue
 import com.sachit.moneypal.domain.model.PaymentMethod
 import com.sachit.moneypal.domain.model.Transaction
 import java.math.BigDecimal
@@ -18,6 +19,8 @@ data class HistoryFilterState(
     val recurrentOnly: Boolean = false,
     val creditOnly: Boolean = false,
     val paymentMethod: PaymentMethod? = null,
+    /** Plan 049: restrict the list to rows affected by a data-health issue. */
+    val dataHealthIssue: DataHealthIssue? = null,
 ) {
     val isActive: Boolean
         get() = query.isNotBlank() ||
@@ -26,7 +29,8 @@ data class HistoryFilterState(
             maxAmount != null ||
             recurrentOnly ||
             creditOnly ||
-            paymentMethod != null
+            paymentMethod != null ||
+            dataHealthIssue != null
 }
 
 /**
@@ -51,11 +55,15 @@ internal fun filterTransactions(
     transactions: List<Transaction>,
     filter: HistoryFilterState,
     categoryNames: Map<Long, String>,
+    issueRowIds: Set<Long> = emptySet(),
 ): List<Transaction> {
     if (!filter.isActive) return transactions
 
     val query = filter.query.trim().lowercase(Locale.ROOT)
     return transactions.filter { transaction ->
+        if (filter.dataHealthIssue != null && transaction.id !in issueRowIds) {
+            return@filter false
+        }
         if (filter.categoryName != null &&
             categoryNames[transaction.categoryId] != filter.categoryName
         ) {

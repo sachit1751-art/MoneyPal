@@ -20,6 +20,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.sachit.moneypal.domain.datahealth.DataHealthIssue
 import com.sachit.moneypal.presentation.ui.analytics.AnalyticsScreen
 import com.sachit.moneypal.presentation.ui.changelog.ChangelogHistoryScreen
 import com.sachit.moneypal.presentation.ui.changelog.ChangelogHistoryViewModel
@@ -112,6 +113,10 @@ fun AppNavGraph(
                     type = NavType.BoolType
                     defaultValue = false
                 },
+                navArgument(Screen.Main.ARG_OPEN_HISTORY_ISSUE) {
+                    type = NavType.StringType
+                    defaultValue = ""
+                },
             ),
         ) { backStackEntry ->
             logcat(tag) { "Navigating to Main" }
@@ -120,16 +125,26 @@ fun AppNavGraph(
                 backStackEntry.arguments?.getBoolean(Screen.Main.ARG_OPEN_WALLET) ?: false
             val forceWalletSetup =
                 backStackEntry.arguments?.getBoolean(Screen.Main.ARG_FORCE_WALLET_SETUP) ?: false
+            val openHistoryIssue: DataHealthIssue? = backStackEntry.arguments
+                ?.getString(Screen.Main.ARG_OPEN_HISTORY_ISSUE)
+                ?.takeIf { it.isNotEmpty() }
+                ?.let { name ->
+                    runCatching { DataHealthIssue.valueOf(name) }.getOrNull()
+                }
 
             LaunchedEffect(backStackEntry.id) {
                 if (openWallet || forceWalletSetup) {
                     backStackEntry.arguments?.putBoolean(Screen.Main.ARG_OPEN_WALLET, false)
                     backStackEntry.arguments?.putBoolean(Screen.Main.ARG_FORCE_WALLET_SETUP, false)
                 }
+                if (openHistoryIssue != null) {
+                    backStackEntry.arguments?.putString(Screen.Main.ARG_OPEN_HISTORY_ISSUE, "")
+                }
             }
 
             MainScreen(
                 openWalletOnStart = openWallet,
+                openHistoryIssue = openHistoryIssue,
                 onNavigateToAnalytics = {
                     navController.navigate(Screen.Analytics.route)
                 },
@@ -198,6 +213,11 @@ fun AppNavGraph(
             DataHealthScreen(
                 onBack = {
                     navController.popBackStack()
+                },
+                onReviewIssue = { issue ->
+                    navController.navigate(
+                        Screen.Main.createRoute(openHistoryIssue = issue),
+                    ) { popUpTo(Screen.Main.route) { inclusive = true } }
                 },
             )
         }
