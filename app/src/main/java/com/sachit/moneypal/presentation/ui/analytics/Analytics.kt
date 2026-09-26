@@ -214,7 +214,13 @@ fun Analytics(
         showTutorialOverride?.let { !it } ?: (tutorialCompleted || state.isHistoricalView)
 
     val tutorialOrder =
-        remember(hasSpends, state.creditOwed, state.periodFinished, state.isHistoricalView) {
+        remember(
+            hasSpends,
+            state.creditOwed,
+            state.periodFinished,
+            state.isHistoricalView,
+            state.incomeSpendComparison,
+        ) {
             buildList {
                 // 1. Header (if visible)
                 if (!state.periodFinished || state.isHistoricalView) {
@@ -236,6 +242,11 @@ fun Analytics(
                     if (state.creditOwed > BigDecimal.ZERO) {
                         add(6) // Credit Owed
                     }
+                }
+
+                // Plan 046: income vs spend card (when the period has income)
+                if (state.incomeSpendComparison != null) {
+                    add(7)
                 }
             }
         }
@@ -367,6 +378,11 @@ fun Analytics(
                     title = stringResource(R.string.analytics_tutorial_credit_title),
                     description = stringResource(R.string.analytics_tutorial_credit_desc)
                 )
+
+                7 -> TutorialTooltip(
+                    title = stringResource(R.string.analytics_tutorial_income_title),
+                    description = stringResource(R.string.analytics_tutorial_income_desc)
+                )
             }
         }) {
         Scaffold(
@@ -425,6 +441,7 @@ fun Analytics(
                                 scrollState = scrollState,
                                 hasSpends = state.spends.isNotEmpty(),
                                 isOverBudget = state.spends.sumOf { it.amount } > state.wholeBudget,
+                                onShareReport = actions.onShareReport,
                             )
                         }
 
@@ -497,7 +514,9 @@ fun Analytics(
                             IncomeSpendCard(
                                 comparison = comparison,
                                 currency = state.currencyCode,
-                                modifier = Modifier.padding(horizontal = 16.dp),
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp)
+                                    .markIfInOrder(7),
                             )
                         }
 

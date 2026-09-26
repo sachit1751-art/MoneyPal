@@ -7,8 +7,12 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Share
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +23,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialShapes
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -31,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.foundation.layout.size
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -51,6 +58,7 @@ fun FinishedPeriodHeader(
     scrollState: ScrollState = rememberScrollState(),
     hasSpends: Boolean = false,
     isOverBudget: Boolean = false,
+    onShareReport: () -> Unit = {},
 ) {
     val localDensity = LocalDensity.current
     val statusBarHeight = LocalWindowInsets.current.calculateTopPadding()
@@ -69,6 +77,22 @@ fun FinishedPeriodHeader(
             },
         contentAlignment = Alignment.Center,
     ) {
+        // Plan 044: share entry point for the finished period — the regular
+        // header (MiddlePeriodHeader) only shows while the period is active.
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.End,
+        ) {
+            IconButton(onClick = onShareReport) {
+                Icon(
+                    imageVector = Icons.Rounded.Share,
+                    contentDescription = stringResource(R.string.share_report_cd),
+                    modifier = Modifier.size(24.dp),
+                )
+            }
+        }
         val halfWidth = headerSize.width / 2
         val halfHeight = headerSize.height / 2
 
