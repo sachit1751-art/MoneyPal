@@ -789,6 +789,9 @@
 
     <!-- Plan 048: muted SMS senders -->
     <string name="settings_muted_sender_subtitle">Muted — tap to receive captures from this sender again</string>
+    <string name="notification_sms_capture_mute_sender">Mute sender</string>
+    <string name="sms_review_mute_sender">Mute sender</string>
+    <string name="sms_review_sender_muted">Muted %1$s — its captures are skipped from now on</string>
 
     <!-- Shortcut -->
     <string name="shortcut_add_expense_short_label">Add expense</string>
@@ -889,6 +892,8 @@
     <string name="analytics_tutorial_savings_desc">Based on the 50/30/20 rule, we suggest how much you should ideally be saving. This can be changed on settings.</string>
     <string name="analytics_tutorial_credit_title">Credit Card Management</string>
     <string name="analytics_tutorial_credit_desc">Tap the credit card to view all CC transactions, mark them as paid, or adjust your billing cutoff date to avoid interest.</string>
+    <string name="analytics_tutorial_income_title">Income vs spend</string>
+    <string name="analytics_tutorial_income_desc">Compares the money you received with the money you spent this period, and shows your savings rate. Tap the card to expand the breakdown.</string>
     <string name="analytics_tutorial_history_title">Transaction History</string>
     <string name="analytics_tutorial_history_desc">Tap here to see a list of all your expenses for this period.</string>
     <string name="skip_tutorial">Skip</string>
@@ -993,6 +998,7 @@
     <string name="data_health_issues_found">Issues found</string>
     <string name="data_health_issue_missing_attachments">%1$d receipts no longer on this device</string>
     <string name="data_health_issue_duplicate_ids">%1$d transactions share a duplicate id</string>
+    <string name="data_health_review_action">Review</string>
     <string name="data_health_overview_title">Overview</string>
     <string name="data_health_total_transactions">Total transactions</string>
     <string name="data_health_income_count">Income entries</string>

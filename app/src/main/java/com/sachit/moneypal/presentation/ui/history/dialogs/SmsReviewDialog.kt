@@ -32,6 +32,7 @@ fun SmsReviewDialog(
     onConfirm: (Transaction) -> Unit,
     onEdit: (Transaction) -> Unit,
     onDelete: (Transaction) -> Unit,
+    onMuteSender: (Transaction) -> Unit = {},
     onDismiss: () -> Unit,
 ) {
     AlertDialog(
@@ -52,6 +53,7 @@ fun SmsReviewDialog(
                             onConfirm = onConfirm,
                             onEdit = onEdit,
                             onDelete = onDelete,
+                            onMuteSender = onMuteSender,
                         )
                     }
                 }
@@ -72,6 +74,7 @@ private fun SmsReviewRow(
     onConfirm: (Transaction) -> Unit,
     onEdit: (Transaction) -> Unit,
     onDelete: (Transaction) -> Unit,
+    onMuteSender: (Transaction) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -102,6 +105,11 @@ private fun SmsReviewRow(
             )
         }
         Row(modifier = Modifier.align(Alignment.End)) {
+            if (!transaction.smsSender.isNullOrBlank()) {
+                TextButton(onClick = { onMuteSender(transaction) }) {
+                    Text(stringResource(R.string.sms_review_mute_sender))
+                }
+            }
             TextButton(onClick = { onDelete(transaction) }) {
                 Text(stringResource(R.string.sms_review_delete))
             }

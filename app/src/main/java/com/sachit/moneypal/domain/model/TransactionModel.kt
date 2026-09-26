@@ -45,6 +45,8 @@ data class Transaction(
     val source: String? = null,
     /** SMS capture confidence 0..100; null when [source] != "sms" (plan 014). */
     val captureConfidence: Int? = null,
+    /** Raw SMS sender address this capture came from; null when source != "sms" (plan 048). */
+    val smsSender: String? = null,
 ) {
     /** True when this recurring expense is paused (reminders and due-today sums off). */
     val isRecurrentPaused: Boolean get() = isRecurrent && pausedAtEpochMs != null
@@ -73,7 +75,8 @@ data class Transaction(
             isIncome: Boolean = false,
             pausedAtEpochMs: Long? = null,
             source: String? = null,
-            captureConfidence: Int? = null
+            captureConfidence: Int? = null,
+            smsSender: String? = null
         ): Transaction {
             require(!(isAdjustment && isIncome)) { "An adjustment cannot be income" }
             return Transaction(
@@ -102,6 +105,7 @@ data class Transaction(
             pausedAtEpochMs = pausedAtEpochMs,
             source = source,
             captureConfidence = captureConfidence,
+            smsSender = smsSender,
         )
         }
     }

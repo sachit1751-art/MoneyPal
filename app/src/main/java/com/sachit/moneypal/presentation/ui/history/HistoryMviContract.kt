@@ -1,5 +1,6 @@
 package com.sachit.moneypal.presentation.ui.history
 
+import com.sachit.moneypal.domain.datahealth.DataHealthIssue
 import com.sachit.moneypal.domain.model.BudgetSettings
 import com.sachit.moneypal.domain.model.BudgetState
 import com.sachit.moneypal.domain.model.Transaction
@@ -46,12 +47,17 @@ sealed interface HistoryUiIntent {
 
     data class SetLockSwipeable(val locked: Boolean) : HistoryUiIntent
 
+    /** Plan 049: pre-filter History to the rows affected by a data-health issue. */
+    data class SetDataHealthIssueFilter(val issue: DataHealthIssue?) : HistoryUiIntent
+
     data class UpdateCreditCutoffDay(val day: Int) : HistoryUiIntent
 
     /** Plan 015: review-inbox controls for low-confidence SMS captures. */
     data object SetSmsReviewDialogVisible : HistoryUiIntent
     data object DismissSmsReviewDialog : HistoryUiIntent
     data class ConfirmSmsCapture(val transaction: Transaction) : HistoryUiIntent
+    /** Plan 048: mute the SMS sender of a review-inbox row. */
+    data class MuteSmsSender(val transaction: Transaction) : HistoryUiIntent
 }
 
 sealed interface HistoryUiEffect {

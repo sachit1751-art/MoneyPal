@@ -60,7 +60,10 @@ data class TransactionEntity(
     val source: String? = null,
     /** SMS capture confidence 0..100 (null when source != "sms"). */
     @ColumnInfo(defaultValue = "NULL")
-    val captureConfidence: Int? = null
+    val captureConfidence: Int? = null,
+    /** Raw SMS sender address this capture came from; null when source != "sms" (plan 048). */
+    @ColumnInfo(defaultValue = "NULL")
+    val smsSender: String? = null
 ) {
     companion object {
         fun fromDomain(
@@ -82,7 +85,8 @@ data class TransactionEntity(
             isIncome: Boolean = false,
             pausedAtEpochMs: Long? = null,
             source: String? = null,
-            captureConfidence: Int? = null
+            captureConfidence: Int? = null,
+            smsSender: String? = null
         ): TransactionEntity = TransactionEntity(
             id = 0,
             amount = amount,
@@ -103,7 +107,8 @@ data class TransactionEntity(
             isIncome = isIncome,
             pausedAtEpochMs = pausedAtEpochMs,
             source = source,
-            captureConfidence = captureConfidence
+            captureConfidence = captureConfidence,
+            smsSender = smsSender
         )
     }
 }

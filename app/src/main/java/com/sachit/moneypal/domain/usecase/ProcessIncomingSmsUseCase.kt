@@ -144,6 +144,7 @@ class ProcessIncomingSmsUseCase @Inject constructor(
                 categoryId = suggestedCategory?.category?.id,
                 source = "sms",
                 captureConfidence = confidence,
+                smsSender = match.sender,
             )
 
             if (isPastPeriodEnd) {

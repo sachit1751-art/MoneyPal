@@ -499,6 +499,9 @@
 
     <!-- Plan 048: muted SMS senders -->
     <string name="settings_muted_sender_subtitle">En sourdine — toucher pour recevoir à nouveau les captures de cet expéditeur</string>
+    <string name="notification_sms_capture_mute_sender">Masquer l\'expéditeur</string>
+    <string name="sms_review_mute_sender">Masquer l\'expéditeur</string>
+    <string name="sms_review_sender_muted">Expéditeur %1$s masqué — ses captures seront ignorées à partir de maintenant</string>
     <string name="forecast_title">Prévision de dépenses</string>
     <string name="forecast_on_pace_line">Dans le rythme — dépenses à %1$d%% de votre budget quotidien</string>
     <string name="forecast_over_pace_line">Dépassement de %1$s d\'ici le %2$s</string>
@@ -675,6 +678,8 @@
     <string name="analytics_tutorial_savings_desc">Sur la base de la règle 50/30/20, nous vous suggérons de sauvegarder le montant idéal. Cela peut être modifié dans les paramètres.</string>
     <string name="analytics_tutorial_credit_title">Gestion des cartes de crédit</string>
     <string name="analytics_tutorial_credit_desc">Appuyez sur la carte de crédit pour afficher toutes les transactions en CC, les marquer comme payées ou ajuster votre date limite de facturation pour éviter les intérêts.</string>
+    <string name="analytics_tutorial_income_title">Revenus et dépenses</string>
+    <string name="analytics_tutorial_income_desc">Compare l\'argent reçu à l\'argent dépensé sur la période et affiche votre taux d\'épargne. Touchez la carte pour déplier le détail.</string>
     <string name="analytics_tutorial_history_title">Historique des transactions</string>
     <string name="analytics_tutorial_history_desc">Cliquez ici pour voir la liste de toutes vos dépenses pour cette période.</string>
     <string name="skip_tutorial">Passer</string>
@@ -712,6 +717,7 @@
     <string name="data_health_issues_found">Problèmes détectés</string>
     <string name="data_health_issue_missing_attachments">%1$d reçus ne sont plus sur cet appareil</string>
     <string name="data_health_issue_duplicate_ids">%1$d transactions partagent un identifiant dupliqué</string>
+    <string name="data_health_review_action">Vérifier</string>
     <string name="data_health_overview_title">Aperçu</string>
     <string name="data_health_total_transactions">Transactions totales</string>
     <string name="data_health_income_count">Entrées de revenus</string>

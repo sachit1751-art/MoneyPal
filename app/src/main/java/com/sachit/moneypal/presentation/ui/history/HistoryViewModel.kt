@@ -34,9 +34,11 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import logcat.logcat
+import java.io.File
 import java.math.BigDecimal
 import java.time.LocalDate
 import javax.inject.Inject
+import com.sachit.moneypal.domain.datahealth.DataHealthIssue
 
 private const val TAG = "HistoryViewModel"
 
@@ -183,11 +185,15 @@ class HistoryViewModel @Inject constructor(
             is HistoryUiIntent.MarkRefunded -> markRefunded(intent.transaction)
             is HistoryUiIntent.RefundReceived -> onRefundReceived(intent.transaction)
             is HistoryUiIntent.SetLockSwipeable -> _lockSwipeable.value = intent.locked
+            is HistoryUiIntent.SetDataHealthIssueFilter -> _filter.update {
+                it.copy(dataHealthIssue = intent.issue)
+            }
             is HistoryUiIntent.ToggleExpandedTransaction -> toggleExpandedTransaction(intent.transactionId)
             is HistoryUiIntent.UpdateCreditCutoffDay -> updateCreditCutoffDay(intent.day)
             is HistoryUiIntent.SetSmsReviewDialogVisible -> _showSmsReviewDialog.value = true
             is HistoryUiIntent.DismissSmsReviewDialog -> _showSmsReviewDialog.value = false
             is HistoryUiIntent.ConfirmSmsCapture -> confirmSmsCapture(intent.transaction)
+            is HistoryUiIntent.MuteSmsSender -> muteSmsSender(intent.transaction)
             is HistoryFilterIntent.SetSearchQuery -> _filter.update { it.copy(query = intent.query) }
             is HistoryFilterIntent.ToggleCategoryName -> _filter.update {
                 if (it.categoryName == intent.name) {
@@ -222,6 +228,22 @@ class HistoryViewModel @Inject constructor(
                         )
                     )
                 }
+        }
+    }
+
+    /** Plan 048: mute the sender of a low-confidence capture from the review inbox. */
+    private fun muteSmsSender(transaction: Transaction) {
+        val sender = transaction.smsSender
+        if (sender.isNullOrBlank()) return // manual/legacy row — nothing to mute
+        viewModelScope.launch {
+            settingsRepository.setMutedSmsSenders(
+                settingsRepository.getSettings().mutedSmsSenders + sender,
+            )
+            _effects.emit(
+                HistoryUiEffect.ShowSnackbar(
+                    context.getString(R.string.sms_review_sender_muted, sender)
+                )
+            )
         }
     }
 
@@ -450,7 +472,12 @@ class HistoryViewModel @Inject constructor(
         val groupedPast: Map<LocalDate?, List<Transaction>>
         val matchCount: Int
         if (inputs.filter.isActive) {
-            val filteredDisplay = filterTransactions(displayTx, inputs.filter, categoryNames)
+            // Plan 049: resolve the data-health issue filter to concrete row ids
+            // from the ledger the user actually sees (display scope).
+            val issueRowIds = inputs.filter.dataHealthIssue?.let { issue ->
+                resolveIssueRowIds(displayTx, issue)
+            } ?: emptySet()
+            val filteredDisplay = filterTransactions(displayTx, inputs.filter, categoryNames, issueRowIds)
             val (fCurrent, fPast) = splitPeriodTransactions(
                 transactions = filteredDisplay,
                 budgetStartDate = startDate,
@@ -537,6 +564,28 @@ class HistoryViewModel @Inject constructor(
             debtAdjustedBalance = debtAdjustedBalance,
             pendingRefunds = inputs.pendingRefunds,
         )
+    }
+
+    /**
+     * Plan 049: rows matching a data-health issue, computed from the display
+     * list so the filter always mirrors what History renders.
+     */
+    private fun resolveIssueRowIds(
+        transactions: List<Transaction>,
+        issue: DataHealthIssue,
+    ): Set<Long> = when (issue) {
+        DataHealthIssue.DUPLICATE_IDS -> transactions
+            .filter { it.clientGeneratedId != null }
+            .groupBy { it.clientGeneratedId!! }
+            .filterValues { it.size > 1 }
+            .flatMap { it.value }
+            .map { it.id }
+            .toSet()
+
+        DataHealthIssue.MISSING_RECEIPTS -> transactions
+            .filter { !it.attachmentUri.isNullOrBlank() && !File(it.attachmentUri!!).exists() }
+            .map { it.id }
+            .toSet()
     }
 
     private data class UIInputs(

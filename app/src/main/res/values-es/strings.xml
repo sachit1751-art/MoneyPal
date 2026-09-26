@@ -499,6 +499,9 @@
 
     <!-- Plan 048: muted SMS senders -->
     <string name="settings_muted_sender_subtitle">Silenciado — toca para volver a recibir capturas de este remitente</string>
+    <string name="notification_sms_capture_mute_sender">Silenciar remitente</string>
+    <string name="sms_review_mute_sender">Silenciar remitente</string>
+    <string name="sms_review_sender_muted">Se silenció a %1$s — sus capturas se omitirán de ahora en adelante</string>
     <string name="forecast_title">Previsión de gasto</string>
     <string name="forecast_on_pace_line">En ritmo — gastando al %1$d%% de tu presupuesto diario</string>
     <string name="forecast_over_pace_line">Excederás %1$s para el %2$s</string>
@@ -676,6 +679,8 @@
     <string name="analytics_tutorial_savings_desc">Según la regla 50/30/20, te sugerimos cuánto deberías ahorrar idealmente. Puedes modificar esta configuración en ajustes.</string>
     <string name="analytics_tutorial_credit_title">Gestión de tarjeta de crédito</string>
     <string name="analytics_tutorial_credit_desc">Pulsa sobre la estrella para ver todas las transacciones realizadas con ella, marcarlas como pagadas o ajusta la fecha límite de facturación para evitar intereses.</string>
+    <string name="analytics_tutorial_income_title">Ingresos frente a gastos</string>
+    <string name="analytics_tutorial_income_desc">Compara el dinero recibido con el gastado en este periodo y muestra tu tasa de ahorro. Toca la tarjeta para expandir el desglose.</string>
     <string name="analytics_tutorial_history_title">Historial de Transacciones</string>
     <string name="analytics_tutorial_history_desc">Haz tap aquí para ver la lista completa de gastos en este periodo.</string>
     <string name="skip_tutorial">Omitir</string>
@@ -712,6 +717,7 @@
     <string name="data_health_issues_found">Problemas encontrados</string>
     <string name="data_health_issue_missing_attachments">%1$d recibos ya no están en este dispositivo</string>
     <string name="data_health_issue_duplicate_ids">%1$d transacciones comparten un id duplicado</string>
+    <string name="data_health_review_action">Revisar</string>
     <string name="data_health_overview_title">Resumen</string>
     <string name="data_health_total_transactions">Transacciones totales</string>
     <string name="data_health_income_count">Entradas de ingresos</string>

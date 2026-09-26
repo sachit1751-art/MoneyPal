@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sachit.moneypal.R
+import com.sachit.moneypal.domain.datahealth.DataHealthIssue
 import com.sachit.moneypal.domain.model.Transaction
 import com.sachit.moneypal.presentation.ui.history.dialogs.DeleteRecurrentExpenseDialog
 import com.sachit.moneypal.presentation.ui.history.dialogs.SmsReviewDialog
@@ -62,6 +63,7 @@ enum class RecurrentPaymentsViewMode {
 fun HistoryScreen(
     modifier: Modifier = Modifier,
     readOnly: Boolean = false,
+    issueFilter: DataHealthIssue? = null,
     onCollapseDragDelta: ((Float) -> Unit)? = null,
     onQueueDeleteWithUndo: (transaction: Transaction, message: String, onUndo: () -> Unit) -> Unit = { _, _, _ -> },
     onCancelPendingDelete: () -> Unit = {},
@@ -69,6 +71,12 @@ fun HistoryScreen(
     viewModel: HistoryViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(issueFilter) {
+        if (issueFilter != null) {
+            viewModel.processIntent(HistoryUiIntent.SetDataHealthIssueFilter(issueFilter))
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.effects.collect { effect ->
@@ -443,6 +451,7 @@ fun History(
                 onProcessIntent(HistoryUiIntent.SetEditingTransaction(expense))
             },
             onDelete = { expense -> onProcessIntent(HistoryUiIntent.DeleteTransaction(expense)) },
+            onMuteSender = { expense -> onProcessIntent(HistoryUiIntent.MuteSmsSender(expense)) },
             onDismiss = { onProcessIntent(HistoryUiIntent.DismissSmsReviewDialog) },
         )
     }

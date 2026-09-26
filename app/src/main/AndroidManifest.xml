@@ -64,6 +64,10 @@
             android:exported="false" />
 
         <receiver
+            android:name=".presentation.sms.MuteSmsSenderReceiver"
+            android:exported="false" />
+
+        <receiver
             android:name=".presentation.notification.NotificationRescheduleReceiver"
             android:enabled="true"
             android:exported="true">

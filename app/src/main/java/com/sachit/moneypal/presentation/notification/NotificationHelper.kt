@@ -15,6 +15,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.sachit.moneypal.R
 import com.sachit.moneypal.presentation.MainActivity
+import com.sachit.moneypal.presentation.sms.MuteSmsSenderReceiver
 import com.sachit.moneypal.presentation.sms.UndoSmsCaptureReceiver
 import com.sachit.moneypal.presentation.util.font.format.symbolOnlyCurrencyFormat
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -50,6 +51,7 @@ class NotificationHelper @Inject constructor(
         // Plan-045 action pending-intent request codes (unique per action).
         private const val REQUEST_CODE_MARK_OCCURRENCE_PAID = 2100
         private const val REQUEST_CODE_SNOOZE_OCCURRENCE = 2101
+        private const val REQUEST_CODE_MUTE_SMS_SENDER = 2102
     }
 
     init {
@@ -599,6 +601,20 @@ class NotificationHelper @Inject constructor(
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        // Plan 048: one-tap "Mute sender" so a noisy source stops producing
+        // captures (and this notification) without digging through Settings.
+        val muteIntent = Intent(context, MuteSmsSenderReceiver::class.java).apply {
+            action = MuteSmsSenderReceiver.ACTION_MUTE
+            putExtra(MuteSmsSenderReceiver.EXTRA_SENDER, sender)
+            putExtra(MuteSmsSenderReceiver.EXTRA_NOTIFICATION_ID, NOTIFICATION_ID_SMS_CAPTURE)
+        }
+        val mutePendingIntent = PendingIntent.getBroadcast(
+            context,
+            REQUEST_CODE_MUTE_SMS_SENDER,
+            muteIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         val notification = NotificationCompat.Builder(context, CHANNEL_SMS_CAPTURE)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
@@ -608,6 +624,7 @@ class NotificationHelper @Inject constructor(
             .setDefaults(NotificationCompat.DEFAULT_ALL)
             .setContentIntent(pendingIntent)
             .addAction(0, context.getString(R.string.notification_sms_capture_undo), undoPendingIntent)
+            .addAction(0, context.getString(R.string.notification_sms_capture_mute_sender), mutePendingIntent)
             .setAutoCancel(true)
             .setCategory(Notification.CATEGORY_EVENT)
             .build()

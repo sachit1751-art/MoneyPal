@@ -122,4 +122,13 @@ object AppDatabaseMigrations {
             )
         }
     }
+
+    val MIGRATION_24_25: Migration = object : Migration(24, 25) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            // Plan 048: store the raw SMS sender on each capture so review-inbox
+            // rows can offer "Mute this sender" without re-deriving the address.
+            // Nullable column: manual entries and pre-25 captures keep NULL.
+            db.execSQL("ALTER TABLE transactions ADD COLUMN smsSender TEXT DEFAULT NULL")
+        }
+    }
 }
