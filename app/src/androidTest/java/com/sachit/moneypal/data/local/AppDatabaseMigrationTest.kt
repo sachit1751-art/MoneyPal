@@ -114,10 +114,19 @@ class AppDatabaseMigrationTest {
             db.longOf("SELECT COUNT(*) FROM transactions WHERE TRIM(comment) = '' AND categoryId IS NOT NULL")
         ).isEqualTo(0)
         assertThat(db.longOf("SELECT categoryId FROM transactions WHERE comment = 'Groceries'")).isEqualTo(1)
-    }
+    }        @Test
+        fun migrate23To24_createsWalletBalanceTable() {
+            helper.createDatabase(testDb, 23).close()
 
-    @Test
-    fun migrateAllFrom13_runsTheWholeChain_andValidatesTheCurrentSchema() {
+            val db = helper.runMigrationsAndValidate(testDb, 24, true)
+
+            assertThat(db.tableExists("wallet_balance")).isTrue()
+            assertThat(db.columnNames("wallet_balance"))
+                .containsExactly("id", "startingBalance", "updatedAt")
+        }
+
+        @Test
+        fun migrateAllFrom13_runsTheWholeChain_andValidatesTheCurrentSchema() {
         helper.createDatabase(testDb, 13).close()
 
         helper.runMigrationsAndValidate(
